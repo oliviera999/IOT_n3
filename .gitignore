@@ -1,0 +1,24 @@
+# Build / cache (firmwares)
+.pio/
+.pioenvs/
+.piolibdeps/
+*.pyc
+__pycache__/
+
+# IDE / OS
+.vscode/
+desktop.ini
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Fichiers sensibles (ne pas versionner)
+credentials.h
+config_private.h
+.env
+.env.local
+
+# Logs serveur
+error_log
+*.log
