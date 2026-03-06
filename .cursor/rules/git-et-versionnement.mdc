@@ -26,8 +26,9 @@ alwaysApply: true
   - En resume : **version + doc + commit + push (submodules puis parent)** a chaque changement.
 
 - **Script de publication automatique (serveur)**
-  - Le script `scripts/publish-cycle.ps1` automatise ce cycle pour le composant **serveur** : incrementation VERSION (patch), entree CHANGELOG.md, commit dans le submodule, commit reference dans le parent, optionnellement push.
-  - Usage (depuis la racine IOT_n3) : `.\scripts\publish-cycle.ps1 -Component serveur -Message "description des changements"` ; ajouter `-Push` pour pousser apres commit. Options : `-Type Ajout|Modifié|Correctif`, `-DryRun` pour simuler sans executer.
+  - Le script `scripts/publish-cycle.ps1` automatise ce cycle pour le composant **serveur** : incrementation VERSION (patch), entree CHANGELOG.md, commit dans le submodule, commit reference dans le parent, **push par defaut** (serveur puis parent).
+  - **Quand l'utilisateur demande d'executer le cycle de publication** : l'agent execute le script depuis la racine IOT_n3 avec un message adapte aux changements recents. Aucune action manuelle n'est requise : version, changelog, commits et push sont faits par l'agent.
+  - Usage (depuis la racine IOT_n3) : `.\scripts\publish-cycle.ps1 -Component serveur -Message "description"` (pousse par defaut). Options : `-NoPush` pour ne pas pousser, `-Type Ajout|Modifié|Correctif`, `-DryRun` pour simuler.
   - Faire les modifications de code avant d'executer le script ; le script ajoute VERSION, CHANGELOG et les fichiers modifies au commit.
 
 - **Procedure de push complete**

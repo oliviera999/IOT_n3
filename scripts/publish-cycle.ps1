@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Automatise le cycle de publication du projet IOT_n3 (version + doc + commit + optionnel push).
+    Automatise le cycle de publication du projet IOT_n3 (version + doc + commit + push).
 
 .DESCRIPTION
     Pour le composant "serveur" :
@@ -8,10 +8,13 @@
     2. Ajoute une entrée dans serveur/CHANGELOG.md.
     3. Commit dans le sous-module serveur avec [serveur] <Message>.
     4. Commit la référence du submodule dans le dépôt parent avec [projet] référence serveur <version> - <Message>.
-    5. Si -Push : pousse le serveur puis le dépôt parent.
+    5. Pousse le serveur puis le dépôt parent (par défaut ; utiliser -NoPush pour ne pas pousser).
 
     À exécuter depuis la racine du dépôt IOT_n3. Les modifications de code doivent déjà être faites
     (le script ajoute VERSION, CHANGELOG et tous les fichiers modifiés suivis au commit).
+
+    Quand l'agent ou l'utilisateur demande "cycle de publication", exécuter ce script avec un message
+    adapté : tout est fait automatiquement (version, changelog, commits, push), sans action manuelle.
 
 .PARAMETER Component
     Composant à publier. Pour l'instant seul "serveur" est supporté.
@@ -22,16 +25,16 @@
 .PARAMETER Type
     Type d'entrée CHANGELOG : Modifié (défaut), Ajout, Correctif.
 
-.PARAMETER Push
-    Pousser vers origin après les commits (submodule puis parent).
+.PARAMETER NoPush
+    Ne pas pousser vers origin après les commits (par défaut le script pousse).
 
 .PARAMETER DryRun
     Affiche les actions sans les exécuter.
 
 .EXAMPLE
-    .\scripts\publish-cycle.ps1 -Component serveur -Message "version dans footer page d'accueil"
+    .\scripts\publish-cycle.ps1 -Component serveur -Message "integration contenu page accueil"
 .EXAMPLE
-    .\scripts\publish-cycle.ps1 -Component serveur -Message "nouvelle route msp1" -Push
+    .\scripts\publish-cycle.ps1 -Component serveur -Message "nouvelle route msp1" -NoPush
 #>
 
 [CmdletBinding()]
@@ -48,11 +51,14 @@ param(
     [string] $Type = 'Modifié',
 
     [Parameter(Mandatory = $false)]
-    [switch] $Push,
+    [switch] $NoPush,
 
     [Parameter(Mandatory = $false)]
     [switch] $DryRun
 )
+
+# Par défaut on pousse ; -NoPush désactive le push
+$Push = -not $NoPush
 
 $ErrorActionPreference = 'Stop'
 $root = $null
@@ -150,6 +156,6 @@ if ($Component -eq 'serveur') {
         }
         Write-Host "Push effectué (serveur puis parent)."
     } else {
-        Write-Host "Pour pousser : exécutez avec -Push ou faites git push dans serveur puis à la racine."
+        Write-Host "Push non effectué ( -NoPush ). Pour pousser : git push dans serveur puis à la racine."
     }
 }
