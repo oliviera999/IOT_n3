@@ -1,0 +1,38 @@
+---
+description: Conventions pour le code serveur PHP unifie (Slim 4, ffp3/msp1/n3pp/galeries)
+globs: serveur/**/*.php,serveur/**/*.twig
+alwaysApply: false
+---
+
+# Conventions serveur PHP
+
+- **Version** : PHP 8.1+ pour tout nouveau code. Type hinting strict.
+
+- **Architecture**
+  - Le serveur est une application Slim 4 unifiee (`serveur/`) avec un front controller unique (`public/index.php`).
+  - Tous les endpoints (ffp3, msp1, n3pp, galeries) passent par le routeur Slim.
+  - Nouveaux endpoints : creer un Controller + Repository dans les namespaces adequats (`App\Controller\Msp\`, `App\Controller\N3pp\`, etc.).
+  - Ne pas creer de scripts PHP independants hors de l'architecture Slim.
+
+- **Base de donnees**
+  - PDO avec **prepared statements** uniquement (pas de requetes concatenees).
+  - Les repositories encapsulent l'acces aux donnees.
+  - Ne jamais creer de connexions PDO manuelles — utiliser le service/config centralise.
+
+- **Validation des entrees**
+  - Valider TOUTE donnee entrante (cle API, signature, types, bornes).
+  - Ne jamais faire confiance aux donnees POST des firmwares sans validation.
+
+- **Notifications**
+  - Pas de `mail()` direct : utiliser un service de notification.
+
+- **Timezone**
+  - Serveur heberge en Europe/Paris, projet physique a Casablanca (Africa/Casablanca).
+  - Documenter tout choix de timezone et rester coherent dans tout le code.
+  - Ne pas appeler `date_default_timezone_set()` manuellement dans les controleurs.
+
+- **Hygiene**
+  - Ne pas versionner les `error_log`.
+  - Nettoyer les fichiers "old" / variantes numerotees : archiver ou supprimer les fichiers obsoletes.
+
+- **Reference** : les regles detaillees dans `serveur/.cursorrules` s'appliquent en complement.

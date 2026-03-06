@@ -1,0 +1,41 @@
+---
+description: Conventions communes a tous les firmwares ESP32/Arduino (PlatformIO)
+globs: firmwires/**/*.cpp,firmwires/**/*.h,firmwires/**/*.ino,firmwires/**/platformio.ini
+alwaysApply: false
+---
+
+# Conventions firmwares
+
+- **Build** : PlatformIO (pas Arduino IDE). Framework Arduino.
+
+- **Offline-first** (principe general)
+  - Tout firmware IoT doit fonctionner sans reseau (valeurs par defaut, config locale).
+  - En cas d'echec reseau, continuer avec la derniere config connue — ne jamais boucler indefiniment.
+  - Timeouts courts sur toutes les operations reseau (5 s max sauf derogation documentee).
+
+- **Capteurs**
+  - Toujours valider les mesures : verifier `isnan()`, bornes de plage, coherence.
+  - Retourner une **valeur par defaut sure** en cas d'erreur capteur.
+
+- **Port serie**
+  - Ne pas coder en dur `COMx` dans les `platformio.ini` versionnes.
+  - Utiliser des variables d'environnement ou un fichier d'override local non versionne.
+
+- **Nommage**
+  - Classes : `PascalCase`
+  - Fonctions : `camelCase`
+  - Constantes : `UPPER_SNAKE_CASE`
+  - Pas de nombres magiques : utiliser des constantes nommees.
+
+- **Memoire**
+  - Eviter les allocations dynamiques dans les boucles.
+  - Eviter `String` Arduino dans les chemins chauds (boucles, callbacks frequents).
+  - Surveiller la heap disponible.
+
+- **Logs** : `Serial.printf("[Module] ...")` simple et clair.
+
+- **Modularisation**
+  - Pour les nouveaux projets, s'inspirer de `ffp5cs` (modules : capteurs, actionneurs, web, mail).
+  - Eviter les `main.cpp` monolithiques de plus de 500 lignes.
+
+- **Reference** : les regles detaillees de ffp5cs (`.cursorrules`, `.cursor/rules/`) s'appliquent en complement pour ce sous-projet.

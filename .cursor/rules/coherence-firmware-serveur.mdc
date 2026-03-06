@@ -1,0 +1,29 @@
+---
+description: Coherence des interfaces et contrats entre firmwares et serveur
+alwaysApply: true
+---
+
+# Coherence firmware-serveur
+
+- **Principe** : les firmwares et le serveur partagent un **contrat d'interface** (endpoints, champs JSON, cles de config, codes de statut). Ce contrat doit rester coherent des deux cotes.
+
+- **Constantes partagees**
+  - Une meme notion (cle API, nom de champ, code de statut) doit avoir le **meme nom et la meme valeur** cote firmware et cote serveur.
+  - Si un mapping est necessaire, le documenter explicitement (doc API ou commentaire).
+
+- **Changement de contrat**
+  - Toute modification d'un endpoint, d'un champ JSON, d'une cle de config ou d'un code de statut est un **changement de contrat**.
+  - Mettre a jour les deux cotes (firmware + serveur) simultanement.
+  - Documenter le changement dans la doc du serveur ou dans un fichier de reference partage.
+
+- **Modele de reference**
+  - Pour les nouveaux projets, s'inspirer du contrat **FFP5CS <-> FFP3** :
+    - Authentification HMAC-SHA256.
+    - Donnees en JSON structure.
+    - Heartbeat / supervision.
+    - Constantes harmonisees (voir `firmwires/ffp5cs/.cursor/rules/FFP5CS-constantes-harmonisees-firmware-serveur.mdc`).
+
+- **Documentation API**
+  - Documenter les endpoints (URL, methode, champs attendus, reponses) dans la doc du serveur.
+  - Doc centralisee : `serveur/docs/` (couvre ffp3, msp1, n3pp et galeries).
+  - Pour un nouveau endpoint : l'ajouter dans la doc et incrementer la version serveur.

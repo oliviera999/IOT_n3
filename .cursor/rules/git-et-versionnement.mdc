@@ -1,0 +1,54 @@
+---
+description: Regles Git, submodules et versionnement du projet IOT_n3
+alwaysApply: true
+---
+
+# Git et versionnement
+
+- **Depot principal** : `IOT_n3` (racine). Contient tout sauf les sous-projets autonomes.
+
+- **Submodules**
+  - `firmwires/ffp5cs` et `serveur` sont des **submodules Git** (depots autonomes).
+  - Clone complet : `git clone --recurse-submodules <url>`
+  - Mise a jour : `git submodule update --init --recursive`
+  - Ne pas modifier directement le contenu d'un submodule depuis le depot parent sans y entrer d'abord (`cd firmwires/ffp5cs` ou `cd serveur`).
+
+- **Cycle obligatoire a chaque modification**
+  - Toute modification de code (firmware ou serveur) doit suivre ce cycle complet :
+    1. **Incrementer la version** du composant modifie (voir « Versionnage » ci-dessous).
+    2. **Mettre a jour la documentation** concernee :
+       - Firmware : `firmwires/README.md`, version dans le code, `CHANGELOG.md` ou `VERSION.md` du sous-projet.
+       - Serveur : `serveur/VERSION`, `serveur/CHANGELOG.md`, `README.md` racine si le contrat change.
+       - Transversal : `RECOMMANDATIONS_IOT.md`, `docs/inventaire_appareils.md` si un appareil ou endpoint est ajoute/modifie.
+    3. **Commiter** dans le depot du composant (submodule ou racine) avec un message au format `[composant] description`.
+    4. **Commiter la reference du submodule** dans le depot parent IOT_n3 si un submodule a ete modifie.
+    5. **Pousser** vers GitHub : d'abord les submodules modifies, puis le depot parent.
+  - En resume : **version + doc + commit + push (submodules puis parent)** a chaque changement.
+
+- **Procedure de push complete**
+  - Si un submodule a ete modifie :
+    1. `cd <submodule>` → `git add . && git commit -m "[composant] ..." && git push`
+    2. Revenir a la racine : `cd <racine IOT_n3>`
+    3. `git add <submodule>` (enregistre la nouvelle reference)
+  - Puis depuis la racine :
+    - `git add . && git commit -m "[projet] ..." && git push`
+  - Raccourci : `git push --recurse-submodules=on-demand` pousse les submodules automatiquement si necessaire.
+
+- **Tags de release**
+  - Format : `n3-iot-YYYY.MM` (ex. `n3-iot-2025.03`).
+  - Tagger les etats stables (firmware + serveur coherents).
+
+- **Messages de commit**
+  - En **francais**, concis.
+  - Format : `[composant] description` (ex. `[n3pp4_2] correction lecture DHT`, `[serveur] ajout route msp1`).
+
+- **Fichiers a ne JAMAIS commiter**
+  - `error_log`, `.pio/`, `credentials.h`, `secrets.h`, `desktop.ini`, `.env` contenant des secrets reels, fichiers temporaires de build.
+  - Verifier le `.gitignore` racine et ceux des sous-dossiers.
+
+- **Versionnage des sous-projets**
+  - ffp5cs : version dans `include/config.h` + `VERSION.md` (format MAJOR.MINOR).
+  - Serveur (ex ffp3) : version dans `VERSION` + `CHANGELOG.md` (Semantic Versioning).
+  - Firmwares simples (n3pp4_2, msp2_5, uploadphotosserver_*) : version dans la constante `version` du `main.cpp` (ex. `"4.2"`, `"2.5"`).
+  - Respecter les regles de versionnage specifiques de chaque sous-projet.
+  - **Incrementer la version a chaque modification**, meme mineure.

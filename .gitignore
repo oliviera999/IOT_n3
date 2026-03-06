@@ -16,9 +16,11 @@ Thumbs.db
 # Fichiers sensibles (ne pas versionner)
 credentials.h
 config_private.h
+secrets.h
 .env
 .env.local
 
 # Logs serveur
 error_log
 *.log
+cronlog*.txt

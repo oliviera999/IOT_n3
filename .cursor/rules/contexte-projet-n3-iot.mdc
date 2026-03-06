@@ -1,0 +1,38 @@
+---
+description: Contexte global du projet IoT de la salle aeree n3 (Lycee Lyautey, Casablanca)
+alwaysApply: true
+---
+
+# Contexte projet n3 IoT
+
+- **Projet** : IoT de la salle aeree n3 (Nature, Numerique, Nomade) — Lycee Lyautey, Casablanca.
+  - Aquaponie, jardins, station meteo, photos, robotique.
+  - Portail vitrine : [n3.olution.info](https://n3.olution.info)
+  - Backend IoT (donnees, controle, galeries) : [iot.olution.info](https://iot.olution.info)
+
+- **Structure du workspace**
+  - `firmwires/` : firmwares ESP32, ESP32-CAM, Arduino UNO (PlatformIO).
+  - `serveur/` : serveur unifie PHP (Slim 4) — front controller unique gerant ffp3, msp1, n3pp et galeries.
+  - `docs/` : inventaire des appareils (`inventaire_appareils.md`).
+
+- **Submodules Git**
+  - `firmwires/ffp5cs` : controleur aquaponie ESP32 (depot autonome).
+  - `serveur` : serveur unifie n3 IoT (depot autonome n3_serveur, ex ffp3).
+  - Ces sous-projets ont leurs propres regles Cursor (`.cursorrules`, `.cursor/rules/`).
+
+- **Langue**
+  - Repondre en **francais**.
+  - Documentation, commentaires et messages de commit en francais.
+
+- **Nommage des appareils**
+  - Prefixe `n3-` pour tous les appareils (ex. `n3-msp-01`, `n3-n3pp-01`, `n3-ffp-serre`).
+  - Registre : `docs/inventaire_appareils.md`.
+
+- **Liens firmware-serveur** (resume)
+  - N3PP (serre) : `n3pp4_2` -> `serveur` (route `/n3pp/...`)
+  - MSP1 (meteo) : `msp2_5` -> `serveur` (route `/msp1/...`)
+  - FFP3 (aquaponie avancee) : `ffp5cs` -> `serveur` (routes `/post-data`, `/heartbeat`, etc.)
+  - Cameras : `uploadphotosserver_*` -> `serveur` (routes `/msp1gallery/`, `/n3ppgallery/`, `/ffp3/ffp3gallery/`)
+
+- **References**
+  - `README.md`, `RECOMMANDATIONS_IOT.md`, `ANALYSE_ARBORESCENCE.md`

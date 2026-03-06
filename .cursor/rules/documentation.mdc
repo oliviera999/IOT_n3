@@ -1,0 +1,31 @@
+---
+description: Regles de documentation et de maintenance des fichiers de reference
+alwaysApply: true
+---
+
+# Documentation
+
+- **Pas de fichiers `.md` inutiles**
+  - Ne PAS creer de fichiers Markdown sans demande explicite de l'utilisateur.
+  - Les documentations liees a une tache demandee sont autorisees.
+
+- **Mise a jour obligatoire a chaque modification**
+  - Toute modification de code doit s'accompagner de la mise a jour de la documentation concernee (voir regle `git-et-versionnement.mdc` pour le cycle complet).
+  - Les fichiers de version (`VERSION`, `CHANGELOG.md`, `VERSION.md`, constante `version` dans le code) font partie de la documentation a maintenir.
+
+- **Fichiers de reference a maintenir**
+  - `README.md` (racine) : vue d'ensemble, structure, tableau firmware-serveur.
+  - `RECOMMANDATIONS_IOT.md` : recommandations techniques transversales.
+  - `docs/inventaire_appareils.md` : registre des appareils deployes.
+
+- **Ajout d'un nouvel appareil**
+  - L'ajouter dans `docs/inventaire_appareils.md` avec : identifiant `n3-*`, type de firmware, emplacement, version.
+
+- **Ajout d'un nouveau firmware connecte**
+  - Documenter le lien firmware-serveur dans le tableau du `README.md` racine.
+  - Documenter l'API/endpoint dans la doc du serveur concerne.
+
+- **README des sous-projets**
+  - `firmwires/README.md` : reference pour les firmwares (compilation, cartes, structure).
+  - `serveur/README.md` : reference pour le serveur unifie (installation, config, architecture, endpoints).
+  - Ces README sont la source de verite pour leur perimetre — ne pas les contredire.

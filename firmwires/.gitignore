@@ -13,6 +13,7 @@ desktop.ini
 .DS_Store
 Thumbs.db
 
-# Fichiers sensibles (décommenter si vous externalisez les secrets)
-# credentials.h
-# config_private.h
+# Fichiers sensibles (ne pas versionner)
+credentials.h
+config_private.h
+secrets.h

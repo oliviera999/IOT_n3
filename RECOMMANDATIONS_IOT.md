@@ -178,6 +178,7 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 
 3. **Documentation des déploiements**  
    - Indiquer dans un fichier (ex. `docs/deploiement.md`) quels firmwares sont déployés où (salle n³, labo, démo), et sur quelle URL/board ils sont configurés (iot.olution.info, board=2/3, etc.).
+   - **Cron / mise à jour serveur :** les dépôts IOT_n3 et n3_serveur utilisent la branche **master** (pas `main`). Pour un cron qui met à jour le code sur iot.olution.info : `cd /chemin/vers/site && git pull origin master` (et éventuellement `git submodule update --init --recursive` si le site est un clone avec submodules).
 
 ---
 
@@ -205,6 +206,7 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 | Moyenne | Config | Gérer la partition msp2_5 (fichier ou suppression de la ligne) ; utiliser variables d’env pour les ports série. | **Fait** |
 | Moyenne | Inventaire | Créer un registre des appareils (tableau ou page admin) et un nommage cohérent (n3-*). | **Fait** ([docs/inventaire_appareils.md](docs/inventaire_appareils.md)) |
 | Moyenne | Versionnement | Git à la racine IOT_n3 ; submodules ; tags. | **Fait** |
+| Moyenne | Cycle de livraison | À chaque modification : incrémenter la version, mettre à jour la doc concernée, commit puis push (submodules puis dépôt parent). Voir `.cursor/rules/git-et-versionnement.mdc`. | **Règle** |
 | Moyenne | Doc | Contexte salle n³ et liens n3 / iot dans le README. | **Fait** |
 | Basse | Backend | Documenter les APIs (URLs, formats) ; à long terme, viser une convergence vers une API centralisée (type FFP3). | À faire |
 | Basse | Code | Modulariser n3pp4_2 et msp2_5 ; extraire une lib commune (WiFi, NTP, OLED, HTTP). | À faire |
