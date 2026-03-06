@@ -12,3 +12,6 @@ Format : [version] - date - description.
 - **Cycle obligatoire** : chaque modification (firmware ou serveur) doit être associée à une incrémentation de version, une mise à jour des fichiers de documentation concernés, suivie d’un commit et d’un push de tout le projet (dépôt parent et submodules) vers GitHub.
 - Règles détaillées dans `.cursor/rules/git-et-versionnement.mdc` et `documentation.mdc`.
 - Mise à jour des règles : contexte serveur unifié, procédure de push complète (submodules puis parent).
+
+### Référence submodule serveur
+- **serveur** : version 5.0.0 (migration serveur unifié Slim 4, routes msp1/n3pp/galeries).
