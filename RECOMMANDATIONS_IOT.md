@@ -141,7 +141,7 @@ D’après le [RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md) :
 
 **Structure actuelle (galeries à la racine de `serveur/`) :**
 - `serveur/msp1gallery/` (upload.php, msp1-gallery.php) → URL `/msp1gallery/upload.php`
-- `serveur/n3ppgallery/` (upload.php, n3pp-gallery.php, triphotos.php) → URL `/n3ppgallery/upload.php`
+- `serveur/n3ppgallery/` (upload.php, n3pp-gallery.php, triphotos.php) → URL `/n3ppgallery/upload.php`. **triphotos.php** modifie/déplace des fichiers : le protéger en production (cron, token `TRIPHOTOS_SECRET`, ou accès restreint).
 - FFP3 : galerie intégrée dans l’app Slim (routes dans `serveur/ffp3/`).
 
 Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_deppsleep** envoient respectivement vers `/msp1gallery/upload.php` et `/n3ppgallery/upload.php`. Vérifier que le serveur web (Apache/Nginx) expose bien ces chemins à la racine du site (ex. `https://iot.olution.info/msp1gallery/`, `https://iot.olution.info/n3ppgallery/`).
@@ -171,7 +171,7 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 **Recommandations :**
 
 1. **Dépôt racine**  
-   - Dépôt Git initialisé à la racine **IOT_n3**. Les sous-dépôts **ffp5cs** et **ffp3** restent en **submodules** (voir §3 « Versionnement et submodules »).
+   - Dépôt Git initialisé à la racine **IOT_n3**. Le dossier **serveur** est un sous-module **n3_serveur** (contenant msp1, n3pp, ffp3 intégré) ; **firmwires/ffp5cs** reste en submodule (voir §3 « Versionnement et submodules »).
 
 2. **Tags et releases**  
    - Tagger les versions stables (ex. `n3-iot-2025.03`) pour pouvoir retrouver un état cohérent firmwares + serveur après une mise à jour.
@@ -212,7 +212,7 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 ### Versionnement et submodules
 
 - **Dépôt racine :** `git init` à la racine de IOT_n3. Fichier `.gitignore` racine (`.pio/`, fichiers sensibles, `error_log`, etc.).
-- **Submodules :** Les dépôts **firmwires/ffp5cs** et **serveur/ffp3** restent en submodules. **ffp5cs** a été ajouté ; le dossier `firmwires/ffp5cs_backup` (sauvegarde avant ajout) peut être supprimé après vérification. Pour **ffp3** : si le dossier `serveur/ffp3` existe déjà avec son `.git`, le déplacer (ex. `serveur/ffp3_backup`), puis à la racine : `git submodule add https://github.com/oliviera999/ffp3.git serveur/ffp3`.
+- **Submodules :** **serveur** pointe vers le dépôt **n3_serveur** (https://github.com/oliviera999/n3_serveur.git), qui contient msp1, n3pp, les galeries et **ffp3** en dossier intégré (fusionné avec historique via `git subtree add`). **firmwires/ffp5cs** reste un submodule séparé. Le dépôt ffp3 n’est plus un submodule ; son code est dans `serveur/ffp3/` au sein de n3_serveur.
 - **Clone avec submodules :** `git clone --recurse-submodules <url>` ou `git submodule update --init --recursive`.
 - **Tags :** ex. `git tag n3-iot-2025.03` pour une release.
 
@@ -222,7 +222,7 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 
 - **Présentation salle aérée n³ :** [https://n3.olution.info](https://n3.olution.info)  
 - **Backend IoT :** [https://iot.olution.info](https://iot.olution.info)  
-- **Documentation projet :** [README](README.md), [ANALYSE_ARBORESCENCE](ANALYSE_ARBORESCENCE.md), [docs/inventaire_appareils](docs/inventaire_appareils.md), [firmwires/README](firmwires/README.md), [firmwires/RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md), [serveur/ffp3/README](serveur/ffp3/README.md)
+- **Documentation projet :** [README](README.md), [ANALYSE_ARBORESCENCE](ANALYSE_ARBORESCENCE.md), [docs/inventaire_appareils](docs/inventaire_appareils.md), [firmwires/README](firmwires/README.md), [firmwires/RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md), [serveur/ffp3/README](serveur/ffp3/README.md) (ffp3 fait partie du dépôt n3_serveur).
 
 ---
 

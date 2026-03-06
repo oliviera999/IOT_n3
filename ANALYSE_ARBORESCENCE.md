@@ -21,11 +21,14 @@ Le workspace **IOT_n3** est un projet **IoT (Internet des Objets)** centré sur 
 
 ```
 c:\IOT_n3\
+├── .gitignore
+├── README.md, RECOMMANDATIONS_IOT.md, ANALYSE_ARBORESCENCE.md
+├── docs\               # Inventaire des appareils (inventaire_appareils.md)
 ├── firmwires\          # Tous les projets firmware (ESP32, Arduino, PlatformIO)
 └── serveur\            # Applications web PHP (données, contrôle, galeries)
 ```
 
-- **Dépôt Git** initialisé à la racine (IOT_n3) ; `firmwires/ffp5cs` et `serveur/ffp3` en submodules. Voir [RECOMMANDATIONS_IOT.md](RECOMMANDATIONS_IOT.md).
+- **Dépôt Git** initialisé à la racine (IOT_n3) ; **serveur** est un submodule **n3_serveur** (contenant msp1, n3pp, ffp3 intégré) ; `firmwires/ffp5cs` en submodule. Voir [RECOMMANDATIONS_IOT.md](RECOMMANDATIONS_IOT.md).
 - **README racine** : [README.md](README.md) décrit le projet, les liens firmware ↔ serveur, et pointe vers [docs/inventaire_appareils.md](docs/inventaire_appareils.md).
 
 ---
@@ -40,8 +43,8 @@ Regroupe **tous les firmwares** pour cartes ESP32, ESP32-CAM et Arduino UNO. Out
 |--------|------|
 | `README.md` | Description des projets, commandes de compilation/upload, structure des dossiers |
 | `RAPPORT_ANALYSE.md` | Rapport d’analyse (bugs, sécurité, recommandations) – mars 2025 |
-| `RECOMMANDATIONS.md` | Recommandations (Git, nommage, partition, refactor) – état antérieur |
-| `.gitignore` | À la racine : `.pio/`, `desktop.ini`, fichiers sensibles, `error_log` ; dépôt Git initialisé (IOT_n3) ; ffp5cs et ffp3 en submodules |
+| `RECOMMANDATIONS.md` | Recommandations (Git, nommage, partition, refactor) – mis à jour (état actuel) |
+| `.gitignore` | À la racine firmwires et IOT_n3 : `.pio/`, `desktop.ini`, fichiers sensibles, `error_log` |
 
 ### 3.2 Projets firmware (détail)
 
@@ -60,7 +63,7 @@ Regroupe **tous les firmwares** pour cartes ESP32, ESP32-CAM et Arduino UNO. Out
 - **Fonctionnalités :** 2× DHT, humidité sol, pluie, DS18B20, 4 LDR, 2 servos, relais, mails, serveur web, NTP, OLED
 - **Fichiers :** `platformio.ini`, `src/main.cpp` (~1058 lignes), `lib/`, `include/`, `test/`
 - **Stack :** idem n3pp + OneWire, DallasTemperature, ESP32Servo, Preferences, ESPmDNS
-- **Note :** `platformio.ini` référence `min_spiffs.csv` sans que le fichier soit présent dans le dépôt
+- **Note :** la ligne `board_build.partitions = min_spiffs.csv` a été retirée ; partition par défaut utilisée
 
 #### C. Upload photos (ESP32-CAM) – 3 projets
 
@@ -189,7 +192,7 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
 - **Fonctionnalités :** ingestion données capteurs (POST avec clé API + HMAC-SHA256), dashboard (Highcharts, CSV), surveillance aquaponie, contrôle GPIO, sync ESP32 ↔ serveur, tâches planifiées (CRON), logging (Monolog).
 
-- **Dépôt Git :** `serveur/ffp3/` contient un `.git/` (sous-projet versionné).
+- **Dépôt Git :** `serveur/ffp3/` est un dossier versionné dans le dépôt **n3_serveur** (ffp3 a été fusionné avec historique via `git subtree add` ; ce n’est plus un sous-dépôt séparé).
 
 ### 4.3 Fichiers communs / divers
 
@@ -211,7 +214,7 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
 ### 5.1 Versionnement
 
-- **Racine IOT_n3** : dépôt Git initialisé (`.gitignore` racine). **firmwires/ffp5cs** et **serveur/ffp3** sont des **submodules** (dépôts préexistants conservés en submodules). Voir RECOMMANDATIONS_IOT.md §3 pour les URLs et la procédure.
+- **Racine IOT_n3** : dépôt Git initialisé (`.gitignore` racine). **serveur** est un submodule pointant vers **n3_serveur** (dépôt contenant msp1, n3pp, galeries et ffp3 en dossier intégré) ; **firmwires/ffp5cs** est un submodule. Voir RECOMMANDATIONS_IOT.md §3 pour les URLs et la procédure.
 - **Registre des appareils** : voir `docs/inventaire_appareils.md`.
 
 ### 5.2 Sécurité (déjà signalée dans RAPPORT_ANALYSE)
@@ -264,15 +267,17 @@ c:\IOT_n3\
     ├── msp1gallery\         # Galerie / upload photos (endpoint msp1gallery)
     ├── n3pp\                # Contrôle, datas N3PP
     ├── n3ppgallery\         # Galerie / upload photos (endpoint n3ppgallery)
-    └── ffp3\                # App Slim 4 (aquaponie, dashboard, API) + .git
+    └── ffp3\                # App Slim 4 (aquaponie, dashboard, API), intégré dans n3_serveur
 ```
+
+*Note :* Le dossier **serveur/** dans IOT_n3 est un clone du dépôt **n3_serveur** (submodule) ; ffp3 n’est plus un sous-dépôt séparé mais un dossier versionné dans n3_serveur.
 
 ---
 
 ## 7. Recommandations synthétiques
 
 1. **Racine** : le README (`README.md`) décrit le projet et les liens firmware ↔ serveur ; à maintenir à jour.
-2. **Git** : dépôt à la racine et submodules (ffp5cs, ffp3) en place ; stratégie documentée dans RECOMMANDATIONS_IOT.md.
+2. **Git** : dépôt à la racine ; submodules **serveur** (n3_serveur) et **firmwires/ffp5cs** ; stratégie documentée dans RECOMMANDATIONS_IOT.md.
 3. **Firmwares** : appliquer les corrections et recommandations de `RAPPORT_ANALYSE.md` (bugs n3pp4_2, secrets, partition msp2_5) ; à terme, s’inspirer de ffp5cs pour modulariser n3pp et msp.
 4. **Serveur** : éviter de versionner `error_log` ; clarifier le rôle des fichiers « old » / « 2 » dans n3pp et les archiver ou supprimer si obsolètes.
 5. **Documentation** : garder le README firmwires à jour (déjà bien détaillé) et faire pointer le README racine vers les différentes parties du projet.
