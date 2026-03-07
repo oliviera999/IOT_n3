@@ -1,6 +1,6 @@
 # Recommandations techniques – IoT de la salle aérée n³
 
-*Dernière mise à jour : mars 2025.*
+*Dernière mise à jour : mars 2026.*
 
 **Contexte :** [La salle aérée n³](https://n3.olution.info) (Nature, Numérique, Nomade) — Lycée Lyautey de Casablanca. Espace pédagogique en plein air : aquaponie, jardins, station météo, objets connectés et robotique.
 
@@ -35,7 +35,7 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 
 ### 2.1 Sécurité et secrets
 
-**Problème :** Mots de passe WiFi, identifiants SMTP et clé API (`apiKeyValue = "fdGTMoptd5CD2ert3"`) sont en clair dans les sources (n3pp4_2, msp2_5, uploadphotosserver_*, LVGL_Widgets). Risque en cas de partage du code ou dépôt public.
+**Problème :** **n3pp4_2** et **msp2_5** ont déjà externalisé les secrets dans `credentials.h` (avec `credentials.h.example`). Les autres firmwares (uploadphotosserver_*, LVGL_Widgets) peuvent encore avoir des secrets en dur dans les sources. Risque en cas de partage du code ou dépôt public pour ces derniers.
 
 **Recommandations :**
 
@@ -201,7 +201,7 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 
 | Priorité | Thème | Action | État |
 |----------|------|--------|------|
-| Haute | Sécurité | Externaliser WiFi, SMTP et clé API dans un fichier non versionné ; documenter `.env` / `credentials.h.example`. | À faire |
+| Haute | Sécurité | Externaliser WiFi, SMTP et clé API dans un fichier non versionné ; documenter `.env` / `credentials.h.example`. | **Partiel** : fait pour n3pp4_2 et msp2_5 (credentials.h) ; à compléter pour uploadphotosserver_*, LVGL_Widgets si applicable. |
 | Haute | Bugs | Corriger `batterie()` et affichage OLED dans n3pp4_2 (voir RAPPORT_ANALYSE). | **Fait** |
 | Moyenne | Config | Gérer la partition msp2_5 (fichier ou suppression de la ligne) ; utiliser variables d’env pour les ports série. | **Fait** |
 | Moyenne | Inventaire | Créer un registre des appareils (tableau ou page admin) et un nommage cohérent (n3-*). | **Fait** ([docs/inventaire_appareils.md](docs/inventaire_appareils.md)) |

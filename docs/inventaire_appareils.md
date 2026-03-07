@@ -1,6 +1,6 @@
 # Registre des appareils IoT – Salle aérée n³
 
-*Dernière mise à jour : mars 2025.*
+*Dernière mise à jour : mars 2026.*
 
 Ce document recense les appareils (ESP32, ESP32-CAM, etc.) déployés ou prévus pour **[la salle aérée n³](https://n3.olution.info)**. Backend : [iot.olution.info](https://iot.olution.info).
 

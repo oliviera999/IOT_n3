@@ -1,6 +1,6 @@
 # Analyse générale de l'arborescence – IOT_n3
 
-**Date :** 5 mars 2025 (mise à jour doc : mars 2025)  
+**Date :** 5 mars 2026 (mise à jour doc : mars 2026)  
 **Périmètre :** `c:\IOT_n3`
 
 ---
@@ -28,7 +28,7 @@ c:\IOT_n3\
 └── serveur\            # Applications web PHP (données, contrôle, galeries)
 ```
 
-- **Dépôt Git** initialisé à la racine (IOT_n3) ; **serveur** est un submodule **n3_serveur** (contenant msp1, n3pp, ffp3 intégré) ; `firmwires/ffp5cs` en submodule. Voir [RECOMMANDATIONS_IOT.md](RECOMMANDATIONS_IOT.md).
+- **Dépôt Git** initialisé à la racine (IOT_n3) ; **serveur** est un submodule **n3_serveur** (contenant msp1, n3pp, ffp3 intégré) ; **firmwires** (submodule) contient **ffp5cs** en dossier ordinaire. Voir [RECOMMANDATIONS_IOT.md](RECOMMANDATIONS_IOT.md).
 - **README racine** : [README.md](README.md) décrit le projet, les liens firmware ↔ serveur, et pointe vers [docs/inventaire_appareils.md](docs/inventaire_appareils.md).
 
 ---
@@ -221,13 +221,12 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
 ### 5.1 Versionnement
 
-- **Racine IOT_n3** : dépôt Git initialisé (`.gitignore` racine). **serveur** est un submodule pointant vers **n3_serveur** (dépôt contenant msp1, n3pp, galeries et ffp3 en dossier intégré) ; **firmwires/ffp5cs** est un submodule. Voir RECOMMANDATIONS_IOT.md §3 pour les URLs et la procédure.
+- **Racine IOT_n3** : dépôt Git initialisé (`.gitignore` racine). **serveur** est un submodule pointant vers **n3_serveur** (dépôt contenant msp1, n3pp, galeries et ffp3 en dossier intégré) ; **firmwires/ffp5cs** est un dossier ordinaire dans le submodule firmwires. Voir RECOMMANDATIONS_IOT.md §3 pour les URLs et la procédure.
 - **Registre des appareils** : voir `docs/inventaire_appareils.md`.
 
 ### 5.2 Sécurité (déjà signalée dans RAPPORT_ANALYSE)
 
-- Mots de passe WiFi et SMTP en clair dans les `main.cpp` (n3pp4_2, msp2_5, etc.).
-- Clé API en dur (`apiKeyValue`). À externaliser (fichier non versionné ou variables d’environnement).
+- **n3pp4_2** et **msp2_5** : secrets externalisés dans `credentials.h` (non versionné) + `credentials.h.example`. Autres firmwares : à vérifier (LVGL_Widgets a encore une clé en dur).
 
 ### 5.3 Configuration
 
@@ -263,7 +262,7 @@ c:\IOT_n3\
 │   ├── uploadphotosserver_n3pp_1_6_deppsleep\
 │   ├── uploadphotosserver_ffp3_1_5_deppsleep\
 │   ├── ratata\              # Kit ZYC0108-EN (8 env. UNO + ESP32-CAM)
-│   ├── ffp5cs\              # Contrôleur aquaponie (WROOM/S3, modulaire) + .git
+│   ├── ffp5cs\              # Contrôleur aquaponie (WROOM/S3, modulaire) (dossier ordinaire)
 │   ├── LVGL_Widgets\        # ESP32-S3 + écran LVGL
 │   └── (test psram s3, test psram s3 2 dans ffp5cs)
 │
@@ -285,7 +284,7 @@ c:\IOT_n3\
 ## 7. Recommandations synthétiques
 
 1. **Racine** : le README (`README.md`) décrit le projet et les liens firmware ↔ serveur ; à maintenir à jour.
-2. **Git** : dépôt à la racine ; submodules **serveur** (n3_serveur) et **firmwires/ffp5cs** ; stratégie documentée dans RECOMMANDATIONS_IOT.md.
+2. **Git** : dépôt à la racine ; submodules **serveur** (n3_serveur) et **firmwires** (ffp5cs est un dossier dans firmwires) ; stratégie documentée dans RECOMMANDATIONS_IOT.md.
 3. **Firmwares** : appliquer les corrections et recommandations de `RAPPORT_ANALYSE.md` (bugs n3pp4_2, secrets, partition msp2_5) ; à terme, s’inspirer de ffp5cs pour modulariser n3pp et msp.
 4. **Serveur** : éviter de versionner `error_log` ; clarifier le rôle des fichiers « old » / « 2 » dans n3pp et les archiver ou supprimer si obsolètes.
 5. **Documentation** : garder le README firmwires à jour (déjà bien détaillé) et faire pointer le README racine vers les différentes parties du projet.

@@ -376,6 +376,8 @@ if ($SkipCommit -or $DryRun) {
 
 Write-Host ""
 Write-Host "=== Commit serveur ===" -ForegroundColor Cyan
+$serveurCommitted = $false
+$versionList = ($artifacts | ForEach-Object { "$($_.TargetName)=$($_.Version)" }) -join ", "
 Push-Location serveur
 try {
     git add ota/
@@ -383,7 +385,6 @@ try {
     if ([string]::IsNullOrWhiteSpace($status)) {
         Write-Host "Aucun changement dans serveur/ota/, rien a committer." -ForegroundColor Gray
     } else {
-        $versionList = ($artifacts | ForEach-Object { "$($_.TargetName)=$($_.Version)" }) -join ", "
         $commitMsg = "ota: publish $versionList"
         git commit -m $commitMsg
         if ($LASTEXITCODE -ne 0) {
@@ -396,13 +397,29 @@ try {
             exit 1
         }
         Write-Host "Commit et push serveur reussis." -ForegroundColor Green
+        $serveurCommitted = $true
     }
 } finally {
     Pop-Location
 }
 
-Write-Host ""
-Write-Host "Rappel : le depot parent IOT_n3 pointe vers une nouvelle ref du sous-module serveur." -ForegroundColor Yellow
-Write-Host "Pour versionner : git add serveur ; git commit -m 'update serveur ref (OTA)'" -ForegroundColor Gray
+# Commit du depot parent : enregistrer la nouvelle ref du sous-module serveur
+if ($serveurCommitted) {
+    Write-Host ""
+    Write-Host "=== Commit depot parent (ref serveur) ===" -ForegroundColor Cyan
+    git add serveur
+    $parentStatus = git status --porcelain serveur
+    if (-not [string]::IsNullOrWhiteSpace($parentStatus)) {
+        git commit -m "ota: update ref serveur (publish $versionList)"
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Erreur : git commit depot parent a echoue." -ForegroundColor Red
+            exit 1
+        }
+        Write-Host "Commit depot parent reussi (ref serveur mise a jour)." -ForegroundColor Green
+    } else {
+        Write-Host "Aucun changement de ref serveur, rien a committer dans le depot parent." -ForegroundColor Gray
+    }
+}
+
 Write-Host ""
 Write-Host "Publication OTA terminee." -ForegroundColor Cyan
