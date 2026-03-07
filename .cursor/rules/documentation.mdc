@@ -29,3 +29,6 @@ alwaysApply: true
   - `firmwires/README.md` : reference pour les firmwares (compilation, cartes, structure).
   - `serveur/README.md` : reference pour le serveur unifie (installation, config, architecture, endpoints).
   - Ces README sont la source de verite pour leur perimetre — ne pas les contredire.
+
+- **Dossier `serveur/site initial/`**
+  - Ne pas modifier : ancienne version des fichiers serveur, conservee pour consultation uniquement (reference, comparaison, historique). Les evolutions se font dans les dossiers actuels (msp1, n3pp, ffp3, galeries).

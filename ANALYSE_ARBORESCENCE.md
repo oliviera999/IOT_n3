@@ -77,10 +77,11 @@ Les noms des firmwares indiquent l’**endpoint cible** (msp1gallery, n3ppgaller
 
 #### D. Ratata – Kit ZYC0108-EN – `ratata/`
 
-- **Un projet, 8 environnements** dans un seul `platformio.ini` :
+- **Documentation dédiée :** voir [firmwires/ratata/README.md](firmwires/ratata/README.md) pour la structure, les huit exemples et les broches.
+- **Un projet, 8 environnements** (objectif : un `platformio.ini` à la racine de `ratata/`) :
   - **7 env. Arduino UNO :** `1_auto_move`, `2_servo_angle`, `3_ultrasonic_follow`, `4_obstacle_avoidance`, `5_tracking`, `6_2_arduino_uno`, `test`
   - **1 env. ESP32-CAM :** `6_1_esp32_car` (voiture avec caméra WiFi, stream HTTP)
-- **Structure :** `src/` avec un sous-dossier par exemple (`1_Auto_move/`, `2_servo_Angle/`, …, `6_1_ESP32_Car/` avec `app_httpd.cpp`, `camera_index.h`), chacun avec `main.cpp`
+- **Structure actuelle :** `ZYC0108-EN/ZYC0108-EN/2_Arduino_Code/` contient les exemples (1_Auto_move, 2_servo_Angle, …, 6.1_ESP32_Car, 6.2_Arduino_UNO, test). Optionnel : `src/` + `platformio.ini` à la racine pour build PlatformIO.
 - **Broches communes UNO :** 74HCT595N, PWM 5/6, Servo 9, Ultrason 12/13, suivi de ligne A0–A2
 
 #### E. FFP5CS – Contrôleur aquaponie ESP32 – `ffp5cs/`
@@ -199,7 +200,13 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 - **error_log** : présents dans plusieurs sous-dossiers (msp1, n3pp, galeries) – à ne pas versionner en production.
 - **Fichiers « old » / « 2 »** : variantes ou anciennes versions (ex. `n3pp-outputsold.php`, `n3pp-databaseold.php`, `n3pp-outputs2.php`) – à clarifier ou archiver.
 
-### 4.4 Synthèse serveur
+### 4.4 Dossier `serveur/site initial/`
+
+- **Rôle** : archive d’une ancienne version des fichiers serveur (ex. ffp3_prov4).
+- **Règle** : **ne pas modifier** ce dossier. Il est conservé pour **consultation uniquement** (référence, comparaison avec la version actuelle, historique, dépannage).
+- Les évolutions et corrections se font dans les dossiers actuels du serveur (msp1, n3pp, ffp3, galeries), pas dans `site initial/`.
+
+### 4.5 Synthèse serveur
 
 | Chemin | Type | Rôle |
 |--------|------|------|
@@ -263,6 +270,7 @@ c:\IOT_n3\
 └── serveur\
     ├── index.php            # Portail n³ iot datas
     ├── README.txt           # Crédits thème
+    ├── site initial\        # Archive ancienne version — consultation uniquement, ne pas modifier
     ├── msp1\                # Contrôle, datas MSP1
     ├── msp1gallery\         # Galerie / upload photos (endpoint msp1gallery)
     ├── n3pp\                # Contrôle, datas N3PP

@@ -13,8 +13,9 @@ IOT_n3/
 ├── RECOMMANDATIONS_IOT.md
 ├── ANALYSE_ARBORESCENCE.md
 ├── docs/               → Inventaire des appareils (inventaire_appareils.md)
-├── firmwires/          → Tous les projets firmware (PlatformIO) ; ffp5cs en submodule
+├── firmwires/          → Submodule n3_firmwires (tous les projets firmware PlatformIO)
 └── serveur/            → Applications web PHP (msp1, n3pp, msp1gallery, n3ppgallery, ffp3)
+                           · site initial/ : ancienne version des fichiers serveur — consultation uniquement, ne pas modifier
 ```
 
 - **Firmwares** : [firmwires/](firmwires/) — compilation et upload avec [PlatformIO](https://platformio.org/).

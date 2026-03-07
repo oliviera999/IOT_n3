@@ -171,7 +171,7 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 **Recommandations :**
 
 1. **Dépôt racine**  
-   - Dépôt Git initialisé à la racine **IOT_n3**. Le dossier **serveur** est un sous-module **n3_serveur** (contenant msp1, n3pp, ffp3 intégré) ; **firmwires/ffp5cs** reste en submodule (voir §3 « Versionnement et submodules »).
+   - Dépôt Git initialisé à la racine **IOT_n3**. **firmwires** (n3_firmwires) et **serveur** (n3_serveur) sont des sous-modules (voir §3 « Versionnement et submodules »).
 
 2. **Tags et releases**  
    - Tagger les versions stables (ex. `n3-iot-2025.03`) pour pouvoir retrouver un état cohérent firmwares + serveur après une mise à jour.
@@ -214,9 +214,17 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 ### Versionnement et submodules
 
 - **Dépôt racine :** `git init` à la racine de IOT_n3. Fichier `.gitignore` racine (`.pio/`, fichiers sensibles, `error_log`, etc.).
-- **Submodules :** **serveur** pointe vers le dépôt **n3_serveur** (https://github.com/oliviera999/n3_serveur.git), qui contient msp1, n3pp, les galeries et **ffp3** en dossier intégré (fusionné avec historique via `git subtree add`). **firmwires/ffp5cs** reste un submodule séparé. Le dépôt ffp3 n’est plus un submodule ; son code est dans `serveur/ffp3/` au sein de n3_serveur.
+- **Submodules :** **firmwires** pointe vers **n3_firmwires** (https://github.com/oliviera999/n3_firmwires.git) ; **serveur** pointe vers **n3_serveur** (https://github.com/oliviera999/n3_serveur.git), qui contient msp1, n3pp, les galeries et ffp3. ffp5cs est un dossier ordinaire dans n3_firmwires (plus de submodule ffp5cs à la racine).
 - **Clone avec submodules :** `git clone --recurse-submodules <url>` ou `git submodule update --init --recursive`.
 - **Tags :** ex. `git tag n3-iot-2025.03` pour une release.
+
+### Gestion des firmwares
+
+- **Registre central :** le fichier **firmwires/firmwares.manifest.json** recense tous les projets firmware (chemin, carte, environnement PlatformIO, lien serveur, cible OTA). C’est la source de vérité pour lister les firmwares et, à terme, pour faire évoluer les scripts (build, OTA, inventaire).
+- **Liste et versions :** depuis la racine IOT_n3, exécuter `.\scripts\firmwires-list.ps1` pour afficher le tableau des firmwares ; `-WithVersion` ajoute la version extraite du code, `-Json` sortie JSON.
+- **Publication OTA :** `.\scripts\publish_ota.ps1` (n3pp, msp, cam-msp1, cam-n3pp, cam-ffp3) ; ffp5cs utilise son propre script dans `firmwires/ffp5cs/scripts/`. Après publication OTA, committer la référence du sous-module serveur dans le dépôt parent.
+- **Inventaire :** tenir à jour **docs/inventaire_appareils.md** (identifiant n3-*, type de firmware, emplacement, dernière version). La sortie de `firmwires-list.ps1 -WithVersion` peut aider à aligner les versions connues.
+- **Migration déjà en place :** firmwires est le submodule **n3_firmwires**. En cas de clone sans migration effectuée, voir [SUBMODULES_SETUP.md](SUBMODULES_SETUP.md) et `scripts/migrate-firmwires-to-submodule.ps1`.
 
 ---
 

@@ -8,10 +8,10 @@ alwaysApply: true
 - **Depot principal** : `IOT_n3` (racine). Contient tout sauf les sous-projets autonomes.
 
 - **Submodules**
-  - `firmwires/ffp5cs` et `serveur` sont des **submodules Git** (depots autonomes).
+  - `firmwires` (depot **n3_firmwires**) et `serveur` (depot **n3_serveur**) sont des **submodules Git**.
   - Clone complet : `git clone --recurse-submodules <url>`
   - Mise a jour : `git submodule update --init --recursive`
-  - Ne pas modifier directement le contenu d'un submodule depuis le depot parent sans y entrer d'abord (`cd firmwires/ffp5cs` ou `cd serveur`).
+  - Ne pas modifier le contenu d'un submodule depuis le depot parent sans y entrer d'abord (`cd firmwires` ou `cd serveur`).
 
 - **Cycle obligatoire a chaque modification**
   - Toute modification de code (firmware ou serveur) doit suivre ce cycle complet :
@@ -20,10 +20,14 @@ alwaysApply: true
        - Firmware : `firmwires/README.md`, version dans le code, `CHANGELOG.md` ou `VERSION.md` du sous-projet.
        - Serveur : `serveur/VERSION`, `serveur/CHANGELOG.md`, `README.md` racine si le contrat change.
        - Transversal : `RECOMMANDATIONS_IOT.md`, `docs/inventaire_appareils.md` si un appareil ou endpoint est ajoute/modifie.
-    3. **Commiter** dans le depot du composant (submodule ou racine) avec un message au format `[composant] description`.
-    4. **Commiter la reference du submodule** dans le depot parent IOT_n3 si un submodule a ete modifie.
-    5. **Pousser** vers GitHub : d'abord les submodules modifies, puis le depot parent.
-  - En resume : **version + doc + commit + push (submodules puis parent)** a chaque changement.
+    3. **Tester localement avant de deployer** :
+       - Pour toute modification du composant `serveur`, lancer un test via le serveur local PHP (`php -S`) avant commit/push/deploiement.
+       - Verifier au minimum les routes/pages impactees, le chargement des assets (`/assets/css/main.css`, JS, images) et l'absence d'erreur fatale.
+       - Ne pas deployer le serveur sans avoir valide ce test local, sauf impossibilite explicite documentee a l'utilisateur.
+    4. **Commiter** dans le depot du composant (submodule ou racine) avec un message au format `[composant] description`.
+    5. **Commiter la reference du submodule** dans le depot parent IOT_n3 si un submodule a ete modifie.
+    6. **Pousser** vers GitHub : d'abord les submodules modifies, puis le depot parent.
+  - En resume : **version + doc + test local + commit + push (submodules puis parent)** a chaque changement.
 
 - **Script de publication automatique (serveur)**
   - Le script `scripts/publish-cycle.ps1` automatise ce cycle pour le composant **serveur** : incrementation VERSION (patch), entree CHANGELOG.md, commit dans le submodule, commit reference dans le parent, **push par defaut** (serveur puis parent).
@@ -32,10 +36,10 @@ alwaysApply: true
   - Faire les modifications de code avant d'executer le script ; le script ajoute VERSION, CHANGELOG et les fichiers modifies au commit.
 
 - **Procedure de push complete**
-  - Si un submodule a ete modifie :
-    1. `cd <submodule>` → `git add . && git commit -m "[composant] ..." && git push`
+  - Si un submodule a ete modifie (firmwires ou serveur) :
+    1. `cd firmwires` ou `cd serveur` → `git add . && git commit -m "[composant] ..." && git push`
     2. Revenir a la racine : `cd <racine IOT_n3>`
-    3. `git add <submodule>` (enregistre la nouvelle reference)
+    3. `git add firmwires` ou `git add serveur` (enregistre la nouvelle reference)
   - Puis depuis la racine :
     - `git add . && git commit -m "[projet] ..." && git push`
   - Raccourci : `git push --recurse-submodules=on-demand` pousse les submodules automatiquement si necessaire.
@@ -53,8 +57,6 @@ alwaysApply: true
   - Verifier le `.gitignore` racine et ceux des sous-dossiers.
 
 - **Versionnage des sous-projets**
-  - ffp5cs : version dans `include/config.h` + `VERSION.md` (format MAJOR.MINOR).
-  - Serveur (ex ffp3) : version dans `VERSION` + `CHANGELOG.md` (Semantic Versioning).
-  - Firmwares simples (n3pp4_2, msp2_5, uploadphotosserver_*) : version dans la constante `version` du `main.cpp` (ex. `"4.2"`, `"2.5"`).
-  - Respecter les regles de versionnage specifiques de chaque sous-projet.
+  - Firmwares (dans firmwires / n3_firmwires) : ffp5cs dans `include/config.h` + `VERSION.md` ; n3pp4_2, msp2_5, uploadphotosserver_* dans la constante `version` du `main.cpp`.
+  - Serveur (n3_serveur) : version dans `VERSION` + `CHANGELOG.md` (Semantic Versioning).
   - **Incrementer la version a chaque modification**, meme mineure.

@@ -1,0 +1,36 @@
+---
+description: Gestion des multi-environnements du serveur (prod/test/test3/s3)
+globs: serveur/src/Middleware/**/*.php,serveur/config/**/*.php,serveur/public/index.php
+alwaysApply: false
+---
+
+# Serveur — Multi-environnements
+
+Le serveur gere 4 environnements avec des tables BDD separees.
+
+- **Environnements**
+  - `prod` : tables `ffp3Data`, `ffp3Outputs` — donnees reelles.
+  - `test` : tables `ffp3Data2`, `ffp3Outputs2` — tests avec hardware reel.
+  - `test3` et `s3` : environnements supplementaires (ESP32-S3, variantes).
+  - Variable `.env` : `ENV=prod` ou `ENV=test` pour le defaut.
+
+- **Acces aux tables**
+  - Toujours utiliser `TableConfig::getEnvironment()` et `TableConfig::getDataTable()`.
+  - Ne JAMAIS coder en dur un nom de table (`ffp3Data`, `msp1Data`, etc.).
+  - Le `EnvironmentMiddleware` injecte l'environnement dans l'attribut de la requete.
+
+- **Routes**
+  - Routes prod : `/post-data`, `/aquaponie`, `/dashboard`
+  - Routes test : `/post-data-test`, `/aquaponie-test`, `/dashboard-test`
+  - Les routes legacy (`/ffp3/*`, `*.php`) sont gerees par `.htaccess` — ne pas les casser.
+
+- **Ajout d'un nouvel environnement**
+  - Creer les tables BDD correspondantes.
+  - Ajouter les routes dans `public/index.php` avec `EnvironmentMiddleware`.
+  - Configurer les controleurs pour accepter l'environnement en attribut.
+  - Ajouter les tests d'environnement dans `tools/verify_environments.php`.
+
+- **Auth par environnement**
+  - Les routes API firmware (POST data, heartbeat, outputs state) sont publiques.
+  - Les routes de controle (dashboard, toggle, export) sont protegees par `AuthMiddleware` / `TokenAuthMiddleware`.
+  - L'auth est configurable via `AUTH_METHOD` dans `.env` : `session`, `token`, `both`, `none`.

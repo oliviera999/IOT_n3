@@ -1,0 +1,40 @@
+---
+description: Guide pour les firmwares legacy n3pp4_2 et msp2_5 (ESP32 serre et meteo)
+globs: firmwires/n3pp4_2/**/*.cpp,firmwires/n3pp4_2/**/*.h,firmwires/msp2_5/**/*.cpp,firmwires/msp2_5/**/*.h
+alwaysApply: false
+---
+
+# Firmwares legacy — n3pp4_2 et msp2_5
+
+Ces deux firmwares partagent une architecture identique mais avec des capteurs et actionneurs differents.
+
+- **Architecture commune**
+  - Cycle : `Wificonnect()` → `variablestoesp()` → lecture capteurs → `datatobdd()` → `sommeil()`
+  - Deep sleep avec reveil timer (3000s) + GPIO 4.
+  - OLED SSD1306 pour affichage local.
+  - ESP Mail Client pour alertes SMTP.
+
+- **Etat actuel : secrets en dur**
+  - WiFi SSID/password, cle API, identifiants SMTP sont codes en dur dans `main.cpp`.
+  - La meme cle API (`fdGTMoptd5CD2ert3`) est partagee entre les deux firmwares.
+  - A terme : migrer vers `credentials.h` (voir skill `migration-firmware-credentials`).
+
+- **Format de communication**
+  - POST : `application/x-www-form-urlencoded` (pas JSON).
+  - GET : parsing JSON de la reponse du serveur.
+  - Endpoints legacy avec `.php` : `/n3pp/n3ppdatas/post-n3pp-data.php`, `/msp1/msp1datas/post-msp1-data.php`.
+
+- **Capteurs — validation requise**
+  - Toujours verifier `isnan()` apres lecture DHT.
+  - Valider les plages de valeurs (pas de temperature < -40 ou > 80).
+  - Les capteurs sol analogiques (humidite, luminosite) peuvent retourner 0 ou 4095 si deconnectes.
+
+- **Modifications**
+  - Ne pas moderniser ces firmwares en bloc sans plan explicite.
+  - Changements acceptables sans plan : correction de bugs, externalisation des secrets, ajout de validation capteurs.
+  - Changements qui necessitent un plan : migration JSON, changement d'endpoint, ajout HMAC.
+  - Toute modification doit maintenir la compatibilite avec les endpoints serveur existants.
+
+- **Differences**
+  - n3pp4_2 : board=3, 4 capteurs sol, pompe arrosage, alertes automatiques.
+  - msp2_5 : board=2, 2 DHT (int/ext), DS18B20, tracker solaire (servos), capteur pluie.

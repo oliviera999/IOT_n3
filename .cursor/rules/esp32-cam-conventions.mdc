@@ -1,0 +1,112 @@
+---
+description: Conventions pour le firmware unifié ESP32-CAM (uploadphotosserver)
+globs: firmwires/uploadphotosserver/**/*.cpp,firmwires/uploadphotosserver/**/*.h,firmwires/uploadphotosserver/**/platformio.ini,firmwires/uploadphotosserver_*/**/*.cpp,firmwires/uploadphotosserver_*/**/*.h
+alwaysApply: false
+---
+
+# Conventions ESP32-CAM (upload photos)
+
+## Firmware unifié
+
+Le firmware camera est **unifié** dans `firmwires/uploadphotosserver/`.
+Trois environnements PlatformIO compilent le même code source avec des build flags différents :
+
+| Env PlatformIO | Build flag      | Galerie cible                     | Deep sleep | SD  |
+|----------------|-----------------|-----------------------------------|------------|-----|
+| `msp1`         | `-DTARGET_MSP1` | `/msp1gallery/upload.php`         | Non        | Non |
+| `n3pp`         | `-DTARGET_N3PP` | `/n3ppgallery/upload.php`         | Oui (600s) | Oui |
+| `ffp3`         | `-DTARGET_FFP3` | `/ffp3/ffp3gallery/upload.php`    | Oui (600s) | Non |
+
+Compiler : `pio run -e msp1` / `pio run -e n3pp` / `pio run -e ffp3`
+
+Les anciens répertoires séparés (`uploadphotosserver_msp1`, `uploadphotosserver_n3pp_*`, `uploadphotosserver_ffp3_*`) sont conservés comme référence historique mais ne doivent plus être modifiés.
+
+## Structure des fichiers
+
+- `include/config.h` : paramètres communs + configuration par cible (`#if defined(TARGET_xxx)`).
+- `include/credentials.h` : secrets WiFi (non versionné, copier `credentials.h.example`).
+- `src/main.cpp` : code source unifié, utilise les macros `USE_DEEP_SLEEP`, `USE_SD`.
+- `platformio.ini` : 3 envs, `lib_deps = ArduinoJson`, pas de port COM codé en dur.
+
+## Config camera commune
+
+- Board : ESP32-CAM AI Thinker, capteur OV2640.
+- Pins identiques (PWDN, XCLK, Y2-Y9) définies dans `config.h` — ne pas modifier sans changer de board.
+- Utiliser `pin_sccb_sda` / `pin_sccb_scl` (pas les anciens noms `pin_sscb_*` dépréciés).
+- Désactiver le brown-out détecteur au démarrage.
+
+## Upload
+
+- POST multipart/form-data vers `iot.olution.info` (galerie correspondante).
+- Champ fichier : `imageFile`.
+- Boundary : `RandomNerdTutorials` (doit correspondre côté serveur `GalleryUploadController`).
+- Chunks de 4096 octets.
+- Toujours libérer le framebuffer (`esp_camera_fb_return(fb)`) **après** l'envoi HTTP, pas avant.
+- Ne pas accéder à `fb->buf` / `fb->len` après `esp_camera_fb_return()` — use-after-free.
+
+## OTA distant (HTTP)
+
+- **Toutes les cibles** supportent l'OTA distant (pas d'ArduinoOTA local).
+- Métadonnées : `GET http://iot.olution.info/ota/cam/metadata.json`
+- Binaires : `http://iot.olution.info/ota/cam/<cible>/firmware.bin`
+- Format du `metadata.json` :
+  ```json
+  {
+    "msp1": { "version": "2.0", "url": "http://…/firmware.bin", "md5": "" },
+    "n3pp": { … },
+    "ffp3": { … }
+  }
+  ```
+- Vérification de version sémantique (MAJOR.MINOR.PATCH) — téléchargement si remote > local.
+- **msp1** : vérifie au boot + toutes les 2 h dans la boucle.
+- **n3pp / ffp3** : vérifie toutes les 6 boots (~1 h avec 600 s deep sleep) via `RTC_DATA_ATTR`.
+- En cas d'échec (réseau, JSON invalide, cible absente) : continue normalement sans bloquer.
+- Utilise `HTTPUpdate` + `ArduinoJson` (lib_deps dans platformio.ini).
+
+### Déploiement d'une mise à jour OTA
+
+1. Incrémenter `FIRMWARE_VERSION` dans `config.h`.
+2. Compiler : `pio run -e <cible>`.
+3. Copier `.pio/build/<cible>/firmware.bin` vers `serveur/ota/cam/<cible>/firmware.bin`.
+4. Mettre à jour `serveur/ota/cam/metadata.json` (version, md5 optionnel).
+5. Déployer sur le serveur — les appareils se mettront à jour automatiquement.
+
+## Sécurité
+
+- Les uploads photo ne sont actuellement pas authentifiés — à corriger si exposé sur Internet.
+- Les identifiants WiFi sont externalisés dans `credentials.h` (pas en dur dans le code).
+- Ne pas versionner `credentials.h` — seul `credentials.h.example` est versionné.
+
+## Créneau horaire
+
+- Photos uniquement entre 6h et 22h (constantes `HOUR_START` / `HOUR_END` dans `config.h`).
+- Synchronisation NTP (`pool.ntp.org`, GMT+0, DST 3600s).
+- Si NTP échoue, la photo est prise par défaut (fail-open).
+
+## Énergie
+
+- **msp1** : timer périodique dans `loop()` (600 000 ms = 10 min).
+- **n3pp / ffp3** : deep sleep 600 s. `setup()` fait tout, `loop()` déclenche le sommeil.
+- Deep sleep : WiFi et caméra sont réinitialisés à chaque réveil.
+
+## Warmup caméra
+
+- `warmupCamera()` : initialisation progressive du capteur (exposition, gain, AWB) + 3 captures jetables.
+- `adjustExposure()` : heuristique d'ajustement AEC sur la luminosité moyenne du JPEG avant chaque capture.
+- Indispensable en deep sleep pour éviter les photos vertes ou surexposées.
+
+## LED statut
+
+- GPIO 33 pour la LED de statut.
+- `ledBlink(onMs, offMs, count)` — fonction unifiée.
+- Patterns : blink court (100/100) pour étapes, blink WiFi (500/500), blink photo (1500/1500).
+
+## Ajout d'une nouvelle cible caméra
+
+1. Ajouter un bloc `#elif defined(TARGET_XXX)` dans `config.h` avec `OTA_TARGET_KEY` et les paramètres spécifiques.
+2. Ajouter un `[env:xxx]` dans `platformio.ini` avec `build_flags = -DTARGET_XXX`.
+3. Si la cible a des fonctionnalités spéciales (SD…), ajouter des `#if USE_xxx` dans `main.cpp`.
+4. Côté serveur : ajouter la route dans `public/index.php` et la méthode dans `GalleryUploadController`.
+5. Ajouter l'entrée dans `serveur/ota/cam/metadata.json` et créer le dossier `serveur/ota/cam/xxx/`.
+6. Configurer le dossier de stockage dans `.env` (`GALLERY_*_DIR`).
+7. Enregistrer l'appareil dans `docs/inventaire_appareils.md`.

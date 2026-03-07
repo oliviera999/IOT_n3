@@ -1,9 +1,12 @@
 # Configuration des sous-modules n3_serveur et n3_firmwires
 
-## État actuel (mis à jour après fusion ffp3)
+## État actuel
 
-- **serveur/** est désormais un **sous-module** pointant vers **n3_serveur** dans IOT_n3. Le dépôt n3_serveur contient msp1, n3pp, les galeries et **ffp3** en dossier intégré (fusionné avec historique via `git subtree add` ; le dépôt ffp3 n’est plus un submodule).
-- **firmwires/** : la procédure ci-dessous pour remplacer firmwires par le sous-module n3_firmwires reste à faire si souhaité.
+- **serveur/** est un **sous-module** pointant vers **n3_serveur** (msp1, n3pp, galeries, ffp3).
+- **firmwires/** est un **sous-module** pointant vers **n3_firmwires** (tous les firmwares : n3pp4_2, msp2_5, uploadphotosserver*, ffp5cs, ratata, LVGL_Widgets). ffp5cs n’est plus un submodule à la racine ; il est un dossier normal dans n3_firmwires.
+
+Si votre clone a encore l’ancienne structure (firmwires en dossier + ffp5cs en submodule), exécuter depuis la racine IOT_n3 :  
+`.\scripts\migrate-firmwires-to-submodule.ps1 -DryRun` puis, après avoir poussé le contenu de firmwires vers n3_firmwires, `.\scripts\migrate-firmwires-to-submodule.ps1`.
 
 ## Étapes à faire
 
@@ -34,7 +37,7 @@ git push -u origin master
 
 **Serveur :** déjà fait. Le dossier **serveur** est le sous-module **n3_serveur** (ffp3 a été fusionné dans n3_serveur ; il n’y a plus de sous-module `serveur/ffp3`).
 
-**Firmwires (si vous souhaitez aussi utiliser n3_firmwires) :** une fois le push firmwires réussi, à la racine de IOT_n3 :
+**Firmwires (déjà en submodule sur les clones à jour) :** si vous avez encore l’ancienne structure, une fois le contenu de firmwires poussé vers n3_firmwires, à la racine de IOT_n3 :
 
 ```powershell
 cd c:\IOT_n3

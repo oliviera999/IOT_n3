@@ -24,3 +24,7 @@ secrets.h
 error_log
 *.log
 cronlog*.txt
+
+# Temporaire / backups
+_tmp_ffp5cs/
+backup/
