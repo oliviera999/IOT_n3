@@ -5,8 +5,10 @@
 # metadata.json, puis commit + push dans le depot serveur (sous-module).
 #
 # Cibles supportees :
-#   n3pp      -> serveur/ota/n3pp/        (firmware serre, ESP32)
-#   msp       -> serveur/ota/msp/         (firmware meteo, ESP32)
+#   n3pp      -> serveur/ota/n3pp/        (firmware serre, ESP32 prod)
+#   n3pp-test -> serveur/ota/n3pp-test/   (firmware serre test, env esp32dev_test)
+#   msp       -> serveur/ota/msp/         (firmware meteo, ESP32 prod)
+#   msp-test  -> serveur/ota/msp-test/    (firmware meteo test, env esp32dev_test)
 #   cam-msp1  -> serveur/ota/cam/msp1/    (camera meteo, ESP32-CAM)
 #   cam-n3pp  -> serveur/ota/cam/n3pp/    (camera serre, ESP32-CAM)
 #   cam-ffp3  -> serveur/ota/cam/ffp3/    (camera aquaponie, ESP32-CAM)
@@ -18,14 +20,14 @@
 #
 # Usage :
 #   .\scripts\publish_ota.ps1
-#   .\scripts\publish_ota.ps1 -Targets "n3pp","msp"
+#   .\scripts\publish_ota.ps1 -Targets "n3pp","n3pp-test","msp","msp-test"
 #   .\scripts\publish_ota.ps1 -Targets "cam-msp1","cam-n3pp","cam-ffp3"
 #   .\scripts\publish_ota.ps1 -Build
 #   .\scripts\publish_ota.ps1 -DryRun
 # =============================================================================
 
 param(
-    [string[]]$Targets = @("n3pp", "msp", "cam-msp1", "cam-n3pp", "cam-ffp3"),
+    [string[]]$Targets = @("n3pp", "n3pp-test", "msp", "msp-test", "cam-msp1", "cam-n3pp", "cam-ffp3"),
     [switch]$Build,
     [switch]$SkipCommit,
     [switch]$DryRun,
@@ -61,12 +63,30 @@ $TargetConfig = [ordered]@{
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
+    "n3pp-test" = @{
+        ProjectDir   = "firmwires\n3pp4_2"
+        PioEnv       = "esp32dev_test"
+        OtaDest      = "serveur\ota\n3pp-test"
+        MetadataPath = "serveur\ota\n3pp-test\metadata.json"
+        OtaUrl       = "http://iot.olution.info/ota/n3pp-test/firmware.bin"
+        MetadataKey  = $null
+        AppMaxSize   = 1966080
+    }
     "msp" = @{
         ProjectDir   = "firmwires\msp2_5"
         PioEnv       = "esp32dev"
         OtaDest      = "serveur\ota\msp"
         MetadataPath = "serveur\ota\msp\metadata.json"
         OtaUrl       = "http://iot.olution.info/ota/msp/firmware.bin"
+        MetadataKey  = $null
+        AppMaxSize   = 1966080
+    }
+    "msp-test" = @{
+        ProjectDir   = "firmwires\msp2_5"
+        PioEnv       = "esp32dev_test"
+        OtaDest      = "serveur\ota\msp-test"
+        MetadataPath = "serveur\ota\msp-test\metadata.json"
+        OtaUrl       = "http://iot.olution.info/ota/msp-test/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -119,8 +139,8 @@ function Get-FirmwareVersion {
 
     $projectDir = $Config.ProjectDir
 
-    # n3pp / msp : version dans main.cpp
-    if ($TargetName -eq "n3pp" -or $TargetName -eq "msp") {
+    # n3pp / msp / n3pp-test / msp-test : version dans main.cpp (même source, env différent pour *-test)
+    if ($TargetName -eq "n3pp" -or $TargetName -eq "msp" -or $TargetName -eq "n3pp-test" -or $TargetName -eq "msp-test") {
         $mainCpp = Join-Path $projectDir "src\main.cpp"
         if (-not (Test-Path $mainCpp)) {
             Write-Host "  Erreur : $mainCpp introuvable" -ForegroundColor Red

@@ -83,6 +83,12 @@ Les 3 firmwares camera (`uploadphotosserver_*`) necessitent :
 - Verifier la resolution et la qualite JPEG dans le code
 - Tester en mode deep sleep si applicable (consommation)
 
+### OTA distant (n3pp, msp1, cameras)
+
+- **Publication des binaires** : depuis la racine IOT_n3, `.\scripts\publish_ota.ps1` compile (option `-Build`), copie les `firmware.bin` vers `serveur/ota/`, met a jour les `metadata.json`, puis commit/push dans le sous-module serveur.
+- **Cibles** : `n3pp`, `n3pp-test`, `msp`, `msp-test`, `cam-msp1`, `cam-n3pp`, `cam-ffp3`. Les variantes `-test` utilisent l’env PlatformIO `esp32dev_test` (flag `TEST_MODE`) et publient vers `serveur/ota/n3pp-test/` et `serveur/ota/msp-test/`. Les firmwares en mode test pointent vers `/n3pp-test/` et `/msp1-test/` cote API et vers `ota/n3pp-test/`, `ota/msp-test/` pour l’OTA.
+- **Firmware ffp5cs** : conserve son propre script `firmwires/ffp5cs/scripts/publish_ota.ps1` (ffp3/ota/).
+
 ### FFP5CS (aquaponie)
 
 Le deploiement ffp5cs est plus complexe :

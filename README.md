@@ -65,3 +65,4 @@ Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’u
 
 1. **Compiler un firmware** : aller dans le dossier du projet sous `firmwires/` et lancer `pio run` (puis `pio run -t upload` pour flasher). Adapter le port série dans `platformio.ini`.
 2. **Serveur** : les applications sous `serveur/` sont déployées sur le domaine iot.olution.info (msp1, n3pp, ffp3). Pour ffp3, suivre le README du dossier pour PHP, Composer et base de données.
+3. **Publication OTA** (n3pp, msp, caméras) : depuis la racine, `.\scripts\publish_ota.ps1` publie les binaires vers `serveur/ota/` (prod et test : `n3pp`, `n3pp-test`, `msp`, `msp-test`, etc.). Le firmware ffp5cs utilise son propre script dans `firmwires/ffp5cs/scripts/publish_ota.ps1`.

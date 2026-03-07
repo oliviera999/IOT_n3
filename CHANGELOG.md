@@ -6,6 +6,16 @@ Format : [version] - date - description.
 
 ---
 
+## [2025.03] - 2025-03-07
+
+### OTA et déploiement (n3pp, msp1 test)
+- **Publication OTA** : ajout des cibles `n3pp-test` et `msp-test` dans `scripts/publish_ota.ps1` (env `esp32dev_test`, binaires vers `serveur/ota/n3pp-test/` et `serveur/ota/msp-test/`).
+- **n3pp4_2** (v4.5) : URL OTA conditionnelle selon `TEST_MODE` (n3pp-test vs n3pp).
+- **msp2_5** (v2.7) : URL OTA conditionnelle selon `TEST_MODE` (msp-test vs msp) ; version passée en `version.c_str()` dans la config OTA.
+- **Documentation** : skill déploiement-appareil-iot (section OTA distant), README racine (point Publication OTA).
+
+---
+
 ## [2025.03] - 2025-03-06
 
 ### Règles projet
@@ -14,4 +24,4 @@ Format : [version] - date - description.
 - Mise à jour des règles : contexte serveur unifié, procédure de push complète (submodules puis parent).
 
 ### Référence submodule serveur
-- **serveur** : version 5.0.0 (migration serveur unifié Slim 4, routes msp1/n3pp/galeries).
+- **serveur** : version 5.0.27 (voir serveur/VERSION et serveur/CHANGELOG.md).
