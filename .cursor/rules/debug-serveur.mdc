@@ -1,0 +1,25 @@
+---
+description: Processus de debug des erreurs serveur (référence erreur, cronlog)
+globs: serveur/**/*.php,serveur/**/*.twig,serveur/docs/*.md
+alwaysApply: false
+---
+
+# Debug erreurs serveur
+
+- **Cronlog production** : https://iot.olution.info/public/cronlog.txt  
+  Fichier de log applicatif (Monolog) exposé en lecture pour le diagnostic sans accès SSH.
+
+- **error_log production** (accès autorisé comme cronlog) :
+  - https://iot.olution.info/public/error_log
+  - Variante : https://iot.olution.info/ffp3/public/error_log  
+  Contient les lignes `[n3 500]` (méthode, URL, exception, fichier:ligne, trace), PHP Fatal, FFP3 404.
+
+- **Quand l'utilisateur signale une erreur avec une référence** (ex. « Référence : bb3262da436c ») :
+  1. Récupérer le contenu du cronlog et/ou de l'error_log (URLs ci-dessus).
+  2. Rechercher dans le texte la chaîne `[<référence>]` (ex. `[bb3262da436c]`).
+  3. La ligne loguée contient : message d'exception, fichier, ligne, méthode HTTP, URL.
+  4. Identifier la cause (template manquant, colonne BDD, etc.) et proposer ou appliquer le correctif.
+
+- **Processus automatisé** : toute investigation d'erreur 500 ou d'exception serveur doit inclure la consultation du **cronlog et des error_log** (liens ci-dessus) pour retrouver la référence si elle est fournie, ou les dernières lignes `[ERROR] Exception non gérée` / `[n3 500]` / `Erreur insertion` pour les erreurs récentes.
+
+- **Documentation détaillée** : `serveur/docs/DEBUG_ERREURS_SERVEUR.md` (processus complet, format des lignes, script d'analyse, exemples de causes).

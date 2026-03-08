@@ -57,6 +57,8 @@ Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’u
 - **Inventaire des appareils** : voir [docs/inventaire_appareils.md](docs/inventaire_appareils.md) pour le registre et le nommage (n3-*).
 - **Firmwares** : voir [firmwires/README.md](firmwires/README.md) pour la liste des projets, cartes, commandes de compilation et structure.
 - **FFP3 (serveur)** : voir [serveur/ffp3/README.md](serveur/ffp3/README.md) pour l’installation, la configuration et l’architecture de l’application Slim 4.
+- **Audit des échanges serveur ↔ ESP** : voir [docs/audit_echanges_serveur_esp.md](docs/audit_echanges_serveur_esp.md) pour la synthèse des flux, endpoints et authentification.
+- **Diagnostic erreurs serveur** : [cronlog production](https://iot.olution.info/public/cronlog.txt) ; [error_log production](https://iot.olution.info/public/error_log) (accès autorisé comme le cronlog) ; processus de debug (référence d’erreur, script d'analyse) : [serveur/docs/DEBUG_ERREURS_SERVEUR.md](serveur/docs/DEBUG_ERREURS_SERVEUR.md).
 - **Analyse de l’arborescence** : voir [ANALYSE_ARBORESCENCE.md](ANALYSE_ARBORESCENCE.md) pour une analyse détaillée des dossiers et des points d’attention.
 
 ---
