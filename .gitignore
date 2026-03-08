@@ -25,6 +25,9 @@ error_log
 *.log
 cronlog*.txt
 
+# Rapports de verification serveur (extraits de logs)
+scripts/reports/
+
 # Temporaire / backups
 _tmp_ffp5cs/
 backup/
