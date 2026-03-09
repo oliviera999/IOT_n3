@@ -10,7 +10,7 @@ Ce document recense les appareils (ESP32, ESP32-CAM, etc.) déployés ou prévus
 
 | Identifiant | Type de firmware | Carte | Emplacement / pôle | Endpoint serveur | Version firmware | Auth |
 |-------------|------------------|-------|---------------------|------------------|------------------|------|
-| n3-n3pp-01 | n3pp4_2 | ESP32 (esp32dev) | Serre / aquaponie | `/n3pp/n3ppdatas/post-n3pp-data.php` (board=3) | 4.10 | API key POST |
+| n3-n3pp-01 | n3pp4_2 | ESP32 (esp32dev) | Serre / aquaponie | `/n3pp/n3ppdatas/post-n3pp-data.php` (board=3) | 4.11 | API key POST |
 | n3-msp-01 | msp2_5 | ESP32 (esp32dev) | Station météo extérieure | `/msp1/msp1datas/post-msp1-data.php` (board=2) | 2.11 | API key POST |
 | n3-ffp5cs-01 | ffp5cs | ESP32-WROOM | Aquaponie (FFP3) | `/ffp3/post-data` | 12.27 | HMAC-SHA256 |
 | n3-ffp5cs-s3 | ffp5cs | ESP32-S3 (N16R8) | Aquaponie (FFP3) — test S3 | `/ffp3/post-data3-test` | 12.27 | HMAC-SHA256 |

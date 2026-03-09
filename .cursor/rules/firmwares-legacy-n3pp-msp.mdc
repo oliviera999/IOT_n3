@@ -14,10 +14,9 @@ Ces deux firmwares partagent une architecture identique mais avec des capteurs e
   - OLED SSD1306 pour affichage local.
   - ESP Mail Client pour alertes SMTP.
 
-- **Etat actuel : secrets en dur**
-  - WiFi SSID/password, cle API, identifiants SMTP sont codes en dur dans `main.cpp`.
-  - La meme cle API (`fdGTMoptd5CD2ert3`) est partagee entre les deux firmwares.
-  - A terme : migrer vers `credentials.h` (voir skill `migration-firmware-credentials`).
+- **Secrets externalises**
+  - WiFi SSID/password, cle API, identifiants SMTP sont dans `credentials.h` (non versionne) inclus via `credentials.h.example`.
+  - Utiliser `firmwires/credentials.h` (ou `credentials.h.example` comme modele) pour n3pp4_2 et msp2_5.
 
 - **Format de communication**
   - POST : `application/x-www-form-urlencoded` (pas JSON).

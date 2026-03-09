@@ -31,14 +31,13 @@ Chaque firmware qui envoie des données ou est piloté à distance est relié à
 |------------------------------|--------|--------------------------|------------------|
 | **[n3pp4_2](firmwires/n3pp4_2/)** — N3PhasmesProto (serre / aquaponie) | ESP32 | **[serveur/n3pp](serveur/n3pp/)** | Réception des données (`n3ppdatas`), contrôle des sorties (`n3ppcontrol`), galerie photos (`n3ppgallery`) |
 | **[msp2_5](firmwires/msp2_5/)** — MeteoStationPrototype (météo + tracker solaire) | ESP32 | **[serveur/msp1](serveur/msp1/)** | Réception des données (`msp1datas`), contrôle (`msp1control`), galerie (`msp1gallery`) |
-| **[uploadphotosserver_msp1](firmwires/uploadphotosserver_msp1/)** | ESP32-CAM | **[serveur/msp1gallery](serveur/msp1gallery/)** | Envoi vers l’endpoint **msp1gallery** (upload.php). Le nom du firmware indique la *destination*, pas un lien exclusif au projet MSP. |
-| **[uploadphotosserver_n3pp_1_6_deppsleep](firmwires/uploadphotosserver_n3pp_1_6_deppsleep/)** | ESP32-CAM | **[serveur/n3ppgallery](serveur/n3ppgallery/)** | Envoi vers l’endpoint **n3ppgallery**. Le nom indique la *destination*, pas un lien exclusif au projet N3PP. |
-| **[uploadphotosserver_ffp3_1_5_deppsleep](firmwires/uploadphotosserver_ffp3_1_5_deppsleep/)** | ESP32-CAM | **[serveur/ffp3](serveur/ffp3/)** | Envoi vers la galerie **FFP3**. Même principe : destination configurée, pas d’association fixe à un « type » de module. |
+| **[uploadphotosserver](firmwires/uploadphotosserver/)** (unifié, envs msp1/n3pp/ffp3) | ESP32-CAM | **msp1gallery, n3ppgallery, ffp3gallery** | Envoi vers l’endpoint configuré selon l'environnement de build (msp1gallery, n3ppgallery ou ffp3). Un seul firmware avec 3 envs PlatformIO. |
+| **[uploadphotosserver_ffp3_1_5_deppsleep](firmwires/uploadphotosserver_ffp3_1_5_deppsleep/)** (legacy) | ESP32-CAM | **[serveur/ffp3](serveur/ffp3/)** | Envoi vers la galerie **FFP3**. Variante legacy conservée. |
 | **[ffp5cs](firmwires/ffp5cs/)** — Contrôleur aquaponie (WROOM/S3) | ESP32 / ESP32-S3 | **[serveur/ffp3](serveur/ffp3/)** | Même plateforme : FFP3 est le backend web (Slim 4) pour les données et le contrôle des ESP FFP5CS |
 | **[ratata](firmwires/ratata/)** — Kit ZYC0108-EN (voiture / robot) | UNO + ESP32-CAM | — | Pas de serveur dédié (démo locale, stream HTTP possible en direct) |
 | **[LVGL_Widgets](firmwires/LVGL_Widgets/)** — Interface écran tactile | ESP32-S3 | — | Pas de serveur dédié |
 
-**À propos des modules photo (ESP32-CAM)** : les noms `uploadphotosserver_msp1`, `uploadphotosserver_n3pp_*`, `uploadphotosserver_ffp3_*` désignent **l’endpoint cible** (msp1gallery, n3ppgallery ou ffp3), et non une association obligatoire aux projets MSP ou N3PP. Une même caméra peut être configurée pour envoyer vers l’une ou l’autre galerie selon le besoin (configuration dans le firmware).
+**À propos des modules photo (ESP32-CAM)** : le firmware **uploadphotosserver** (unifié) propose 3 envs (msp1, n3pp, ffp3) ciblant msp1gallery, n3ppgallery ou ffp3gallery. Une variante legacy (`uploadphotosserver_ffp3_1_5_deppsleep`) est conservée pour FFP3.
 
 En résumé (données et contrôle) :
 
