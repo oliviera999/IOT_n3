@@ -20,6 +20,10 @@ secrets.h
 .env
 .env.local
 
+# Clé privée OTA (ne JAMAIS commiter — la clé publique est committable)
+scripts/ota_keys/ota_signing_key.pem
+scripts/ota_keys/*.key
+
 # Logs serveur
 error_log
 *.log
