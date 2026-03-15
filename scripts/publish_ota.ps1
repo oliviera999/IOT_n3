@@ -4,6 +4,13 @@
 # Compile (optionnel), copie les firmware.bin vers serveur/ota/, met a jour les
 # metadata.json, puis commit + push dans le depot serveur (sous-module).
 #
+# Securite Phase 1 :
+#   - URLs HTTPS
+#   - Hash SHA-256 (remplace MD5)
+#   - Signature ECDSA P-256 du binaire (optionnel, active via -SignKey)
+#   - Champ min_version pour protection anti-downgrade
+#   - Log d'audit dans scripts/ota-audit.jsonl
+#
 # Cibles supportees :
 #   n3pp      -> serveur/ota/n3pp/        (firmware serre, ESP32 prod)
 #   n3pp-test -> serveur/ota/n3pp-test/   (firmware serre test, env esp32dev_test)
@@ -20,9 +27,8 @@
 #
 # Usage :
 #   .\scripts\publish_ota.ps1
-#   .\scripts\publish_ota.ps1 -Targets "n3pp","n3pp-test","msp","msp-test"
-#   .\scripts\publish_ota.ps1 -Targets "cam-msp1","cam-n3pp","cam-ffp3"
-#   .\scripts\publish_ota.ps1 -Build
+#   .\scripts\publish_ota.ps1 -Targets "n3pp","msp"
+#   .\scripts\publish_ota.ps1 -Build -SignKey scripts\ota_keys\ota_signing_key.pem
 #   .\scripts\publish_ota.ps1 -DryRun
 # =============================================================================
 
@@ -31,7 +37,8 @@ param(
     [switch]$Build,
     [switch]$SkipCommit,
     [switch]$DryRun,
-    [switch]$SkipValidate
+    [switch]$SkipValidate,
+    [string]$SignKey = ""   # Chemin vers la cle privee ECDSA PEM (optionnel)
 )
 
 $ErrorActionPreference = "Stop"
@@ -59,7 +66,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "esp32dev"
         OtaDest      = "serveur\ota\n3pp"
         MetadataPath = "serveur\ota\n3pp\metadata.json"
-        OtaUrl       = "http://iot.olution.info/ota/n3pp/firmware.bin"
+        OtaUrl       = "https://iot.olution.info/ota/n3pp/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -68,7 +75,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "esp32dev_test"
         OtaDest      = "serveur\ota\n3pp-test"
         MetadataPath = "serveur\ota\n3pp-test\metadata.json"
-        OtaUrl       = "http://iot.olution.info/ota/n3pp-test/firmware.bin"
+        OtaUrl       = "https://iot.olution.info/ota/n3pp-test/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -77,7 +84,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "esp32dev"
         OtaDest      = "serveur\ota\msp"
         MetadataPath = "serveur\ota\msp\metadata.json"
-        OtaUrl       = "http://iot.olution.info/ota/msp/firmware.bin"
+        OtaUrl       = "https://iot.olution.info/ota/msp/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -86,7 +93,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "esp32dev_test"
         OtaDest      = "serveur\ota\msp-test"
         MetadataPath = "serveur\ota\msp-test\metadata.json"
-        OtaUrl       = "http://iot.olution.info/ota/msp-test/firmware.bin"
+        OtaUrl       = "https://iot.olution.info/ota/msp-test/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -95,7 +102,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "msp1"
         OtaDest      = "serveur\ota\cam\msp1"
         MetadataPath = "serveur\ota\cam\metadata.json"
-        OtaUrl       = "http://iot.olution.info/ota/cam/msp1/firmware.bin"
+        OtaUrl       = "https://iot.olution.info/ota/cam/msp1/firmware.bin"
         MetadataKey  = "msp1"
         AppMaxSize   = 1966080
     }
@@ -104,7 +111,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "n3pp"
         OtaDest      = "serveur\ota\cam\n3pp"
         MetadataPath = "serveur\ota\cam\metadata.json"
-        OtaUrl       = "http://iot.olution.info/ota/cam/n3pp/firmware.bin"
+        OtaUrl       = "https://iot.olution.info/ota/cam/n3pp/firmware.bin"
         MetadataKey  = "n3pp"
         AppMaxSize   = 1966080
     }
@@ -113,7 +120,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "ffp3"
         OtaDest      = "serveur\ota\cam\ffp3"
         MetadataPath = "serveur\ota\cam\metadata.json"
-        OtaUrl       = "http://iot.olution.info/ota/cam/ffp3/firmware.bin"
+        OtaUrl       = "https://iot.olution.info/ota/cam/ffp3/firmware.bin"
         MetadataKey  = "ffp3"
         AppMaxSize   = 1966080
     }
@@ -131,6 +138,17 @@ if (-not (Test-Path "firmwires")) {
     exit 1
 }
 
+# Verification de la cle de signature
+$signingEnabled = $false
+if ($SignKey -ne "" -and (Test-Path $SignKey)) {
+    $signingEnabled = $true
+    Write-Host "Signature ECDSA activee : $SignKey" -ForegroundColor Green
+} elseif ($SignKey -ne "") {
+    Write-Host "Avertissement : cle de signature introuvable ($SignKey) — publication sans signature ECDSA." -ForegroundColor Yellow
+} else {
+    Write-Host "Info : publication sans signature ECDSA (utiliser -SignKey pour activer)." -ForegroundColor Gray
+}
+
 # -----------------------------------------------------------------------------
 # Extraction de version depuis le code source
 # -----------------------------------------------------------------------------
@@ -139,7 +157,7 @@ function Get-FirmwareVersion {
 
     $projectDir = $Config.ProjectDir
 
-    # n3pp / msp / n3pp-test / msp-test : version dans main.cpp (même source, env différent pour *-test)
+    # n3pp / msp / n3pp-test / msp-test : version dans main.cpp (meme source, env different pour *-test)
     if ($TargetName -eq "n3pp" -or $TargetName -eq "msp" -or $TargetName -eq "n3pp-test" -or $TargetName -eq "msp-test") {
         $mainCpp = Join-Path $projectDir "src\main.cpp"
         if (-not (Test-Path $mainCpp)) {
@@ -149,6 +167,17 @@ function Get-FirmwareVersion {
         $content = Get-Content -Path $mainCpp -Raw
         if ($content -match 'String\s+version\s*=\s*"([^"]+)"') {
             return $Matches[1]
+        }
+        # Fallback : FIRMWARE_VERSION dans le config header
+        $configH = Join-Path $projectDir "include\n3pp_config.h"
+        if (-not (Test-Path $configH)) {
+            $configH = Join-Path $projectDir "include\msp_config.h"
+        }
+        if (Test-Path $configH) {
+            $configContent = Get-Content -Path $configH -Raw
+            if ($configContent -match 'FIRMWARE_VERSION\s+"([^"]+)"') {
+                return $Matches[1]
+            }
         }
         Write-Host "  Erreur : impossible d extraire la version depuis $mainCpp" -ForegroundColor Red
         return $null
@@ -162,19 +191,64 @@ function Get-FirmwareVersion {
             return $null
         }
         $content = Get-Content -Path $configH -Raw
-        $targetDefine = switch ($TargetName) {
-            "cam-msp1" { "TARGET_MSP1" }
-            "cam-n3pp" { "TARGET_N3PP" }
-            "cam-ffp3" { "TARGET_FFP3" }
-        }
-        if ($content -match "(?s)defined\($targetDefine\).*?FIRMWARE_VERSION\s+`"([^`"]+)`"") {
+        # Version commune a toutes les cibles cam
+        if ($content -match 'FIRMWARE_VERSION\s+"([^"]+)"') {
             return $Matches[1]
         }
-        Write-Host "  Erreur : impossible d extraire FIRMWARE_VERSION pour $targetDefine" -ForegroundColor Red
+        Write-Host "  Erreur : impossible d extraire FIRMWARE_VERSION dans $configH" -ForegroundColor Red
         return $null
     }
 
     return $null
+}
+
+# -----------------------------------------------------------------------------
+# Signature ECDSA P-256 du binaire
+# -----------------------------------------------------------------------------
+function Invoke-OtaSign {
+    param(
+        [string]$BinaryPath,
+        [string]$PrivateKeyPath
+    )
+
+    if (-not $PrivateKeyPath -or -not (Test-Path $PrivateKeyPath)) {
+        return $null
+    }
+
+    # Tentative via openssl (prefere : compatible avec mbedTLS DER sur ESP32)
+    $opensslCmd = Get-Command "openssl" -ErrorAction SilentlyContinue
+    if ($opensslCmd) {
+        $tempSig = [System.IO.Path]::GetTempFileName()
+        try {
+            & openssl dgst -sha256 -sign $PrivateKeyPath -outform DER -out $tempSig $BinaryPath 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0 -and (Test-Path $tempSig)) {
+                $sigBytes = [System.IO.File]::ReadAllBytes($tempSig)
+                if ($sigBytes.Length -gt 0) {
+                    return [Convert]::ToBase64String($sigBytes)
+                }
+            }
+        } finally {
+            Remove-Item $tempSig -ErrorAction SilentlyContinue
+        }
+        Write-Host "  Avertissement : openssl dgst a echoue, tentative .NET..." -ForegroundColor Yellow
+    }
+
+    # Fallback : .NET ECDsa (requiert .NET 6+ pour ImportFromPem + DSASignatureFormat)
+    try {
+        $ecdsa = [System.Security.Cryptography.ECDsa]::Create()
+        $ecdsa.ImportFromPem((Get-Content $PrivateKeyPath -Raw))
+        $firmwareBytes = [System.IO.File]::ReadAllBytes($BinaryPath)
+        $sigBytes = $ecdsa.SignData(
+            $firmwareBytes,
+            [System.Security.Cryptography.HashAlgorithmName]::SHA256,
+            [System.Security.Cryptography.DSASignatureFormat]::Rfc3279DerSequence
+        )
+        $ecdsa.Dispose()
+        return [Convert]::ToBase64String($sigBytes)
+    } catch {
+        Write-Host "  Avertissement : signature .NET echouee : $_" -ForegroundColor Yellow
+        return $null
+    }
 }
 
 # -----------------------------------------------------------------------------
@@ -208,9 +282,9 @@ if ($Build) {
 }
 
 # -----------------------------------------------------------------------------
-# Publication : copie des binaires + collecte des infos
+# Publication : copie des binaires + calcul SHA-256 + signature ECDSA
 # -----------------------------------------------------------------------------
-Write-Host "=== Publication OTA ===" -ForegroundColor Cyan
+Write-Host "=== Publication OTA (HTTPS + SHA-256) ===" -ForegroundColor Cyan
 
 $artifacts = @()
 
@@ -250,10 +324,6 @@ foreach ($targetName in $Targets) {
     $destBin = Join-Path $destDir "firmware.bin"
     Copy-Item -Path $srcBin -Destination $destBin -Force
     $size = (Get-Item $destBin).Length
-    $hash = (Get-FileHash -Path $destBin -Algorithm MD5).Hash.ToLowerInvariant()
-
-    Write-Host "  Copie : $srcBin -> $destBin" -ForegroundColor Green
-    Write-Host "  Taille : $size octets | MD5 : $hash" -ForegroundColor Gray
 
     # Validation taille
     if (-not $SkipValidate -and $size -gt $cfg.AppMaxSize) {
@@ -261,11 +331,30 @@ foreach ($targetName in $Targets) {
         exit 1
     }
 
+    # Calcul SHA-256 (remplace MD5)
+    $sha256 = (Get-FileHash -Path $destBin -Algorithm SHA256).Hash.ToLowerInvariant()
+
+    Write-Host "  Copie  : $srcBin -> $destBin" -ForegroundColor Green
+    Write-Host "  Taille : $size octets" -ForegroundColor Gray
+    Write-Host "  SHA-256: $sha256" -ForegroundColor Gray
+
+    # Signature ECDSA P-256 (optionnelle)
+    $signature = $null
+    if ($signingEnabled) {
+        $signature = Invoke-OtaSign -BinaryPath $destBin -PrivateKeyPath $SignKey
+        if ($signature) {
+            Write-Host "  Signature ECDSA : OK ($(($signature.Length)) chars base64)" -ForegroundColor Green
+        } else {
+            Write-Host "  Avertissement : signature ECDSA echouee, publication sans signature." -ForegroundColor Yellow
+        }
+    }
+
     $artifacts += @{
         TargetName   = $targetName
         Version      = $version
         Size         = $size
-        Md5          = $hash
+        Sha256       = $sha256
+        Signature    = $signature
         MetadataPath = $cfg.MetadataPath
         MetadataKey  = $cfg.MetadataKey
         OtaUrl       = $cfg.OtaUrl
@@ -282,7 +371,7 @@ if ($artifacts.Count -eq 0) {
 # Mise a jour des metadata.json
 # -----------------------------------------------------------------------------
 Write-Host ""
-Write-Host "=== Mise a jour metadata ===" -ForegroundColor Cyan
+Write-Host "=== Mise a jour metadata (HTTPS + SHA-256 + min_version) ===" -ForegroundColor Cyan
 
 # Regrouper les artifacts par fichier metadata (les 3 cam partagent le meme)
 $metaGroups = @{}
@@ -313,9 +402,13 @@ foreach ($metaPath in $metaGroups.Keys) {
 
         foreach ($a in $group) {
             $entry = [PSCustomObject]@{
-                version = $a.Version
-                url     = $a.OtaUrl
-                md5     = $a.Md5
+                version     = $a.Version
+                min_version = $a.Version
+                url         = $a.OtaUrl
+                sha256      = $a.Sha256
+            }
+            if ($a.Signature) {
+                $entry | Add-Member -NotePropertyName "signature" -NotePropertyValue $a.Signature -Force
             }
             $key = $a.MetadataKey
             if ($meta.PSObject.Properties[$key]) {
@@ -330,12 +423,16 @@ foreach ($metaPath in $metaGroups.Keys) {
         Write-Host "  Mis a jour : $metaPath (format multi-cible)" -ForegroundColor Green
     }
     else {
-        # Format simple
+        # Format simple (n3pp, msp)
         foreach ($a in $group) {
             $meta = [PSCustomObject]@{
-                version = $a.Version
-                url     = $a.OtaUrl
-                md5     = $a.Md5
+                version     = $a.Version
+                min_version = $a.Version
+                url         = $a.OtaUrl
+                sha256      = $a.Sha256
+            }
+            if ($a.Signature) {
+                $meta | Add-Member -NotePropertyName "signature" -NotePropertyValue $a.Signature -Force
             }
             $json = $meta | ConvertTo-Json -Depth 3
             [System.IO.File]::WriteAllText((Join-Path $PWD $a.MetadataPath), $json, [System.Text.UTF8Encoding]::new($false))
@@ -345,18 +442,39 @@ foreach ($metaPath in $metaGroups.Keys) {
 }
 
 # -----------------------------------------------------------------------------
+# Log d'audit
+# -----------------------------------------------------------------------------
+$auditLog = "scripts\ota-audit.jsonl"
+foreach ($a in $artifacts) {
+    $auditEntry = [PSCustomObject]@{
+        timestamp   = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+        target      = $a.TargetName
+        version     = $a.Version
+        sha256      = $a.Sha256
+        signed      = ($null -ne $a.Signature)
+        dry_run     = $DryRun.IsPresent
+        deployer    = $env:USERNAME
+    } | ConvertTo-Json -Compress
+    Add-Content -Path $auditLog -Value $auditEntry -Encoding UTF8
+}
+Write-Host ""
+Write-Host "  Log d audit : $auditLog" -ForegroundColor Gray
+
+# -----------------------------------------------------------------------------
 # Resume
 # -----------------------------------------------------------------------------
 Write-Host ""
 Write-Host "=== Resume ===" -ForegroundColor Cyan
-Write-Host ("-" * 70)
-Write-Host ("{0,-12} {1,-8} {2,10} {3}" -f "Cible", "Version", "Taille", "Destination")
-Write-Host ("-" * 70)
+Write-Host ("-" * 80)
+Write-Host ("{0,-12} {1,-8} {2,10} {3,-8} {4}" -f "Cible", "Version", "Taille", "Signe", "SHA-256")
+Write-Host ("-" * 80)
 foreach ($a in $artifacts) {
-    $dest = ($TargetConfig[$a.TargetName]).OtaDest
-    Write-Host ("{0,-12} {1,-8} {2,10} {3}" -f $a.TargetName, $a.Version, "$($a.Size) o", $dest) -ForegroundColor White
+    $signed = if ($a.Signature) { "oui" } else { "non" }
+    $sha256Short = $a.Sha256.Substring(0, 16) + "..."
+    Write-Host ("{0,-12} {1,-8} {2,10} {3,-8} {4}" -f `
+        $a.TargetName, $a.Version, "$($a.Size) o", $signed, $sha256Short) -ForegroundColor White
 }
-Write-Host ("-" * 70)
+Write-Host ("-" * 80)
 
 # -----------------------------------------------------------------------------
 # Git commit + push dans serveur (sous-module)
@@ -385,7 +503,9 @@ try {
     if ([string]::IsNullOrWhiteSpace($status)) {
         Write-Host "Aucun changement dans serveur/ota/, rien a committer." -ForegroundColor Gray
     } else {
-        $commitMsg = "ota: publish $versionList"
+        $signedTargets = ($artifacts | Where-Object { $_.Signature } | ForEach-Object { $_.TargetName }) -join ","
+        $commitMsg = "ota: publish $versionList [sha256]"
+        if ($signedTargets) { $commitMsg += " [signed:$signedTargets]" }
         git commit -m $commitMsg
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Erreur : git commit serveur a echoue." -ForegroundColor Red
