@@ -26,7 +26,7 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 | Serre / aquaponie (N3PP) | `n3pp4_2` | serveur/n3pp | Température, humidité, pompe, nourrissage → n3ppdatas, n3ppcontrol |
 | Station météo (MSP) | `msp2_5` | serveur/msp1 | DHT, pluie, DS18B20, tracker solaire → msp1datas, msp1control |
 | Aquaponie avancée (FFP) | `ffp5cs` | serveur/ffp3 | Données + contrôle via API FFP3 (Slim 4) |
-| Caméras (photos) | uploadphotosserver_msp1, _n3pp_*, _ffp3_* | msp1gallery, n3ppgallery, ffp3 | Envoi JPEG vers upload.php. **Les noms des firmwares indiquent l’endpoint cible** (msp1gallery, n3ppgallery ou ffp3), pas une association exclusive à MSP ou N3PP : une caméra peut envoyer vers n’importe quelle galerie selon la config. |
+| Caméras (photos) | uploadphotosserver (unifié, envs msp1, n3pp, ffp3) | msp1gallery, n3ppgallery, ffp3 | Envoi JPEG vers upload.php. **Les noms des firmwares indiquent l’endpoint cible** (msp1gallery, n3ppgallery ou ffp3), pas une association exclusive à MSP ou N3PP : une caméra peut envoyer vers n’importe quelle galerie selon la config. |
 | Robot / démo | ratata, LVGL_Widgets | — | Usage local ou stream direct |
 
 ---
@@ -35,7 +35,7 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 
 ### 2.1 Sécurité et secrets
 
-**Problème :** **n3pp4_2** et **msp2_5** ont déjà externalisé les secrets dans `credentials.h` (avec `credentials.h.example`). Les autres firmwares (uploadphotosserver_*, LVGL_Widgets) peuvent encore avoir des secrets en dur dans les sources. Risque en cas de partage du code ou dépôt public pour ces derniers.
+**Problème :** **n3pp4_2** et **msp2_5** ont déjà externalisé les secrets dans `credentials.h` (avec `credentials.h.example`). Les autres firmwares (uploadphotosserver, LVGL_Widgets) peuvent encore avoir des secrets en dur dans les sources. Risque en cas de partage du code ou dépôt public pour ces derniers.
 
 **Recommandations :**
 
@@ -194,6 +194,42 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 
 3. **Pédagogie**  
    - Si des élèves ou enseignants contribuent au code, documenter les pôles de la salle n³ (lien vers [n3.olution.info/accueil/poles/](https://n3.olution.info/accueil/poles/)) et quels appareils sont associés à quels usages (serre, météo, aquaponie, robotique).
+
+---
+
+### 2.9 Stack ESP-IDF et conventions
+
+Tous les firmwares utilisent le **framework Arduino** (`framework = arduino`). Arduino-ESP32 repose sur **ESP-IDF** comme couche bas niveau : ESP-IDF n’est jamais le framework principal, mais il est toujours présent sous le capot.
+
+**Stack actuelle (projets principaux) :**
+
+| Couche      | Version / composant                              |
+|-------------|--------------------------------------------------|
+| Plateforme WROOM | pioarduino/platform-espressif32 55.03.37       |
+| Plateforme S3    | platformio/espressif32@6.13.0                  |
+| Framework   | arduino-esp32 3.3.7 (WROOM) / 2.0.17 (S3, bundlé) |
+| ESP-IDF     | 5.5.2 (WROOM) / 4.4.7 (S3)                       |
+
+**Firmwares et plateformes :**
+
+| Firmware                 | Plateforme                         | arduino-esp32 | ESP-IDF sous-jacent |
+|--------------------------|------------------------------------|---------------|---------------------|
+| ffp5cs (wroom-prod, wroom-test, wroom-beta) | pioarduino 55.03.37 | 3.3.7 | 5.5.2 |
+| n3pp4_2, msp2_5, uploadphotosserver | pioarduino 55.03.37 | 3.3.7 | 5.5.2 |
+| ffp5cs (wroom-s3-*)      | platformio/espressif32@6.13.0     | 2.0.17 (bundlé) | 4.4.7 |
+| ffp5cs test psram s3     | espressif32@6.4.0 (divergence documentée) | 2.0.14 | Plus ancien |
+
+**Choix WROOM = pioarduino 55.03.37, S3 = platformio/espressif32@6.13.0 :** WROOM utilise pioarduino (ESP-IDF 5.5.2, alignement avec les autres firmwares). S3 reste sur platformio/espressif32 pour stabilité du build ; un alignement S3 sur pioarduino est souhaitable mais bloqué par une erreur de linker (« gap .flash.appdesc/.flash.rodata ») à résoudre (partitions / linker script IDF 5.x pour S3).
+
+**APIs ESP-IDF utilisées en direct (ffp5cs uniquement) :**
+
+Le firmware **ffp5cs** appelle des APIs ESP-IDF directement (éviter `String` Arduino, stabilité long uptime, watchdog) : `esp_task_wdt_*`, `esp_wifi_*`, `nvs_*`, `esp_ota_ops`, `esp_http_client`, `esp_heap_caps`, `esp_sleep_*`, `esp_timer_*`, `esp_reset_reason`, `esp_partition`, `esp_core_dump`, etc. Voir les headers `esp_wifi.h`, `esp_task_wdt.h`, `esp_sleep.h`, `esp_timer.h`, `esp_mac.h`.
+
+**Contraintes de mise à jour :**
+
+- À chaque mise à jour majeure de plateforme, vérifier la compatibilité des APIs ESP-IDF utilisées en direct (`esp_task_wdt_*`, `esp_wifi_*`, `nvs_*` ont évolué entre IDF 4.x et 5.x).
+- Les gardes de version (`#if ESP_IDF_VERSION_MAJOR >= 5`) sont déjà utilisées dans le code (ex. nvs_manager, web_server).
+- WROOM : pioarduino 55.03.37. S3 : platformio/espressif32. Suivre les releases [pioarduino/platform-espressif32](https://github.com/pioarduino/platform-espressif32/releases) et [arduino-esp32](https://github.com/espressif/arduino-esp32/releases).
 
 ---
 

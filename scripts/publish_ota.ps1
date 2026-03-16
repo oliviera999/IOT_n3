@@ -38,7 +38,8 @@ param(
     [switch]$SkipCommit,
     [switch]$DryRun,
     [switch]$SkipValidate,
-    [string]$SignKey = ""   # Chemin vers la cle privee ECDSA PEM (optionnel)
+    [switch]$NoSign,         # Ne pas signer (ignore la cle par defaut)
+    [string]$SignKey = ""    # Chemin vers la cle privee ECDSA PEM (defaut : scripts\ota_keys\ota_signing_key.pem)
 )
 
 $ErrorActionPreference = "Stop"
@@ -139,14 +140,42 @@ if (-not (Test-Path "firmwires")) {
 }
 
 # Verification de la cle de signature
+# Chemin par defaut partage par tous les firmwares cible (n3_ota_pubkey.h)
+$defaultSignKey = Join-Path $root "scripts\ota_keys\ota_signing_key.pem"
+if ($SignKey -eq "") {
+    $SignKey = $defaultSignKey
+}
+
 $signingEnabled = $false
-if ($SignKey -ne "" -and (Test-Path $SignKey)) {
+if ($NoSign) {
+    Write-Host "Info : publication sans signature ECDSA (-NoSign)." -ForegroundColor Gray
+} elseif ($SignKey -ne "" -and (Test-Path $SignKey)) {
     $signingEnabled = $true
     Write-Host "Signature ECDSA activee : $SignKey" -ForegroundColor Green
 } elseif ($SignKey -ne "") {
-    Write-Host "Avertissement : cle de signature introuvable ($SignKey) — publication sans signature ECDSA." -ForegroundColor Yellow
-} else {
-    Write-Host "Info : publication sans signature ECDSA (utiliser -SignKey pour activer)." -ForegroundColor Gray
+    # Cle demandee mais absente : generation auto si chemin par defaut (premiere utilisation)
+    $isDefaultPath = ($SignKey -eq $defaultSignKey -or $SignKey -like "*ota_keys\ota_signing_key.pem")
+    if ($isDefaultPath) {
+        Write-Host "Cle de signature absente — generation via generate_ota_keys.ps1 (premiere utilisation)..." -ForegroundColor Yellow
+        & (Join-Path $scriptDir "generate_ota_keys.ps1") -OutDir "scripts\ota_keys"
+        if (Test-Path $SignKey) {
+            $signingEnabled = $true
+            Write-Host "  Cles generees. Signature ECDSA activee." -ForegroundColor Green
+        } else {
+            Write-Host "Erreur : generation des cles a echoue." -ForegroundColor Red
+            exit 1
+        }
+        if ($Build) {
+            Write-Host "  Utilisez -Build pour recompiler les firmwares avec la nouvelle cle publique." -ForegroundColor Cyan
+        }
+    } else {
+        Write-Host "Avertissement : cle de signature introuvable ($SignKey) — publication sans signature ECDSA." -ForegroundColor Yellow
+    }
+}
+if (-not $signingEnabled -and $SignKey -eq $defaultSignKey) {
+    Write-Host "Info : publication sans signature ECDSA (cle absente, utiliser -SignKey pour forcer la generation)." -ForegroundColor Gray
+} elseif (-not $signingEnabled) {
+    Write-Host "Info : publication sans signature ECDSA." -ForegroundColor Gray
 }
 
 # -----------------------------------------------------------------------------

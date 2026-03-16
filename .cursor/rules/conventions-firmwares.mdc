@@ -6,6 +6,8 @@ alwaysApply: false
 
 # Conventions firmwares
 
+- **Unification** : privilegier les firmwares les plus unifies possibles (code partage, modules communs, constantes harmonisees) sans nuire aux fonctionnalites ni aux specificites de chaque appareil.
+
 - **Build** : PlatformIO (pas Arduino IDE). Framework Arduino.
 
 - **Offline-first** (principe general)
@@ -15,7 +17,7 @@ alwaysApply: false
 
 - **Capteurs**
   - Toujours valider les mesures : verifier `isnan()`, bornes de plage, coherence.
-  - Retourner une **valeur par defaut sure** en cas d'erreur capteur.
+  - Retourner une **valeur par defaut sure** en cas d'erreur capteur (DHT : 20°C / 50 %).
 
 - **Port serie**
   - Ne pas coder en dur `COMx` dans les `platformio.ini` versionnes.
@@ -39,3 +41,13 @@ alwaysApply: false
   - Eviter les `main.cpp` monolithiques de plus de 500 lignes.
 
 - **Reference** : les regles detaillees de ffp5cs (`.cursorrules`, `.cursor/rules/`) s'appliquent en complement pour ce sous-projet.
+
+- **OTA et version**
+  - Incrementer la version a chaque modification du firmware.
+  - Lors de la publication OTA : mettre a jour le metadata.json correspondant (scripts publish_ota extraient la version du code ; synchroniser si derive). Voir `firmwires/docs/WIFI_OTA_REFERENCE.md`.
+
+- **Workflow de validation et scripts**
+  - Pour un workflow complet (erase, flash, monitor N min, analyse du log), s'inspirer de **ffp5cs** : script `ffp5cs/erase_flash_fs_monitor_5min_analyze.ps1`, puis `analyze_log.ps1` / `analyze_log_exhaustive.ps1`. Voir `firmwires/README.md` section « Scripts de monitoring et erase-flash ».
+  - **ffp5cs** : utiliser les scripts dans `ffp5cs/` (workflow, monitor_5min, analyse, rapport diagnostic). Regles cœur dans `ffp5cs/.cursor/rules/` (offline-first, robustesse, pas de blocage > 3s, verification apres modification).
+  - **Autres firmwares** (n3pp4_2, msp2_5, uploadphotosserver) : une fois en place, les scripts racine `firmwires/monitor_Nmin.ps1` et `firmwires/erase_flash_monitor.ps1` (param `-Project`) permettent le meme enchainement ; analyse generique via `firmwires/scripts/analyze_log_generic.ps1` si le projet n'a pas d'analyse dediee.
+  - Bugs complexes (WDT, heap, reseau) : approche **debug systematique** (hypotheses, verification une par une, correction, rejouer scenario + monitor + analyse de log).

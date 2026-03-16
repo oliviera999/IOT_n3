@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Coherence firmware-serveur
 
+- **Unification** : les firmwares et les fichiers serveur doivent etre les plus unifies possibles, sans que cela nuise aux fonctionnalites ni aux specificites des pages ou des firmwares. Privilegier la factorisation (classes abstraites, templates de base, helpers partages) des que le code se repete, tout en conservant les particularites indispensables (multi-boards FFP3, HMAC FFP5CS, etc.).
+
 - **Principe** : les firmwares et le serveur partagent un **contrat d'interface** (endpoints, champs JSON, cles de config, codes de statut). Ce contrat doit rester coherent des deux cotes.
 
 - **Constantes partagees**

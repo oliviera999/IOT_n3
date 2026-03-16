@@ -1,17 +1,19 @@
 ---
-description: Gestion des multi-environnements du serveur (prod/test/test3/s3)
+description: Gestion des multi-environnements du serveur (prod/test/test3/s3/s3test)
 globs: serveur/src/Middleware/**/*.php,serveur/config/**/*.php,serveur/public/index.php
 alwaysApply: false
 ---
 
 # Serveur — Multi-environnements
 
-Le serveur gere 4 environnements avec des tables BDD separees.
+Le serveur gere plusieurs environnements avec des tables BDD separees.
 
 - **Environnements**
-  - `prod` : tables `ffp3Data`, `ffp3Outputs` — donnees reelles.
-  - `test` : tables `ffp3Data2`, `ffp3Outputs2` — tests avec hardware reel.
-  - `test3` et `s3` : environnements supplementaires (ESP32-S3, variantes).
+  - `prod` : tables `ffp3Data`, `ffp3Outputs` — donnees reelles (WROOM).
+  - `test` : tables `ffp3Data2`, `ffp3Outputs2` — tests WROOM.
+  - `test3` : tables `ffp3Data3`, `ffp3Outputs3` — variante test.
+  - `s3` : tables `ffp3DataS3`, `ffp3OutputsS3` — production ESP32-S3.
+  - `s3test` : tables `ffp3DataS3Test`, `ffp3OutputsS3Test` — test ESP32-S3.
   - Variable `.env` : `ENV=prod` ou `ENV=test` pour le defaut.
 
 - **Acces aux tables**

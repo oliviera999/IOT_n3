@@ -6,6 +6,19 @@ Format : [version] - date - description.
 
 ---
 
+## [2026.03] - 2026-03-10
+
+### Audit documentation
+- **firmwares.manifest.json** : création du manifest pour `scripts/firmwires-list.ps1` (n3pp4_2, msp2_5, uploadphotosserver, ffp5cs, ratata, LVGL_Widgets).
+- **ANALYSE_ARBORESCENCE** : mise à jour section uploadphotosserver (projet unifié, 3 envs), structure serveur (Slim 4, modules msp1/n3pp).
+- **inventaire_appareils** : alignement versions firmware (n3pp 4.13, msp 2.13).
+- **RECOMMANDATIONS_IOT** : caméras → uploadphotosserver unifié.
+- **README** : clarification liens module N3PP/MSP1 (serveur unifié Slim 4).
+- **serveur/docs/README** : mise à jour version 5.0.102.
+- **docs/archive/** : archivage rapports ponctuels (check-pages, rapport_*, resume_*, diagnostic-*).
+
+---
+
 ## [2025.03] - 2025-03-07
 
 ### OTA et déploiement (n3pp, msp1 test)

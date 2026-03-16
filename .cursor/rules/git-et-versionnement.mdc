@@ -29,6 +29,14 @@ alwaysApply: true
     6. **Pousser** vers GitHub : d'abord les submodules modifies, puis le depot parent.
   - En resume : **version + doc + test local + commit + push (submodules puis parent)** a chaque changement.
 
+- **Deploiement automatique en production**
+  - Un **CRON s'execute toutes les minutes** sur le serveur de production (iot.olution.info) et fait un `git pull` sur le depot **n3_serveur**.
+  - **Consequence** : une fois le code pousse sur GitHub (via publish-cycle ou manuellement), il est deploye en production **en moins d'une minute**, sans action supplementaire.
+  - L'agent n'a PAS besoin d'attendre, de faire SSH, ni d'executer un script de deploiement distant. Le push vers GitHub **est** le deploiement.
+  - **Cache DI** : si les definitions de dependances (`config/dependencies.php`) ou des classes de controllers changent, le cache DI compile (`var/cache/di/CompiledContainer.php`) peut devenir obsolete. Dans ce cas, pousser un script de maintenance temporaire (`public/maintenance/clear-di-cache.php`) pour le vider via HTTP, puis le supprimer du depot.
+  - **DocumentRoot actuel** : la racine du depot (PAS `public/`). Les URLs d'assets passent par les routes Slim (`/assets/js/{filename}`, `/assets/css/{filename}`). Les fichiers PHP dans `public/` sont accessibles via le prefixe `/public/` (ex. `/public/maintenance/clear-di-cache.php`).
+  - Pour verifier qu'un deploiement est arrive : comparer la version dans le HTML de la page (footer) avec la valeur attendue dans `serveur/VERSION`.
+
 - **Script de publication automatique (serveur)**
   - Le script `scripts/publish-cycle.ps1` automatise ce cycle pour le composant **serveur** : incrementation VERSION (patch), entree CHANGELOG.md, commit dans le submodule, commit reference dans le parent, **push par defaut** (serveur puis parent).
   - **Quand l'utilisateur demande d'executer le cycle de publication** : l'agent execute le script depuis la racine IOT_n3 avec un message adapte aux changements recents. Aucune action manuelle n'est requise : version, changelog, commits et push sont faits par l'agent.

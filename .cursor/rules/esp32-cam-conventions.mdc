@@ -13,13 +13,13 @@ Trois environnements PlatformIO compilent le même code source avec des build fl
 
 | Env PlatformIO | Build flag      | Galerie cible                     | Deep sleep | SD  |
 |----------------|-----------------|-----------------------------------|------------|-----|
-| `msp1`         | `-DTARGET_MSP1` | `/msp1gallery/upload.php`         | Non        | Non |
+| `msp1`         | `-DTARGET_MSP1` | `/msp1gallery/upload.php`         | Oui (600s) | Oui |
 | `n3pp`         | `-DTARGET_N3PP` | `/n3ppgallery/upload.php`         | Oui (600s) | Oui |
-| `ffp3`         | `-DTARGET_FFP3` | `/ffp3/ffp3gallery/upload.php`    | Oui (600s) | Non |
+| `ffp3`         | `-DTARGET_FFP3` | `/ffp3/ffp3gallery/upload.php`    | Oui (600s) | Oui |
 
 Compiler : `pio run -e msp1` / `pio run -e n3pp` / `pio run -e ffp3`
 
-Les anciens répertoires séparés (`uploadphotosserver_msp1`, `uploadphotosserver_n3pp_*`, `uploadphotosserver_ffp3_*`) sont conservés comme référence historique mais ne doivent plus être modifiés.
+Les anciens répertoires sont dans `firmwires/archive/` (référence historique, ne plus modifier).
 
 ## Structure des fichiers
 
@@ -58,10 +58,9 @@ Les anciens répertoires séparés (`uploadphotosserver_msp1`, `uploadphotosserv
   }
   ```
 - Vérification de version sémantique (MAJOR.MINOR.PATCH) — téléchargement si remote > local.
-- **msp1** : vérifie au boot + toutes les 2 h dans la boucle.
-- **n3pp / ffp3** : vérifie toutes les 6 boots (~1 h avec 600 s deep sleep) via `RTC_DATA_ATTR`.
+- **Toutes les cibles** : vérification OTA toutes les 6 réveils (~1 h avec 600 s deep sleep) via `RTC_DATA_ATTR`.
 - En cas d'échec (réseau, JSON invalide, cible absente) : continue normalement sans bloquer.
-- Utilise `HTTPUpdate` + `ArduinoJson` (lib_deps dans platformio.ini).
+- Implémentation : `n3_common` (n3_ota) comme n3pp/msp ; `HTTPUpdate` + `ArduinoJson`.
 
 ### Déploiement d'une mise à jour OTA
 
@@ -85,8 +84,7 @@ Les anciens répertoires séparés (`uploadphotosserver_msp1`, `uploadphotosserv
 
 ## Énergie
 
-- **msp1** : timer périodique dans `loop()` (600 000 ms = 10 min).
-- **n3pp / ffp3** : deep sleep 600 s. `setup()` fait tout, `loop()` déclenche le sommeil.
+- **Toutes les cibles (msp1, n3pp, ffp3)** : deep sleep 600 s. `setup()` fait tout (WiFi, photo, OTA éventuel), `loop()` déclenche le sommeil.
 - Deep sleep : WiFi et caméra sont réinitialisés à chaque réveil.
 
 ## Warmup caméra

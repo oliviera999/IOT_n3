@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Firmwares legacy — n3pp4_2 et msp2_5
 
-Ces deux firmwares partagent une architecture identique mais avec des capteurs et actionneurs differents.
+Ces deux firmwares partagent une architecture identique mais avec des capteurs et actionneurs differents. Ils utilisent la bibliotheque **libn3_iot** (drivers DHT, analogique, DS18B20, registre de capteurs).
 
 - **Architecture commune**
   - Cycle : `Wificonnect()` → `variablestoesp()` → lecture capteurs → `datatobdd()` → `sommeil()`
@@ -25,7 +25,8 @@ Ces deux firmwares partagent une architecture identique mais avec des capteurs e
 
 - **Capteurs — validation requise**
   - Toujours verifier `isnan()` apres lecture DHT.
-  - Valider les plages de valeurs (pas de temperature < -40 ou > 80).
+  - **Fallback si invalide** : temperature = 20.0f, humidite = 50.0f (harmonise msp, n3pp, ffp5cs).
+  - Valider les plages de valeurs (temperature -40 a 80°C, humidite 0–100 %).
   - Les capteurs sol analogiques (humidite, luminosite) peuvent retourner 0 ou 4095 si deconnectes.
 
 - **Modifications**

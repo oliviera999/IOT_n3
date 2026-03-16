@@ -67,7 +67,7 @@ Verifier dans les logs firmware :
 
 **Code 500** :
 - Erreur cote serveur (BDD, config, exception PHP)
-- Verifier les logs Monolog du serveur
+- Consulter le **cronlog production** : https://iot.olution.info/public/cronlog.txt — chercher la reference d'erreur (ex. `[bb3262da436c]`) si l'utilisateur l'a fournie, ou les dernieres lignes `[ERROR] Exception non geree` / `Erreur insertion`. Voir `serveur/docs/DEBUG_ERREURS_SERVEUR.md` et la regle `debug-serveur.mdc`.
 
 ### 4. Couche applicative / contrat
 
@@ -99,9 +99,8 @@ curl -X POST https://iot.olution.info/ffp3/post-data \
 
 ### Logs serveur
 
-Verifier les fichiers de log Monolog du serveur :
-- Erreurs PHP dans `error_log`
-- Logs applicatifs (`cronlog.txt` ou `LOG_FILE_PATH` du .env)
+- **Cronlog production (lecture directe)** : https://iot.olution.info/public/cronlog.txt — log applicatif Monolog ; permet de retrouver une reference d'erreur (ex. `bb3262da436c`) et le message/fichier/ligne/URL. Processus detaille : `serveur/docs/DEBUG_ERREURS_SERVEUR.md`.
+- En local / SSH : `error_log` PHP (chemin selon `php.ini`), et fichier defini par `LOG_FILE_PATH` (defaut `cronlog.txt`).
 
 ### Scripts de diagnostic existants
 

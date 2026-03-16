@@ -9,13 +9,15 @@ description: Workflow pour maintenir la coherence du contrat d'interface entre f
 
 Les firmwares et le serveur partagent un **contrat d'interface** : endpoints, champs JSON, cles de config, codes de statut. Ce contrat doit rester synchronise des deux cotes.
 
+**Unification** : firmwares et fichiers serveur doivent etre les plus unifies possibles (factorisation, templates de base, constantes partagees) sans nuire aux fonctionnalites ni aux specificites des pages ou des firmwares.
+
 ## Liens firmware ↔ serveur du projet
 
 | Firmware | Dossier firmware | Serveur | Auth |
 |----------|-----------------|---------|------|
 | n3pp4_2 | `firmwires/n3pp4_2/` | `serveur/` (routes N3pp) | Cle API simple |
 | msp2_5 | `firmwires/msp2_5/` | `serveur/` (routes Msp) | Cle API simple |
-| ffp5cs | `firmwires/ffp5cs/` | `serveur/ffp3/` | HMAC-SHA256 |
+| ffp5cs | `firmwires/ffp5cs/` | `serveur/ffp3/` | api_key (actuel) ; HMAC-SHA256 (cible) |
 | ESP32-CAM (x3) | `firmwires/uploadphotosserver_*/` | `serveur/` (GalleryUpload) | Cle API |
 
 ## Workflow : modification d'un contrat existant
@@ -59,9 +61,10 @@ Check-list :
 ## Modele de reference : FFP5CS ↔ FFP3
 
 Le contrat le plus mature du projet. A utiliser comme inspiration :
-- Auth HMAC-SHA256 (pas de cle API en clair dans l'URL)
-- JSON structure avec champs types
-- Heartbeat / supervision
+- **Auth actuelle** : cle API en POST (`api_key`) — alignee avec msp/n3pp.
+- **Auth cible** : HMAC-SHA256 (serveur deja pret via `timestamp` + `signature` ; firmware a migrer).
+- JSON structure avec champs types.
+- Heartbeat / supervision.
 - Constantes harmonisees (voir `firmwires/ffp5cs/.cursor/rules/FFP5CS-constantes-harmonisees-firmware-serveur.mdc`)
 
 ## Anti-patterns a eviter

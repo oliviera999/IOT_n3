@@ -29,23 +29,22 @@ Chaque firmware qui envoie des données ou est piloté à distance est relié à
 
 | Firmware (dans `firmwires/`) | Carte | Dossier serveur associé | Rôle du serveur |
 |------------------------------|--------|--------------------------|------------------|
-| **[n3pp4_2](firmwires/n3pp4_2/)** — N3PhasmesProto (serre / aquaponie) | ESP32 | **[serveur/n3pp](serveur/n3pp/)** | Réception des données (`n3ppdatas`), contrôle des sorties (`n3ppcontrol`), galerie photos (`n3ppgallery`) |
-| **[msp2_5](firmwires/msp2_5/)** — MeteoStationPrototype (météo + tracker solaire) | ESP32 | **[serveur/msp1](serveur/msp1/)** | Réception des données (`msp1datas`), contrôle (`msp1control`), galerie (`msp1gallery`) |
-| **[uploadphotosserver](firmwires/uploadphotosserver/)** (unifié, envs msp1/n3pp/ffp3) | ESP32-CAM | **msp1gallery, n3ppgallery, ffp3gallery** | Envoi vers l’endpoint configuré selon l'environnement de build (msp1gallery, n3ppgallery ou ffp3). Un seul firmware avec 3 envs PlatformIO. |
-| **[uploadphotosserver_ffp3_1_5_deppsleep](firmwires/uploadphotosserver_ffp3_1_5_deppsleep/)** (legacy) | ESP32-CAM | **[serveur/ffp3](serveur/ffp3/)** | Envoi vers la galerie **FFP3**. Variante legacy conservée. |
+| **[n3pp4_2](firmwires/n3pp4_2/)** — N3PhasmesProto (serre / aquaponie) | ESP32 | **Module N3PP** ([serveur](serveur/README.md)) | Réception des données (`n3ppdatas`), contrôle des sorties (`n3ppcontrol`), galerie photos (`n3ppgallery`) |
+| **[msp2_5](firmwires/msp2_5/)** — MeteoStationPrototype (météo + tracker solaire) | ESP32 | **Module MSP1** ([serveur](serveur/README.md)) | Réception des données (`msp1datas`), contrôle (`msp1control`), galerie (`msp1gallery`) |
+| **[uploadphotosserver](firmwires/uploadphotosserver/)** (unifié, envs msp1/n3pp/ffp3) | ESP32-CAM | **msp1gallery, n3ppgallery, ffp3gallery** | Envoi JPEG vers l’endpoint selon l’env de build. Un seul firmware avec 3 envs PlatformIO. |
 | **[ffp5cs](firmwires/ffp5cs/)** — Contrôleur aquaponie (WROOM/S3) | ESP32 / ESP32-S3 | **[serveur/ffp3](serveur/ffp3/)** | Même plateforme : FFP3 est le backend web (Slim 4) pour les données et le contrôle des ESP FFP5CS |
 | **[ratata](firmwires/ratata/)** — Kit ZYC0108-EN (voiture / robot) | UNO + ESP32-CAM | — | Pas de serveur dédié (démo locale, stream HTTP possible en direct) |
 | **[LVGL_Widgets](firmwires/LVGL_Widgets/)** — Interface écran tactile | ESP32-S3 | — | Pas de serveur dédié |
 
-**À propos des modules photo (ESP32-CAM)** : le firmware **uploadphotosserver** (unifié) propose 3 envs (msp1, n3pp, ffp3) ciblant msp1gallery, n3ppgallery ou ffp3gallery. Une variante legacy (`uploadphotosserver_ffp3_1_5_deppsleep`) est conservée pour FFP3.
+**À propos des modules photo (ESP32-CAM)** : le firmware **uploadphotosserver** (unifié) propose 3 envs (msp1, n3pp, ffp3) ciblant msp1gallery, n3ppgallery ou ffp3gallery. Les variantes legacy sont dans `firmwires/archive/`.
 
 En résumé (données et contrôle) :
 
-- **N3PP** (serre/aquaponie) : firmware `n3pp4_2` → **serveur/n3pp**
-- **MSP1** (météo) : firmware `msp2_5` → **serveur/msp1**
+- **N3PP** (serre/aquaponie) : firmware `n3pp4_2` → **module N3PP** (routes `/n3pp/`, `/serre`)
+- **MSP1** (météo) : firmware `msp2_5` → **module MSP1** (routes `/msp1/`, `/meteo`)
 - **FFP3** (aquaponie avancée) : firmware `ffp5cs` → **serveur/ffp3**
 
-Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’upload indépendants ; les firmwares « uploadphotosserver_* » sont des variantes configurées pour l’une ou l’autre destination.
+Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’upload indépendants ; les firmwares « uploadphotosserver » sont des variantes configurées pour l’une ou l’autre destination.
 
 ---
 
@@ -55,6 +54,7 @@ Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’u
 - **Recommandations IoT (salle n³)** : voir [RECOMMANDATIONS_IOT.md](RECOMMANDATIONS_IOT.md) pour les recommandations techniques (sécurité, inventaire, backend, monitoring).
 - **Inventaire des appareils** : voir [docs/inventaire_appareils.md](docs/inventaire_appareils.md) pour le registre et le nommage (n3-*).
 - **Firmwares** : voir [firmwires/README.md](firmwires/README.md) pour la liste des projets, cartes, commandes de compilation et structure.
+- **Scripts** : voir [scripts/README.md](scripts/README.md) pour l'inventaire des scripts de publication, audit, déploiement et tests.
 - **FFP3 (serveur)** : voir [serveur/ffp3/README.md](serveur/ffp3/README.md) pour l’installation, la configuration et l’architecture de l’application Slim 4.
 - **Audit des échanges serveur ↔ ESP** : voir [docs/audit_echanges_serveur_esp.md](docs/audit_echanges_serveur_esp.md) pour la synthèse des flux, endpoints et authentification.
 - **Diagnostic erreurs serveur** : [cronlog production](https://iot.olution.info/public/cronlog.txt) ; [error_log production](https://iot.olution.info/public/error_log) (accès autorisé comme le cronlog) ; processus de debug (référence d’erreur, script d'analyse) : [serveur/docs/DEBUG_ERREURS_SERVEUR.md](serveur/docs/DEBUG_ERREURS_SERVEUR.md).

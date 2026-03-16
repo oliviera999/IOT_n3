@@ -8,6 +8,8 @@ description: Creer ou modifier des endpoints dans le serveur PHP Slim 4 unifie (
 ## Architecture
 
 Le serveur est une application **Slim 4 unifiee** dans `serveur/`.
+
+**Unification** : privilegier les classes abstraites, templates de base (`data_page.twig`, `_control_base.twig`), helpers de routes et services partages pour garder le code serveur le plus unifie possible, sans nuire aux specificites des pages ou des modules (ffp3, msp1, n3pp).
 Exception : `serveur/ffp3/` est un sous-module autonome (sa propre app Slim 4).
 
 ### Serveur principal (serveur/)

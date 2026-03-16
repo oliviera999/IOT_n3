@@ -10,6 +10,14 @@ alwaysApply: true
   - Portail vitrine : [n3.olution.info](https://n3.olution.info)
   - Backend IoT (donnees, controle, galeries) : [iot.olution.info](https://iot.olution.info)
 
+- **Audience cible**
+  - Eleves college et lycee (usage pedagogique, exploration, projets)
+  - Parents (suivi, decouverte)
+  - Professeurs (enseignement, suivi des projets)
+  - Administration (gestion, supervision)
+  - Partenaires (presentation, valorisation)
+  - L'interface et la documentation doivent rester lisibles et accessibles pour ces publics varies.
+
 - **Structure du workspace**
   - `firmwires/` : firmwares ESP32, ESP32-CAM, Arduino UNO (PlatformIO).
   - `serveur/` : serveur unifie PHP (Slim 4) — front controller unique gerant ffp3, msp1, n3pp et galeries.

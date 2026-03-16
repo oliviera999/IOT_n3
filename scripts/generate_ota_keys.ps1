@@ -47,8 +47,24 @@ if (Test-Path $privKey) {
 
 $generatedOk = $false
 
-# --- Tentative via openssl ---
+# Chercher openssl dans le PATH ou emplacements Windows courants
 $opensslCmd = Get-Command "openssl" -ErrorAction SilentlyContinue
+if (-not $opensslCmd) {
+    $opensslPaths = @(
+        "C:\Program Files\OpenSSL-Win64\bin\openssl.exe",
+        "C:\Program Files\OpenSSL-Win32\bin\openssl.exe",
+        "C:\Program Files (x86)\OpenSSL-Win32\bin\openssl.exe"
+    )
+    foreach ($p in $opensslPaths) {
+        if (Test-Path $p) {
+            $env:PATH = "$(Split-Path $p -Parent);$env:PATH"
+            $opensslCmd = Get-Command "openssl" -ErrorAction SilentlyContinue
+            if ($opensslCmd) { break }
+        }
+    }
+}
+
+# --- Tentative via openssl ---
 if ($opensslCmd) {
     Write-Host "Utilisation d'openssl..." -ForegroundColor Gray
 
@@ -70,19 +86,59 @@ if ($opensslCmd) {
 if (-not $generatedOk) {
     Write-Host "Utilisation .NET ECDsa..." -ForegroundColor Gray
     try {
-        $ecdsa = [System.Security.Cryptography.ECDsa]::Create(
-            [System.Security.Cryptography.ECCurve]::NamedCurves.nistP256
-        )
+        # Création ECDsa P-256 : Create() sans paramètre d'abord (compatible .NET 5+, P-256 par défaut)
+        $ecdsa = $null
+        try {
+            $ecdsa = [System.Security.Cryptography.ECDsa]::Create()
+        } catch { }
+        if (-not $ecdsa) {
+            # Sinon, créer via courbe explicite
+            $curve = $null
+            try {
+                $curve = [System.Security.Cryptography.ECCurve]::CreateFromFriendlyName("nistP256")
+            } catch {
+                try {
+                    $curve = [System.Security.Cryptography.ECCurve]::CreateFromFriendlyName("nistp256")
+                } catch {
+                    try {
+                        $curve = [System.Security.Cryptography.ECCurve+NamedCurves]::nistP256
+                    } catch { }
+                }
+            }
+            if ($curve) {
+                $ecdsa = [System.Security.Cryptography.ECDsa]::Create($curve)
+            }
+        }
+        if (-not $ecdsa) {
+            throw "ECDsa.Create a renvoyé null. Installez .NET 6+ (dotnet --version) ou openssl."
+        }
 
-        # Clé privée PEM (PKCS#8)
-        $privPem = $ecdsa.ExportECPrivateKeyPem()
-        [System.IO.File]::WriteAllText((Join-Path $PWD $privKey), $privPem,
-            [System.Text.UTF8Encoding]::new($false))
+        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 
-        # Clé publique PEM (SPKI)
-        $pubPem = $ecdsa.ExportSubjectPublicKeyInfoPem()
-        [System.IO.File]::WriteAllText((Join-Path $PWD $pubKeyPem), $pubPem,
-            [System.Text.UTF8Encoding]::new($false))
+        # Clé privée et publique PEM (.NET 5+ a Export*Pem, sinon conversion manuelle)
+        $privPem = $null
+        $pubPem  = $null
+
+        if ($ecdsa.GetType().GetMethod("ExportECPrivateKeyPem")) {
+            $privPem = $ecdsa.ExportECPrivateKeyPem()
+            $pubPem  = $ecdsa.ExportSubjectPublicKeyInfoPem()
+        } else {
+            # .NET Framework : export DER puis conversion PEM
+            function To-Pem {
+                param([byte[]]$der, [string]$label)
+                $b64 = [Convert]::ToBase64String($der)
+                $lines = for ($i = 0; $i -lt $b64.Length; $i += 64) {
+                    $len = [Math]::Min(64, $b64.Length - $i)
+                    $b64.Substring($i, $len)
+                }
+                "-----BEGIN $label-----`n" + ($lines -join "`n") + "`n-----END $label-----"
+            }
+            $privPem = To-Pem -der $ecdsa.ExportECPrivateKey() -label "EC PRIVATE KEY"
+            $pubPem  = To-Pem -der $ecdsa.ExportSubjectPublicKeyInfo() -label "PUBLIC KEY"
+        }
+
+        [System.IO.File]::WriteAllText((Join-Path $PWD $privKey), $privPem, $utf8NoBom)
+        [System.IO.File]::WriteAllText((Join-Path $PWD $pubKeyPem), $pubPem, $utf8NoBom)
 
         $ecdsa.Dispose()
         $generatedOk = $true

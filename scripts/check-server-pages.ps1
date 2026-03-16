@@ -1,17 +1,19 @@
 <#
 .SYNOPSIS
-    Verifie les pages en ligne sur le serveur distant et genere un rapport (URLs + analyse error_log et cronlog).
+    Verifie les pages du serveur distant (prod), genere le rapport en local et propose des correctifs avant validation.
 
 .DESCRIPTION
-    En local : appelle le serveur iot.olution.info pour chaque URL definie, recupere les logs (cronlog.txt, error_log)
-    via HTTP, les analyse et produit un rapport Markdown (et optionnellement JSON).
+    Cible par defaut la PROD distante (https://iot.olution.info). Le script s'execute en local, envoie les requetes
+    vers le serveur distant, recupere les logs (cronlog.txt, error_log) via HTTP et genere le rapport sur la machine
+    locale. En presence d'erreurs (URLs 4xx/5xx, erreurs dans les logs), une section "Correctifs proposes" liste des
+    actions precises et fonctionnelles a valider puis appliquer manuellement (aucune modification automatique).
     A executer depuis la racine IOT_n3.
 
 .PARAMETER BaseUrl
-    URL de base du serveur (defaut : https://iot.olution.info).
+    URL de base du serveur (defaut : https://iot.olution.info pour prod).
 
 .PARAMETER ReportDir
-    Dossier de sortie des rapports (defaut : scripts/reports, relatif a la racine du depot).
+    Dossier de sortie des rapports en local (defaut : scripts/reports).
 
 .PARAMETER LogLines
     Nombre de lignes d'erreur a inclure dans le rapport (defaut : 20).
@@ -19,11 +21,17 @@
 .PARAMETER ExportJson
     Si specifie, genere aussi un fichier JSON avec les memes donnees.
 
+.PARAMETER NoCorrectifs
+    Ne pas generer la section "Correctifs proposes" dans le rapport.
+
 .EXAMPLE
     .\scripts\check-server-pages.ps1
 
 .EXAMPLE
     .\scripts\check-server-pages.ps1 -ReportDir docs/rapports-serveur -LogLines 30 -ExportJson
+
+.EXAMPLE
+    .\scripts\check-server-pages.ps1 -BaseUrl http://localhost:8080
 #>
 
 [CmdletBinding()]
@@ -31,7 +39,8 @@ param(
     [string]$BaseUrl = 'https://iot.olution.info',
     [string]$ReportDir = 'scripts/reports',
     [int]$LogLines = 20,
-    [switch]$ExportJson
+    [switch]$ExportJson,
+    [switch]$NoCorrectifs
 )
 
 $ErrorActionPreference = 'Stop'
@@ -205,6 +214,137 @@ if ($cronContent) {
     $cronLogSummary.LastLines = @($cronErrorLines | Select-Object -Last $LogLines)
 }
 
+# --- 2b. Construction des correctifs proposes (sans les appliquer)
+$correctifs = [System.Collections.ArrayList]::new()
+if (-not $NoCorrectifs) {
+    # Correctifs pour URLs en erreur
+    foreach ($row in $results) {
+        if ($row.HttpCode -eq 404) {
+            $pathNorm = $row.Path.TrimEnd('/')
+            $suggestion = "URL $($row.Url) retourne 404. "
+            if ($pathNorm -match '\.php$') {
+                $suggestion += "Verifier que le fichier existe sous serveur/public ou qu'une route Slim equivale dans serveur/public/index.php (groupes /msp1, /n3pp, /ffp3). Verifier aussi .htaccess si le script est servi par Apache."
+            } else {
+                $suggestion += "Verifier que la route est definie dans serveur/public/index.php (rechercher '" + ($pathNorm -replace '^/ffp3', '') + "' ou le chemin sans prefixe /ffp3). Pour les assets (CSS/JS), verifier le chemin sous serveur/public/assets/."
+            }
+            [void]$correctifs.Add([PSCustomObject]@{ Type = 'URL_404'; Source = $row.Path; Correctif = $suggestion; Fichier = 'serveur/public/index.php'; Ligne = $null })
+        }
+        elseif ($row.HttpCode -ge 500) {
+            [void]$correctifs.Add([PSCustomObject]@{
+                Type     = 'URL_5xx'
+                Source   = $row.Path
+                Correctif = "URL $($row.Url) retourne $($row.HttpCode). Consulter error_log (voir section Logs ci-dessous) pour la ligne [n3 500] ou PHP Fatal associee, puis corriger le fichier et la ligne indiques."
+                Fichier  = $null
+                Ligne    = $null
+            })
+        }
+        elseif ($row.HttpCode -ge 400 -and $row.HttpCode -lt 500) {
+            [void]$correctifs.Add([PSCustomObject]@{
+                Type     = 'URL_4xx'
+                Source   = $row.Path
+                Correctif = "URL $($row.Url) retourne $($row.HttpCode). Verifier authentification (route protegee ?), parametres attendus (GET/POST) et serveur/public/index.php (middleware auth, publicPaths/protectedPaths)."
+                Fichier  = 'serveur/public/index.php'
+                Ligne    = $null
+            })
+        }
+    }
+
+    # Parser error_log : [n3 500] ... Exception: message in /path/file.php:123
+    $patternN3500 = '\[n3 500\].*?—\s*(\S+):\s*(.+?)\s+in\s+(.+?):(\d+)'
+    $patternFatal = 'Fatal error:\s*(.+?)\s+in\s+(.+?)\s+on\s+line\s+(\d+)'
+    $patternFatal2 = 'PHP Fatal error:\s*(.+?)\s+in\s+(.+?)\s+on\s+line\s+(\d+)'
+    foreach ($line in $errorLogSummary.LastLines) {
+        if ($line -match $patternN3500) {
+            $exClass = $Matches[1]; $msg = $Matches[2].Trim(); $file = $Matches[3]; $lineNum = $Matches[4]
+            $fileLocal = $file -replace '^.*[/\\](templates|src|public)[/\\]', 'serveur/$1/'
+            [void]$correctifs.Add([PSCustomObject]@{
+                Type     = 'error_log_500'
+                Source   = $line
+                Correctif = "Exception $exClass : $msg. Fichier (cote serveur) : $file ligne $lineNum. En local : ouvrir $fileLocal vers la ligne $lineNum, corriger selon le message (template manquant, variable indefinie, colonne BDD, etc.)."
+                Fichier  = $fileLocal
+                Ligne    = [int]$lineNum
+            })
+        }
+        elseif ($line -match $patternFatal -or $line -match $patternFatal2) {
+            $msg = $Matches[1]; $file = $Matches[2]; $lineNum = $Matches[3]
+            $fileLocal = $file -replace '^.*[/\\](templates|src|public)[/\\]', 'serveur/$1/'
+            [void]$correctifs.Add([PSCustomObject]@{
+                Type     = 'error_log_fatal'
+                Source   = $line
+                Correctif = "PHP Fatal : $msg. Fichier : $file ligne $lineNum. En local : $fileLocal ligne $lineNum. Corriger la syntaxe, la classe manquante ou l'appel incorrect."
+                Fichier  = $fileLocal
+                Ligne    = [int]$lineNum
+            })
+        }
+        elseif ($line -match 'FFP3 404|n3-iot 404') {
+            [void]$correctifs.Add([PSCustomObject]@{
+                Type     = 'error_log_404'
+                Source   = $line
+                Correctif = "Requete vers route inexistante (loggee dans error_log). Extraire METHOD et URI de la ligne, puis ajouter la route dans serveur/public/index.php ou le fichier .php correspondant."
+                Fichier  = 'serveur/public/index.php'
+                Ligne    = $null
+            })
+        }
+    }
+
+    # Parser cronlog : Exception / Erreur insertion (fichier:ligne si present)
+    $patternCronFile = 'in\s+(.+?):(\d+)|in\s+(.+?)\s+line\s+(\d+)'
+    foreach ($line in $cronLogSummary.LastLines) {
+        $suggestion = $null
+        if ($line -match 'Erreur insertion') {
+            $suggestion = "Erreur insertion (cronlog). Souvent liee a une colonne BDD manquante ou un type invalide. Verifier le schema des tables (ffp3Data, ffp3Outputs, etc.) et le code d'insertion dans les Repository (serveur/src/). Comparer avec TableConfig et les migrations."
+        }
+        elseif ($line -match 'Exception non gérée|Exception non geree') {
+            if ($line -match $patternCronFile) {
+                $f = if ($Matches[1]) { $Matches[1] } else { $Matches[3] }
+                $l = if ($Matches[2]) { $Matches[2] } else { $Matches[4] }
+                $fLocal = $f -replace '^.*[/\\](templates|src|public)[/\\]', 'serveur/$1/'
+                $suggestion = "Exception dans cronlog. Fichier : $f ligne $l. En local : $fLocal ligne $l. Corriger l'exception (donnees, BDD, fichier manquant)."
+            } else {
+                $suggestion = "Exception non geree (cronlog). Consulter la ligne complete ci-dessus pour le message et la pile d'appels, puis identifier le fichier et la ligne dans le depot serveur/."
+            }
+        }
+        if ($suggestion) {
+            [void]$correctifs.Add([PSCustomObject]@{ Type = 'cronlog'; Source = $line; Correctif = $suggestion; Fichier = $null; Ligne = $null })
+        }
+    }
+
+    # Deduplication par (Type, Fichier, Ligne) pour eviter doublons
+    $seen = @{}
+    $correctifsUniques = [System.Collections.ArrayList]::new()
+    foreach ($c in $correctifs) {
+        $key = "$($c.Type)|$($c.Fichier)|$($c.Ligne)"
+        if (-not $seen[$key]) {
+            $seen[$key] = $true
+            [void]$correctifsUniques.Add($c)
+        }
+    }
+    $correctifs = $correctifsUniques
+}
+
+# --- 2c. Section Correctifs (texte pour le rapport)
+$correctifsSection = ''
+if (-not $NoCorrectifs -and $correctifs.Count -gt 0) {
+    $correctifsSection = @"
+
+## Correctifs proposes (a valider puis appliquer manuellement)
+
+Les actions suivantes sont suggerees en fonction des erreurs detectees. **Aucune modification n'est appliquee automatiquement.** Valider chaque point, appliquer les correctifs dans le depot local, tester (ex. php -S + check-server-pages -BaseUrl http://localhost:8080), puis redéployer en prod et relancer ce script pour verifier.
+
+| # | Type | Fichier/Ligne | Action proposee |
+|---|------|----------------|-----------------|
+"@
+    $i = 1
+    foreach ($c in $correctifs) {
+        $fic = if ($c.Fichier) { $c.Fichier } else { '-' }
+        $lig = if ($c.Ligne) { $c.Ligne } else { '-' }
+        $action = ($c.Correctif -replace '\|', '\|' -replace "`r?`n", ' ').Trim()
+        $correctifsSection += "| $i | $($c.Type) | ${fic} : ${lig} | $action |`n"
+        $i++
+    }
+    $correctifsSection += "`n**Validation :** appliquer manuellement les correctifs souhaites, tester en local, deployer, puis relancer ce script.`n"
+}
+
 # --- 3. Generation du rapport Markdown
 $genTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $md = @"
@@ -253,9 +393,9 @@ $md += @"
 
 **Dernières lignes pertinentes (max $LogLines) :**
 
-``````
+```
 $(($errorLogSummary.LastLines -join "`n"))
-``````
+```
 
 ### Résumé cronlog.txt
 
@@ -265,10 +405,10 @@ $(($errorLogSummary.LastLines -join "`n"))
 
 **Dernières lignes pertinentes (max $LogLines) :**
 
-``````
+```
 $(($cronLogSummary.LastLines -join "`n"))
-``````
-
+```
+$correctifsSection
 ---
 *Rapport généré par scripts/check-server-pages.ps1*
 "@
@@ -276,12 +416,14 @@ $(($cronLogSummary.LastLines -join "`n"))
 [System.IO.File]::WriteAllText($reportPath, $md, [System.Text.UTF8Encoding]::new($false))
 Write-Host "Rapport enregistre : $reportPath" -ForegroundColor Green
 
-# --- 4. Export JSON optionnel
+# --- 5. Export JSON optionnel
 if ($ExportJson) {
+    $correctifsExport = @($correctifs | ForEach-Object { [PSCustomObject]@{ Type = $_.Type; Source = $_.Source; Correctif = $_.Correctif; Fichier = $_.Fichier; Ligne = $_.Ligne } })
     $export = @{
         generatedAt = $genTime
         baseUrl      = $BaseUrl
         urlResults   = @($results)
+        correctifs   = $correctifsExport
         errorLog     = @{
             available  = $errorLogSummary.Available
             statusCode = $errorLogSummary.StatusCode
@@ -308,7 +450,10 @@ if ($ExportJson) {
     Write-Host "JSON enregistre : $jsonPath" -ForegroundColor Green
 }
 
-# --- 5. Resumé console
+# --- 6. Resumé console
 Write-Host ""
 Write-Host "Resume : $okCount OK, $warnCount avert., $errCount erreur(s)" -ForegroundColor $(if ($errCount -gt 0) { 'Red' } else { 'Green' })
+if (-not $NoCorrectifs -and $correctifs.Count -gt 0) {
+    Write-Host "Correctifs proposes : $($correctifs.Count) (voir rapport, section Correctifs proposes)" -ForegroundColor Yellow
+}
 Write-Host "Termine." -ForegroundColor Cyan

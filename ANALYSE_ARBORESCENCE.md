@@ -65,15 +65,15 @@ Regroupe **tous les firmwares** pour cartes ESP32, ESP32-CAM et Arduino UNO. Out
 - **Stack :** idem n3pp + OneWire, DallasTemperature, ESP32Servo, Preferences, ESPmDNS
 - **Note :** la ligne `board_build.partitions = min_spiffs.csv` a été retirée ; partition par défaut utilisée
 
-#### C. Upload photos (ESP32-CAM) – 3 projets
+#### C. Upload photos (ESP32-CAM) – projet unifié
 
-| Dossier | Cible galerie | Deep sleep | Remarques |
-|---------|----------------|------------|-----------|
-| `uploadphotosserver_msp1/` | msp1 (iot.olution.info) | Non | OTA, envoi 6h–22h |
-| `uploadphotosserver_n3pp_1_6_deppsleep/` | n3pp | 600 s | EEPROM, SD_MMC |
-| `uploadphotosserver_ffp3_1_5_deppsleep/` | ffp3 | 600 s | idem |
+| Env PlatformIO | Cible galerie | Deep sleep | Remarques |
+|----------------|---------------|------------|-----------|
+| `msp1` | msp1gallery | 600 s | OTA, SD, envoi 6h–22h |
+| `n3pp` | n3ppgallery | 600 s | OTA, SD |
+| `ffp3` | ffp3gallery | 600 s | idem |
 
-Les noms des firmwares indiquent l’**endpoint cible** (msp1gallery, n3ppgallery ou ffp3), pas une association exclusive aux projets MSP ou N3PP : une caméra peut être configurée pour envoyer vers n’importe quelle galerie. Chaque projet : `platformio.ini` (env `esp32cam`), `src/main.cpp`, README. Capture JPEG, POST HTTP vers le serveur, WiFi, NTP, LED de statut (GPIO 33 pour msp1).
+Un seul firmware **uploadphotosserver** avec trois envs PlatformIO. Les envs indiquent l’**endpoint cible** (msp1gallery, n3ppgallery, ffp3gallery). Compilation : `pio run -e msp1` / `-e n3pp` / `-e ffp3`. Capture JPEG, POST HTTP vers le serveur, WiFi, NTP, LED de statut (GPIO 33).
 
 #### D. Ratata – Kit ZYC0108-EN – `ratata/`
 
@@ -121,7 +121,7 @@ Les noms des firmwares indiquent l’**endpoint cible** (msp1gallery, n3ppgaller
 |--------|----------|-------------------------------------|------------|
 | n3pp4_2 | ESP32 | ~1300 | Monolithique |
 | msp2_5 | ESP32 | ~1058 | Monolithique |
-| uploadphotosserver_* | ESP32-CAM | ~200–550 | Un fichier principal |
+| uploadphotosserver | ESP32-CAM | variable | Un fichier principal unifié (3 envs) |
 | ratata (par ex.) | UNO / ESP32-CAM | variable (court à ~500) | Un main par exemple |
 | ffp5cs | WROOM / S3 | réparti en plusieurs .cpp | Modulaire |
 | LVGL_Widgets | ESP32-S3 | ~1700+ | Monolithique |
@@ -134,36 +134,32 @@ Applications **PHP** pour la collecte de données, le contrôle des appareils et
 
 ### 4.1 Entrée principale
 
-- **`index.php`** : page d’accueil « n³ iot datas » (HTML5 UP – Massively). Liens vers ffp3, msp1, n3pp, etc. CSS hébergé sur `https://iot.olution.info/assets/css/`.
+- **`public/index.php`** : front controller Slim 4 d’accueil « n³ iot datas » (HTML5 UP – Massively). Liens vers ffp3, msp1, n3pp, etc. CSS hébergé sur `https://iot.olution.info/assets/css/`.
 - **`README.txt`** : crédits du thème Massively (HTML5 UP), pas une doc technique du serveur.
 
-### 4.2 Applications par « produit »
+### 4.2 Modules par produit
 
-Structure répétée pour **msp1** et **n3pp**.
+Les modules MSP1 et N3PP sont des routes et Controllers dans l'app Slim unifiée.
 
-#### A. MSP1 – `serveur/msp1/`
+#### A. Module MSP1 (météo)
 
-- **msp1control/** : interface de contrôle (PHP)  
-  - `index.php`, `msp1-database.php`, `msp1-style.css`, `msp1-outputs-action.php`  
-  - **securecontrol/** : `index.php`, `msp1-outputs.php` (zone sécurisée)
-- **msp1datas/** : réception des données  
-  - `post-msp1-data.php`, `msp1-data.php`, `msp1-config.php`, `cronmsp1.php`, `cronpompe.php`, `cronlog.txt`
+- **Routes** : `/msp1/msp1datas/post-msp1-data.php` (POST firmware), `/meteo` (page données), `/meteo-control` (page contrôle)
+- **Controllers** : `src/Controller/Msp/` (MspPostDataController, MspDataController, MspOutputController)
+- **Templates** : `msp1_data.twig`, `msp1_control.twig`
 
-La galerie photos (upload, affichage) est dans **`serveur/msp1gallery/`** à la racine de `serveur/` (voir ci‑dessous).
+La galerie photos : routes **`/msp1gallery/`** (voir ci-dessous).
 
-#### B. N3PP – `serveur/n3pp/`
+#### B. Module N3PP (serre)
 
-- **n3ppcontrol/** : contrôle (index, database, style, outputs-action ; variantes `n3pp-outputs*.php`, `n3phasme-*`, `n3-database2.php`).  
-  - **securecontrol/** : `index.php`, `n3pp-outputs.php`, `n3pp-outputs2.php`, etc.
-- **n3ppdatas/** : données et crons  
-  - `post-n3pp-data.php`, `post-n3pp-data2.php`, `n3pp-data.php`, `n3pp-data2.php`, `n3pp-config.php`, `n3pp-config2.php`, `cronn3pp.php`, `data_analysis.php`, `cronlogn3pp.txt`
+- **Routes** : `/n3pp/n3ppdatas/post-n3pp-data.php` (POST firmware), `/serre` (page données), `/serre-control` (page contrôle)
+- **Controllers** : `src/Controller/N3pp/` (N3ppPostDataController, N3ppDataController, N3ppOutputController)
+- **Templates** : `n3pp_data.twig`, `n3pp_control.twig`
 
-La galerie photos est dans **`serveur/n3ppgallery/`** à la racine de `serveur/` (voir ci‑dessous).
+La galerie photos : routes **`/n3ppgallery/`** (voir ci-dessous).
 
-#### Galeries photo à la racine de `serveur/`
+#### Galeries photo
 
-- **`serveur/msp1gallery/`** : `upload.php`, `msp1-gallery.php` → URL `/msp1gallery/upload.php`
-- **`serveur/n3ppgallery/`** : `upload.php`, `n3pp-gallery.php`, `triphotos.php` → URL `/n3ppgallery/upload.php`
+- **Routes** : `/msp1gallery/upload.php`, `/n3ppgallery/upload.php`, `/ffp3/ffp3gallery/upload.php` — gérées par `GalleryUploadController`, `GalleryViewController`
 
 Présence de **error_log** et de fichiers « old » / « 2 » indiquant des évolutions et du legacy.
 
@@ -210,10 +206,9 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
 | Chemin | Type | Rôle |
 |--------|------|------|
-| `serveur/index.php` | HTML/PHP | Portail « n³ iot datas » |
-| `serveur/msp1/` | PHP procédural | Contrôle, données, galerie MSP1 |
-| `serveur/n3pp/` | PHP procédural | Contrôle, données, galerie N3PP (avec variantes/legacy) |
-| `serveur/ffp3/` | Slim 4 + Twig + DI | Application aquaponie/IoT structurée (MVC, services, tests) |
+| `serveur/public/index.php` | Slim 4 | Front controller unique |
+| Modules msp1, n3pp | Slim 4 | Controllers `src/Controller/Msp/`, `N3pp/` — données, contrôle, galeries |
+| `serveur/ffp3/` | Slim 4 (dossier) | Sous-projet historique, scripts, doc ; code actif dans `serveur/src/` |
 
 ---
 
@@ -258,23 +253,20 @@ c:\IOT_n3\
 │   ├── README.md, RAPPORT_ANALYSE.md, RECOMMANDATIONS.md
 │   ├── n3pp4_2\              # N3PhasmesProto (ESP32 serre/aquaponie)
 │   ├── msp2_5\              # MeteoStationPrototype (ESP32 météo + tracker)
-│   ├── uploadphotosserver_msp1\
-│   ├── uploadphotosserver_n3pp_1_6_deppsleep\
-│   ├── uploadphotosserver_ffp3_1_5_deppsleep\
+│   ├── uploadphotosserver\       # ESP32-CAM unifié (envs msp1, n3pp, ffp3)
 │   ├── ratata\              # Kit ZYC0108-EN (8 env. UNO + ESP32-CAM)
 │   ├── ffp5cs\              # Contrôleur aquaponie (WROOM/S3, modulaire) (dossier ordinaire)
 │   ├── LVGL_Widgets\        # ESP32-S3 + écran LVGL
 │   └── (test psram s3, test psram s3 2 dans ffp5cs)
 │
 └── serveur\
-    ├── index.php            # Portail n³ iot datas
-    ├── README.txt           # Crédits thème
-    ├── site initial\        # Archive ancienne version — consultation uniquement, ne pas modifier
-    ├── msp1\                # Contrôle, datas MSP1
-    ├── msp1gallery\         # Galerie / upload photos (endpoint msp1gallery)
-    ├── n3pp\                # Contrôle, datas N3PP
-    ├── n3ppgallery\         # Galerie / upload photos (endpoint n3ppgallery)
-    └── ffp3\                # App Slim 4 (aquaponie, dashboard, API), intégré dans n3_serveur
+    ├── public\index.php     # Front controller Slim 4 unique
+    ├── src\Controller\     # Msp, N3pp, Ffp3, Gallery
+    ├── config\              # routes_msp1_n3pp.php, routes_helpers.php
+    ├── site initial\        # Archive — consultation uniquement
+    ├── msp1gallery\         # Routes /msp1gallery/ (upload photos)
+    ├── n3ppgallery\        # Routes /n3ppgallery/ (upload photos)
+    └── ffp3\                # Sous-projet historique (scripts, doc)
 ```
 
 *Note :* Le dossier **serveur/** dans IOT_n3 est un clone du dépôt **n3_serveur** (submodule) ; ffp3 n’est plus un sous-dépôt séparé mais un dossier versionné dans n3_serveur.

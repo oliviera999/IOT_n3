@@ -6,6 +6,8 @@ alwaysApply: false
 
 # Conventions serveur PHP
 
+- **Unification** : le code serveur doit etre le plus unifie possible (classes abstraites, templates de base, helpers de routes) sans nuire aux fonctionnalites ni aux specificites des pages ou des modules (ffp3, msp1, n3pp).
+
 - **Version** : PHP 8.1+ pour tout nouveau code. Type hinting strict.
 
 - **Architecture**

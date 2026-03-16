@@ -1,0 +1,31 @@
+---
+description: Workflow de validation, monitoring et analyse des logs (reference ffp5cs, scripts partages)
+globs: firmwires/**/*
+alwaysApply: false
+---
+
+# Workflow et scripts firmwares (reference FFP5CS)
+
+- **Reference**
+  - Le projet **ffp5cs** definit le workflow de validation et l'analyse des logs de reference, alignes sur les regles cœur (offline-first, robustesse, verification apres modification). Voir `firmwires/ffp5cs/.cursor/rules/` et `firmwires/README.md`.
+
+- **Workflow complet (erase + flash + monitor + analyse)**
+  - **ffp5cs** : utiliser `ffp5cs/erase_flash_fs_monitor_5min_analyze.ps1` (options `-Port`, `-Environment`, `-DurationMinutes`, `-SkipBuild`). Enchaîne erase, upload firmware, upload LittleFS (sauf wroom-prod), monitor N min, puis `analyze_log.ps1` et `generate_diagnostic_report.ps1`.
+  - **Autres firmwares** : lorsque les scripts racine sont en place, utiliser `firmwires/erase_flash_monitor.ps1 -Project <n3pp4_2|msp2_5|uploadphotosserver|ffp5cs>` ; pour ffp5cs ce script delegue au workflow dans `ffp5cs/`.
+
+- **Monitoring seul**
+  - **ffp5cs** : `ffp5cs/monitor_5min.ps1` (duree, port, env). Logs et analyses dans le **dossier dédié** `ffp5cs/logs/` (plus à la racine du firmware).
+  - **Racine** (prevu) : `firmwires/monitor_Nmin.ps1 -Project <projet> -DurationSeconds 300 -Port COMx`.
+
+- **Analyse des logs**
+  - **ffp5cs** : `analyze_log.ps1` (detaillée, specifique FFP5CS/FFP3), `analyze_log_exhaustive.ps1` (crashes, WDT, heap, reseau, reboots), `generate_diagnostic_report.ps1` (rapport serveur + mails). Toutes les sorties (fichiers .log, _analysis.txt, rapports .md) sont écrites dans `ffp5cs/logs/`.
+  - **Generique** : `firmwires/scripts/analyze_log_generic.ps1` pour n3pp4_2, msp2_5, uploadphotosserver (patterns : crash, heap, reboot, reseau, NVS).
+
+- **Regles alignees ffp5cs**
+  - Apres modification du code firmware : verifier par un cycle erase/flash/monitor/analyse si le changement touche reseau, NVS, taches ou watchdog.
+  - Bugs complexes : hypotheses, verification une par une, correction, rejouer scenario (monitor 5 min minimum, analyse du log).
+  - Ne pas deployer un firmware sans avoir valide au moins un cycle de monitoring et l'absence de crash/WDT dans le log.
+
+- **Documentation**
+  - Inventaire des scripts ffp5cs : `firmwires/ffp5cs/docs/INVENTAIRE_SCRIPTS_FFP5CS.md`.
+  - Section scripts : `firmwires/README.md` (« Scripts de monitoring et erase-flash »).

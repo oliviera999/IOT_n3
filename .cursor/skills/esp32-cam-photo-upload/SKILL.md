@@ -1,6 +1,6 @@
 ---
 name: esp32-cam-photo-upload
-description: Travailler sur les firmwares ESP32-CAM du projet n3 (uploadphotosserver_msp1, uploadphotosserver_n3pp, uploadphotosserver_ffp3). Utiliser quand l'utilisateur modifie un firmware camera, ajoute une nouvelle camera, debug un probleme de photo ou d'upload galerie.
+description: Travailler sur le firmware ESP32-CAM unifié du projet n3 (uploadphotosserver, envs msp1, n3pp, ffp3). Utiliser quand l'utilisateur modifie un firmware camera, ajoute une nouvelle camera, debug un probleme de photo ou d'upload galerie.
 ---
 
 # ESP32-CAM — Firmwares photo
