@@ -6,6 +6,16 @@ Format : [version] - date - description.
 
 ---
 
+## [2026.03] - 2026-03-16
+
+### Renommage firmwares
+- **n3pp4_2 → n3pp** : dossier et références (scripts, doc, règles, serveur, skills). Version n3pp 4.15.
+- **msp2_5 → msp** : idem. Version msp 2.15.
+- Scripts : `publish_ota.ps1`, `erase_flash_monitor.ps1`, `find-bugs.ps1` pointent vers `firmwires/n3pp` et `firmwires/msp`.
+- Documentation, `.cursor/rules`, `.cursor/skills`, libs partagées et inventaire alignés.
+
+---
+
 ## [2026.03] - 2026-03-10
 
 ### Audit documentation
