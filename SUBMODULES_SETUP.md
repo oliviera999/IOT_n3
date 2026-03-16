@@ -3,7 +3,7 @@
 ## État actuel
 
 - **serveur/** est un **sous-module** pointant vers **n3_serveur** (msp1, n3pp, galeries, ffp3).
-- **firmwires/** est un **sous-module** pointant vers **n3_firmwires** (tous les firmwares : n3pp4_2, msp2_5, uploadphotosserver*, ffp5cs, ratata, LVGL_Widgets). ffp5cs n’est plus un submodule à la racine ; il est un dossier normal dans n3_firmwires.
+- **firmwires/** est un **sous-module** pointant vers **n3_firmwires** (tous les firmwares : n3pp, msp, uploadphotosserver*, ffp5cs, ratata, LVGL_Widgets). ffp5cs n’est plus un submodule à la racine ; il est un dossier normal dans n3_firmwires.
 
 Si votre clone a encore l’ancienne structure (firmwires en dossier + ffp5cs en submodule), exécuter depuis la racine IOT_n3 :  
 `.\scripts\migrate-firmwires-to-submodule.ps1 -DryRun` puis, après avoir poussé le contenu de firmwires vers n3_firmwires, `.\scripts\migrate-firmwires-to-submodule.ps1`.

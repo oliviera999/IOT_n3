@@ -9,7 +9,7 @@ description: Scaffolding d'un nouveau projet firmware ESP32/Arduino pour le proj
 
 Quand l'utilisateur veut creer un nouveau firmware pour un appareil ESP32, ESP32-CAM ou Arduino dans le cadre du projet n3.
 
-**Unification** : privilegier la reutilisation de modules, constantes et patterns existants (ffp5cs, n3pp4_2, msp2_5) pour garder les firmwares les plus unifies possibles, sans nuire aux specificites de l'appareil.
+**Unification** : privilegier la reutilisation de modules, constantes et patterns existants (ffp5cs, n3pp, msp) pour garder les firmwares les plus unifies possibles, sans nuire aux specificites de l'appareil.
 
 ## Structure cible
 
@@ -28,7 +28,7 @@ firmwires/<nom_projet>/
 ## Etape 1 — Nommer le projet
 
 Convention : nom court, descriptif, sans espaces.
-Exemples existants : `n3pp4_2`, `msp2_5`, `uploadphotosserver` (envs msp1, n3pp, ffp3), `ffp5cs`.
+Exemples existants : `n3pp`, `msp`, `uploadphotosserver` (envs msp1, n3pp, ffp3), `ffp5cs`.
 
 ## Etape 2 — Creer le platformio.ini
 

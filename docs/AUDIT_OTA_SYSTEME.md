@@ -82,7 +82,7 @@ Le projet IOT_n3 implémente un système OTA pour plusieurs cibles ESP32 (n3pp, 
 
 ## 2. CÔTÉ FIRMWARE — ANALYSE PAR CIBLE
 
-### 2.1 n3pp4_2
+### 2.1 n3pp
 
 | Aspect               | État actuel                                        |
 |----------------------|----------------------------------------------------|
@@ -105,9 +105,9 @@ Le projet IOT_n3 implémente un système OTA pour plusieurs cibles ESP32 (n3pp, 
 #endif
 ```
 
-### 2.2 msp2_5
+### 2.2 msp
 
-Structure identique à n3pp4_2. Mêmes lacunes de sécurité.
+Structure identique à n3pp. Mêmes lacunes de sécurité.
 
 ### 2.3 uploadphotosserver (caméras)
 
@@ -155,7 +155,7 @@ Structure identique à n3pp4_2. Mêmes lacunes de sécurité.
 **Configuration par cible :**
 ```powershell
 "n3pp" = @{
-    ProjectDir   = "firmwares\n3pp4_2"
+    ProjectDir   = "firmwares\n3pp"
     PioEnv       = "esp32dev"
     OtaDest      = "serveur\ota\n3pp"
     MetadataPath = "serveur\ota\n3pp\metadata.json"
@@ -188,8 +188,8 @@ Structure identique à n3pp4_2. Mêmes lacunes de sécurité.
 
 | Cible              | AppMaxSize   |
 |--------------------|--------------|
-| n3pp4_2            | 1 966 080 B  |
-| msp2_5             | 1 966 080 B  |
+| n3pp            | 1 966 080 B  |
+| msp             | 1 966 080 B  |
 | uploadphotosserver | 1 966 080 B  |
 | ffp5cs             | Personnalisé |
 
@@ -351,7 +351,7 @@ serveur/ota/cam/ffp3/metadata.json
 
 **Description :** LVGL_Widgets identifié dans `RECOMMANDATIONS_IOT.md` comme ayant des secrets en dur.
 
-**Cibles confirmées sécurisées :** n3pp4_2, msp2_5 (credentials.h externalisé)
+**Cibles confirmées sécurisées :** n3pp, msp (credentials.h externalisé)
 **À vérifier :** uploadphotosserver, LVGL_Widgets
 
 ---
@@ -402,8 +402,8 @@ Add-Content -Path "ota-audit.jsonl" -Value $auditEntry
 
 | Cible              | Version actuelle | Fichier source              | Format    |
 |--------------------|------------------|-----------------------------|-----------|
-| n3pp4_2            | 4.5              | `src/main.cpp`              | `X.Y`     |
-| msp2_5             | 2.7              | `src/main.cpp`              | `X.Y`     |
+| n3pp            | 4.5              | `src/main.cpp`              | `X.Y`     |
+| msp             | 2.7              | `src/main.cpp`              | `X.Y`     |
 | uploadphotosserver | Non documentée   | `config.h` (par cible)      | `X.Y`     |
 | ffp5cs             | Par env          | Config env-spécifique       | `X.Y.Z`   |
 | Projet global      | 2025.03          | `/VERSION`                  | `YYYY.MM` |
@@ -473,8 +473,8 @@ Add-Content -Path "ota-audit.jsonl" -Value $auditEntry
 | `serveur/ota/msp/metadata.json`           | Métadonnées OTA msp prod                  |
 | `serveur/ota/cam/metadata.json`           | Métadonnées OTA caméras (3 cibles)        |
 | `serveur/ffp3/ota/metadata.json`          | Métadonnées OTA ffp5cs (HTTPS)            |
-| `firmwares/n3pp4_2/src/main.cpp`          | Code OTA client n3pp                      |
-| `firmwares/msp2_5/src/main.cpp`           | Code OTA client msp                       |
+| `firmwares/n3pp/src/main.cpp`          | Code OTA client n3pp                      |
+| `firmwares/msp/src/main.cpp`           | Code OTA client msp                       |
 | `firmwares/uploadphotosserver/src/main.cpp`| Code OTA client caméras                  |
 | `firmwares/ffp5cs/src/web_server.cpp`     | Code OTA client ffp5cs (avancé)           |
 | `docs/audit_echanges_serveur_esp.md`      | Documentation API                         |

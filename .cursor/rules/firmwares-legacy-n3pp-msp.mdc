@@ -1,10 +1,10 @@
 ---
-description: Guide pour les firmwares legacy n3pp4_2 et msp2_5 (ESP32 serre et meteo)
-globs: firmwires/n3pp4_2/**/*.cpp,firmwires/n3pp4_2/**/*.h,firmwires/msp2_5/**/*.cpp,firmwires/msp2_5/**/*.h
+description: Guide pour les firmwares legacy n3pp et msp (ESP32 serre et meteo)
+globs: firmwires/n3pp/**/*.cpp,firmwires/n3pp/**/*.h,firmwires/msp/**/*.cpp,firmwires/msp/**/*.h
 alwaysApply: false
 ---
 
-# Firmwares legacy — n3pp4_2 et msp2_5
+# Firmwares legacy — n3pp et msp
 
 Ces deux firmwares partagent une architecture identique mais avec des capteurs et actionneurs differents. Ils utilisent la bibliotheque **libn3_iot** (drivers DHT, analogique, DS18B20, registre de capteurs).
 
@@ -16,7 +16,7 @@ Ces deux firmwares partagent une architecture identique mais avec des capteurs e
 
 - **Secrets externalises**
   - WiFi SSID/password, cle API, identifiants SMTP sont dans `credentials.h` (non versionne) inclus via `credentials.h.example`.
-  - Utiliser `firmwires/credentials.h` (ou `credentials.h.example` comme modele) pour n3pp4_2 et msp2_5.
+  - Utiliser `firmwires/credentials.h` (ou `credentials.h.example` comme modele) pour n3pp et msp.
 
 - **Format de communication**
   - POST : `application/x-www-form-urlencoded` (pas JSON).
@@ -36,5 +36,5 @@ Ces deux firmwares partagent une architecture identique mais avec des capteurs e
   - Toute modification doit maintenir la compatibilite avec les endpoints serveur existants.
 
 - **Differences**
-  - n3pp4_2 : board=3, 4 capteurs sol, pompe arrosage, alertes automatiques.
-  - msp2_5 : board=2, 2 DHT (int/ext), DS18B20, tracker solaire (servos), capteur pluie.
+  - n3pp : board=3, 4 capteurs sol, pompe arrosage, alertes automatiques.
+  - msp : board=2, 2 DHT (int/ext), DS18B20, tracker solaire (servos), capteur pluie.

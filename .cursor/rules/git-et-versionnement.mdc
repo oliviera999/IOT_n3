@@ -58,13 +58,13 @@ alwaysApply: true
 
 - **Messages de commit**
   - En **francais**, concis.
-  - Format : `[composant] description` (ex. `[n3pp4_2] correction lecture DHT`, `[serveur] ajout route msp1`).
+  - Format : `[composant] description` (ex. `[n3pp] correction lecture DHT`, `[serveur] ajout route msp1`).
 
 - **Fichiers a ne JAMAIS commiter**
   - `error_log`, `.pio/`, `credentials.h`, `secrets.h`, `desktop.ini`, `.env` contenant des secrets reels, fichiers temporaires de build.
   - Verifier le `.gitignore` racine et ceux des sous-dossiers.
 
 - **Versionnage des sous-projets**
-  - Firmwares (dans firmwires / n3_firmwires) : ffp5cs dans `include/config.h` + `VERSION.md` ; n3pp4_2, msp2_5, uploadphotosserver_* dans la constante `version` du `main.cpp`.
+  - Firmwares (dans firmwires / n3_firmwires) : ffp5cs dans `include/config.h` + `VERSION.md` ; n3pp, msp, uploadphotosserver_* dans la constante `version` du `main.cpp`.
   - Serveur (n3_serveur) : version dans `VERSION` + `CHANGELOG.md` (Semantic Versioning).
   - **Incrementer la version a chaque modification**, meme mineure.

@@ -161,7 +161,7 @@ Affichage de 6 cartes avec données en temps réel :
 
 ###### En-tête
 - ✅ Titre : "Contrôle MSP – Le potager"
-- ✅ Description : "Activez/désactivez les sorties et configurez les paramètres du firmware msp2_5."
+- ✅ Description : "Activez/désactivez les sorties et configurez les paramètres du firmware msp."
 - ✅ **Callout warning** : "Les commandes agissent sur le système physique. Vérifiez sur site avant d'activer les sorties."
 
 ###### Section Sorties (1 sortie)

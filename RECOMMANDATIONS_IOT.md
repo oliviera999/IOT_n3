@@ -23,8 +23,8 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 
 | Type d’objet | Firmware | Backend | Données / usage |
 |--------------|----------|---------|------------------|
-| Serre / aquaponie (N3PP) | `n3pp4_2` | serveur/n3pp | Température, humidité, pompe, nourrissage → n3ppdatas, n3ppcontrol |
-| Station météo (MSP) | `msp2_5` | serveur/msp1 | DHT, pluie, DS18B20, tracker solaire → msp1datas, msp1control |
+| Serre / aquaponie (N3PP) | `n3pp` | serveur/n3pp | Température, humidité, pompe, nourrissage → n3ppdatas, n3ppcontrol |
+| Station météo (MSP) | `msp` | serveur/msp1 | DHT, pluie, DS18B20, tracker solaire → msp1datas, msp1control |
 | Aquaponie avancée (FFP) | `ffp5cs` | serveur/ffp3 | Données + contrôle via API FFP3 (Slim 4) |
 | Caméras (photos) | uploadphotosserver (unifié, envs msp1, n3pp, ffp3) | msp1gallery, n3ppgallery, ffp3 | Envoi JPEG vers upload.php. **Les noms des firmwares indiquent l’endpoint cible** (msp1gallery, n3ppgallery ou ffp3), pas une association exclusive à MSP ou N3PP : une caméra peut envoyer vers n’importe quelle galerie selon la config. |
 | Robot / démo | ratata, LVGL_Widgets | — | Usage local ou stream direct |
@@ -35,7 +35,7 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 
 ### 2.1 Sécurité et secrets
 
-**Problème :** **n3pp4_2** et **msp2_5** ont déjà externalisé les secrets dans `credentials.h` (avec `credentials.h.example`). Les autres firmwares (uploadphotosserver, LVGL_Widgets) peuvent encore avoir des secrets en dur dans les sources. Risque en cas de partage du code ou dépôt public pour ces derniers.
+**Problème :** **n3pp** et **msp** ont déjà externalisé les secrets dans `credentials.h` (avec `credentials.h.example`). Les autres firmwares (uploadphotosserver, LVGL_Widgets) peuvent encore avoir des secrets en dur dans les sources. Risque en cas de partage du code ou dépôt public pour ces derniers.
 
 **Recommandations :**
 
@@ -67,7 +67,7 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 1. **Registre des appareils**  
    - Tenir un document ou tableau (ex. `docs/inventaire_appareils.md` ou table dédiée côté serveur) listant :
      - Identifiant (ex. `n3pp-board3`, `msp-board2`, `ffp5cs-serre`)
-     - Type de firmware (n3pp4_2, msp2_5, ffp5cs, etc.)
+     - Type de firmware (n3pp, msp, ffp5cs, etc.)
      - Emplacement / pôle dans la salle n³
      - Dernière version firmware connue, dernière donnée reçue
    - Option : page d’administration sur iot.olution.info listant les boards et leur dernier heartbeat.
@@ -76,7 +76,7 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
    - Utiliser un préfixe commun (ex. `n3-`) pour hostname mDNS ou noms dans les logs (ex. `n3-msp-01`, `n3-n3pp-01`) pour faciliter le diagnostic sur le réseau du lycée.
 
 3. **Version et build**  
-   - Afficher la version du firmware dans les logs et, si possible, dans les requêtes POST (paramètre `version` ou équivalent). FFP5CS le fait déjà ; étendre l’idée à n3pp4_2 et msp2_5.
+   - Afficher la version du firmware dans les logs et, si possible, dans les requêtes POST (paramètre `version` ou équivalent). FFP5CS le fait déjà ; étendre l’idée à n3pp et msp.
 
 ---
 
@@ -88,7 +88,7 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
    - Les `platformio.ini` utilisent `upload_port = COM3` en dur.  
    - Utiliser des **variables d’environnement** (ex. `UPLOAD_PORT`, `MONITOR_PORT`) ou un `platformio.ini` local (non versionné) pour éviter d’écraser la config par machine. Documenter dans chaque README.
 
-2. **Partition msp2_5**  
+2. **Partition msp**  
    - Le fichier `min_spiffs.csv` est référencé mais absent. Soit ajouter le fichier de partition dans le dépôt, soit retirer la ligne `board_build.partitions = min_spiffs.csv` pour utiliser la partition par défaut et éviter les confusions.
 
 3. **Environnements PlatformIO**  
@@ -100,14 +100,14 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 
 D’après le [RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md) :
 
-1. **n3pp4_2 – batterie()**  
+1. **n3pp – batterie()**  
    - Remplacer `sampleTotal += analogRead(pontdiv);` par `sampleTotal += samples[sampleIndex];` pour rester cohérent avec la moyenne glissante.
 
-2. **n3pp4_2 – affichage OLED**  
+2. **n3pp – affichage OLED**  
    - Remplacer `display.print(digitalRead(HeureArrosage));` (et idem pour SeuilSec, SeuilPontDiv, WakeUp) par l’affichage direct des variables (ce sont des variables, pas des broches).
 
 3. **Modularisation**  
-   - n3pp4_2 et msp2_5 sont monolithiques (un seul `main.cpp` très long). À moyen terme, s’inspirer de **ffp5cs** (modules capteurs, actionneurs, web, mail) pour faciliter la maintenance et la réutilisation (ex. lib commune WiFi/NTP/OLED).
+   - n3pp et msp sont monolithiques (un seul `main.cpp` très long). À moyen terme, s’inspirer de **ffp5cs** (modules capteurs, actionneurs, web, mail) pour faciliter la maintenance et la réutilisation (ex. lib commune WiFi/NTP/OLED).
 
 ---
 
@@ -215,7 +215,7 @@ Tous les firmwares utilisent le **framework Arduino** (`framework = arduino`). A
 | Firmware                 | Plateforme                         | arduino-esp32 | ESP-IDF sous-jacent |
 |--------------------------|------------------------------------|---------------|---------------------|
 | ffp5cs (wroom-prod, wroom-test, wroom-beta) | pioarduino 55.03.37 | 3.3.7 | 5.5.2 |
-| n3pp4_2, msp2_5, uploadphotosserver | pioarduino 55.03.37 | 3.3.7 | 5.5.2 |
+| n3pp, msp, uploadphotosserver | pioarduino 55.03.37 | 3.3.7 | 5.5.2 |
 | ffp5cs (wroom-s3-*)      | platformio/espressif32@6.13.0     | 2.0.17 (bundlé) | 4.4.7 |
 | ffp5cs test psram s3     | espressif32@6.4.0 (divergence documentée) | 2.0.14 | Plus ancien |
 
@@ -237,15 +237,15 @@ Le firmware **ffp5cs** appelle des APIs ESP-IDF directement (éviter `String` Ar
 
 | Priorité | Thème | Action | État |
 |----------|------|--------|------|
-| Haute | Sécurité | Externaliser WiFi, SMTP et clé API dans un fichier non versionné ; documenter `.env` / `credentials.h.example`. | **Partiel** : fait pour n3pp4_2 et msp2_5 (credentials.h) ; à compléter pour uploadphotosserver_*, LVGL_Widgets si applicable. |
-| Haute | Bugs | Corriger `batterie()` et affichage OLED dans n3pp4_2 (voir RAPPORT_ANALYSE). | **Fait** |
-| Moyenne | Config | Gérer la partition msp2_5 (fichier ou suppression de la ligne) ; utiliser variables d’env pour les ports série. | **Fait** |
+| Haute | Sécurité | Externaliser WiFi, SMTP et clé API dans un fichier non versionné ; documenter `.env` / `credentials.h.example`. | **Partiel** : fait pour n3pp et msp (credentials.h) ; à compléter pour uploadphotosserver_*, LVGL_Widgets si applicable. |
+| Haute | Bugs | Corriger `batterie()` et affichage OLED dans n3pp (voir RAPPORT_ANALYSE). | **Fait** |
+| Moyenne | Config | Gérer la partition msp (fichier ou suppression de la ligne) ; utiliser variables d’env pour les ports série. | **Fait** |
 | Moyenne | Inventaire | Créer un registre des appareils (tableau ou page admin) et un nommage cohérent (n3-*). | **Fait** ([docs/inventaire_appareils.md](docs/inventaire_appareils.md)) |
 | Moyenne | Versionnement | Git à la racine IOT_n3 ; submodules ; tags. | **Fait** |
 | Moyenne | Cycle de livraison | À chaque modification : incrémenter la version, mettre à jour la doc concernée, commit puis push (submodules puis dépôt parent). Voir `.cursor/rules/git-et-versionnement.mdc`. | **Règle** |
 | Moyenne | Doc | Contexte salle n³ et liens n3 / iot dans le README. | **Fait** |
 | Basse | Backend | Documenter les APIs (URLs, formats) ; à long terme, viser une convergence vers une API centralisée (type FFP3). | À faire |
-| Basse | Code | Modulariser n3pp4_2 et msp2_5 ; extraire une lib commune (WiFi, NTP, OLED, HTTP). | À faire |
+| Basse | Code | Modulariser n3pp et msp ; extraire une lib commune (WiFi, NTP, OLED, HTTP). | À faire |
 
 ### Versionnement et submodules
 

@@ -5,7 +5,7 @@
 # unique submodule pointant vers n3_firmwires.
 #
 # PREREQUIS : Le depot n3_firmwires existe sur GitHub et contient deja tout
-# le contenu de firmwires (n3pp4_2, msp2_5, uploadphotosserver*, ffp5cs, ratata,
+# le contenu de firmwires (n3pp, msp, uploadphotosserver*, ffp5cs, ratata,
 # LVGL_Widgets, firmwares.manifest.json, etc.). ffp5cs doit etre un dossier
 # normal dans n3_firmwires (pas un submodule).
 #
@@ -65,7 +65,7 @@ try {
 
     if (-not $Force) {
         Write-Host "Cette operation va SUPPRIMER le dossier firmwires local et le remplacer par le submodule." -ForegroundColor Yellow
-        Write-Host "Verifiez que n3_firmwires sur GitHub contient bien tout le code (n3pp4_2, msp2_5, ffp5cs, etc.)." -ForegroundColor Yellow
+        Write-Host "Verifiez que n3_firmwires sur GitHub contient bien tout le code (n3pp, msp, ffp5cs, etc.)." -ForegroundColor Yellow
         $r = Read-Host "Continuer ? (o/N)"
         if ($r -ne "o" -and $r -ne "O") {
             Write-Host "Annule." -ForegroundColor Gray

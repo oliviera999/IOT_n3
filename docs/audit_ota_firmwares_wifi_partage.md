@@ -4,7 +4,7 @@
 
 ---
 
-## 1. n3pp4_2 (serre / aquaponie)
+## 1. n3pp (serre / aquaponie)
 
 ### Mécanisme OTA
 - **Type** : OTA HTTP distant via la lib **n3_common** (symbole `n3OtaCheck`, `N3OtaConfig`).
@@ -25,7 +25,7 @@
 
 ---
 
-## 2. msp2_5 (station météo)
+## 2. msp (station météo)
 
 ### Mécanisme OTA
 - **Type** : OTA HTTP distant via **n3_common** (`n3OtaCheck`, `N3OtaConfig`).
@@ -86,8 +86,8 @@
 
 | Firmware              | OTA actuel                    | Dépendance WiFi     | Version à jour ? |
 |-----------------------|-------------------------------|----------------------|------------------|
-| n3pp4_2               | HTTP distant (n3_ota)         | Après Wificonnect()  | Non (4.6)         |
-| msp2_5                | HTTP distant (n3_ota)         | Après Wificonnect()  | Non (2.8)         |
+| n3pp               | HTTP distant (n3_ota)         | Après Wificonnect()  | Non (4.6)         |
+| msp                | HTTP distant (n3_ota)         | Après Wificonnect()  | Non (2.8)         |
 | uploadphotosserver    | ArduinoOTA (msp1 seulement)  | WiFi requis          | Non (2.2)         |
 
 **Recommandations :**

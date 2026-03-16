@@ -48,15 +48,15 @@ Regroupe **tous les firmwares** pour cartes ESP32, ESP32-CAM et Arduino UNO. Out
 
 ### 3.2 Projets firmware (détail)
 
-#### A. N3PhasmesProto – `n3pp4_2/`
+#### A. N3PhasmesProto – `n3pp/`
 
 - **Carte :** ESP32 (`esp32dev`)
 - **Rôle :** Contrôle serre / aquaponie
 - **Fonctionnalités :** Température/humidité air (DHT), 4× humidité sol, pompe, luminosité, nourrissage poisson, mails d’alerte, serveur web, NTP, OLED, deep sleep
-- **Fichiers :** `platformio.ini`, `src/main.cpp` (~1300 lignes), `n3pp4_2.ino` (ancien sketch Arduino)
+- **Fichiers :** `platformio.ini`, `src/main.cpp` (~1300 lignes), `n3pp.ino` (ancien sketch Arduino)
 - **Stack :** AsyncTCP, ESPAsyncWebServer, DHT, ESP Mail Client, Arduino_JSON, Adafruit GFX/SSD1306, ESP32Time, Preferences
 
-#### B. MeteoStationPrototype – `msp2_5/`
+#### B. MeteoStationPrototype – `msp/`
 
 - **Carte :** ESP32 (`esp32dev`)
 - **Rôle :** Station météo + tracker solaire
@@ -119,8 +119,8 @@ Un seul firmware **uploadphotosserver** avec trois envs PlatformIO. Les envs ind
 
 | Projet | Carte(s) | Lignes main.cpp (ordre de grandeur) | Modularité |
 |--------|----------|-------------------------------------|------------|
-| n3pp4_2 | ESP32 | ~1300 | Monolithique |
-| msp2_5 | ESP32 | ~1058 | Monolithique |
+| n3pp | ESP32 | ~1300 | Monolithique |
+| msp | ESP32 | ~1058 | Monolithique |
 | uploadphotosserver | ESP32-CAM | variable | Un fichier principal unifié (3 envs) |
 | ratata (par ex.) | UNO / ESP32-CAM | variable (court à ~500) | Un main par exemple |
 | ffp5cs | WROOM / S3 | réparti en plusieurs .cpp | Modulaire |
@@ -221,21 +221,21 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
 ### 5.2 Sécurité (déjà signalée dans RAPPORT_ANALYSE)
 
-- **n3pp4_2** et **msp2_5** : secrets externalisés dans `credentials.h` (non versionné) + `credentials.h.example`. Autres firmwares : à vérifier (LVGL_Widgets a encore une clé en dur).
+- **n3pp** et **msp** : secrets externalisés dans `credentials.h` (non versionné) + `credentials.h.example`. Autres firmwares : à vérifier (LVGL_Widgets a encore une clé en dur).
 
 ### 5.3 Configuration
 
 - Port série **COM3** en dur dans la plupart des `platformio.ini` ; à adapter ou documenter par machine.
-- **msp2_5** : `board_build.partitions = min_spiffs.csv` sans fichier `min_spiffs.csv` dans le dépôt.
+- **msp** : `board_build.partitions = min_spiffs.csv` sans fichier `min_spiffs.csv` dans le dépôt.
 
 ### 5.4 Qualité de code (firmwares)
 
-- **n3pp4_2** : bug dans `batterie()` (`sampleTotal += analogRead(...)` au lieu des `samples[sampleIndex]`), et affichage OLED utilisant `digitalRead()` sur des variables (à corriger en affichage direct des variables).
+- **n3pp** : bug dans `batterie()` (`sampleTotal += analogRead(...)` au lieu des `samples[sampleIndex]`), et affichage OLED utilisant `digitalRead()` sur des variables (à corriger en affichage direct des variables).
 - Plusieurs firmwares **monolithiques** (un seul `main.cpp` très long) ; ffp5cs sert de référence pour une structure modulaire.
 
 ### 5.5 Redondances
 
-- **Duplication** entre n3pp4_2 et msp2_5 (WiFi, NTP, mail, OLED, serveur web) ; RECOMMANDATIONS suggère un dossier `common/` ou lib partagée.
+- **Duplication** entre n3pp et msp (WiFi, NTP, mail, OLED, serveur web) ; RECOMMANDATIONS suggère un dossier `common/` ou lib partagée.
 
 ### 5.6 Nommage et chemins
 
@@ -251,8 +251,8 @@ c:\IOT_n3\
 │   ├── .gitignore
 │   ├── .vscode\settings.json
 │   ├── README.md, RAPPORT_ANALYSE.md, RECOMMANDATIONS.md
-│   ├── n3pp4_2\              # N3PhasmesProto (ESP32 serre/aquaponie)
-│   ├── msp2_5\              # MeteoStationPrototype (ESP32 météo + tracker)
+│   ├── n3pp\              # N3PhasmesProto (ESP32 serre/aquaponie)
+│   ├── msp\              # MeteoStationPrototype (ESP32 météo + tracker)
 │   ├── uploadphotosserver\       # ESP32-CAM unifié (envs msp1, n3pp, ffp3)
 │   ├── ratata\              # Kit ZYC0108-EN (8 env. UNO + ESP32-CAM)
 │   ├── ffp5cs\              # Contrôleur aquaponie (WROOM/S3, modulaire) (dossier ordinaire)
@@ -277,7 +277,7 @@ c:\IOT_n3\
 
 1. **Racine** : le README (`README.md`) décrit le projet et les liens firmware ↔ serveur ; à maintenir à jour.
 2. **Git** : dépôt à la racine ; submodules **serveur** (n3_serveur) et **firmwires** (ffp5cs est un dossier dans firmwires) ; stratégie documentée dans RECOMMANDATIONS_IOT.md.
-3. **Firmwares** : appliquer les corrections et recommandations de `RAPPORT_ANALYSE.md` (bugs n3pp4_2, secrets, partition msp2_5) ; à terme, s’inspirer de ffp5cs pour modulariser n3pp et msp.
+3. **Firmwares** : appliquer les corrections et recommandations de `RAPPORT_ANALYSE.md` (bugs n3pp, secrets, partition msp) ; à terme, s’inspirer de ffp5cs pour modulariser n3pp et msp.
 4. **Serveur** : éviter de versionner `error_log` ; clarifier le rôle des fichiers « old » / « 2 » dans n3pp et les archiver ou supprimer si obsolètes.
 5. **Documentation** : garder le README firmwires à jour (déjà bien détaillé) et faire pointer le README racine vers les différentes parties du projet.
 

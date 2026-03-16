@@ -15,8 +15,8 @@ Les firmwares et le serveur partagent un **contrat d'interface** : endpoints, ch
 
 | Firmware | Dossier firmware | Serveur | Auth |
 |----------|-----------------|---------|------|
-| n3pp4_2 | `firmwires/n3pp4_2/` | `serveur/` (routes N3pp) | Cle API simple |
-| msp2_5 | `firmwires/msp2_5/` | `serveur/` (routes Msp) | Cle API simple |
+| n3pp | `firmwires/n3pp/` | `serveur/` (routes N3pp) | Cle API simple |
+| msp | `firmwires/msp/` | `serveur/` (routes Msp) | Cle API simple |
 | ffp5cs | `firmwires/ffp5cs/` | `serveur/ffp3/` | api_key (actuel) ; HMAC-SHA256 (cible) |
 | ESP32-CAM (x3) | `firmwires/uploadphotosserver_*/` | `serveur/` (GalleryUpload) | Cle API |
 

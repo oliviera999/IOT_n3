@@ -60,7 +60,7 @@ Mettre a jour `docs/inventaire_appareils.md` :
 | Champ | Exemple |
 |-------|---------|
 | Identifiant | `n3-msp-02` |
-| Type de firmware | `msp2_5` |
+| Type de firmware | `msp` |
 | Emplacement | Station meteo — toit |
 | Board/endpoint | `board=2` |
 | Version firmware | `2.5` |

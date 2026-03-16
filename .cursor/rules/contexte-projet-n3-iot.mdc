@@ -25,7 +25,7 @@ alwaysApply: true
   - `docs/` : inventaire des appareils (`inventaire_appareils.md`).
 
 - **Submodules Git**
-  - `firmwires` : depot **n3_firmwires** (tous les firmwares : n3pp4_2, msp2_5, ffp5cs, uploadphotosserver_*, ratata, LVGL_Widgets).
+  - `firmwires` : depot **n3_firmwires** (tous les firmwares : n3pp, msp, ffp5cs, uploadphotosserver_*, ratata, LVGL_Widgets).
   - `serveur` : depot **n3_serveur** (serveur unifie : msp1, n3pp, ffp3, galeries).
   - Ces sous-projets ont leurs propres regles Cursor (`.cursorrules`, `.cursor/rules/`).
 
@@ -38,8 +38,8 @@ alwaysApply: true
   - Registre : `docs/inventaire_appareils.md`.
 
 - **Liens firmware-serveur** (resume)
-  - N3PP (serre) : `n3pp4_2` -> `serveur` (route `/n3pp/...`)
-  - MSP1 (meteo) : `msp2_5` -> `serveur` (route `/msp1/...`)
+  - N3PP (serre) : `n3pp` -> `serveur` (route `/n3pp/...`)
+  - MSP1 (meteo) : `msp` -> `serveur` (route `/msp1/...`)
   - FFP3 (aquaponie avancee) : `ffp5cs` -> `serveur` (routes `/post-data`, `/heartbeat`, etc.)
   - Cameras : `uploadphotosserver_*` -> `serveur` (routes `/msp1gallery/`, `/n3ppgallery/`, `/ffp3/ffp3gallery/`)
 

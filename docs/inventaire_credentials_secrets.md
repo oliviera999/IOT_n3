@@ -10,8 +10,8 @@ Document de référence : emplacements des fichiers contenant identifiants WiFi,
 
 | Fichier | Rôle | Utilisé par |
 |--------|------|-------------|
-| `firmwires/credentials.h.example` | Template WiFi (3 réseaux), SMTP, API_KEY. Copier en `credentials.h` à la **racine de firmwires/** | n3pp4_2, msp2_5 (build_flags `-I../`) |
-| `firmwires/n3pp4_2/credentials.h.example` | Même schéma + commentaire API_KEY attendue (`fdGTMoptd5CD2ert3`). Copier en `credentials.h` **à la racine firmwires/** pour n3pp/msp | n3pp4_2 (inclus via `-I../`) |
+| `firmwires/credentials.h.example` | Template WiFi (3 réseaux), SMTP, API_KEY. Copier en `credentials.h` à la **racine de firmwires/** | n3pp, msp (build_flags `-I../`) |
+| `firmwires/n3pp/credentials.h.example` | Même schéma + commentaire API_KEY attendue (`fdGTMoptd5CD2ert3`). Copier en `credentials.h` **à la racine firmwires/** pour n3pp/msp | n3pp (inclus via `-I../`) |
 | `firmwires/ffp5cs/include/secrets.h.example` | Template WiFi (WIFI_LIST), email (AUTHOR_EMAIL / AUTHOR_PASSWORD). Copier en `include/secrets.h` | ffp5cs (app, wifi_manager, mailer) |
 | `firmwires/uploadphotosserver/include/credentials.h.example` | Template WiFi (WIFI_LIST) pour caméras. Copier en `include/credentials.h` | uploadphotosserver (envs msp1, n3pp, ffp3) |
 
@@ -21,7 +21,7 @@ Document de référence : emplacements des fichiers contenant identifiants WiFi,
 
 | Fichier | Contient |
 |--------|----------|
-| `firmwires/credentials.h` | WiFi (WIFI_SSID1–3, WIFI_PASS1–3), SMTP, API_KEY — pour n3pp4_2 et msp2_5 |
+| `firmwires/credentials.h` | WiFi (WIFI_SSID1–3, WIFI_PASS1–3), SMTP, API_KEY — pour n3pp et msp |
 | `firmwires/ffp5cs/include/secrets.h` | WIFI_LIST[], AUTHOR_EMAIL, AUTHOR_PASSWORD — pour ffp5cs |
 | `firmwires/uploadphotosserver/include/credentials.h` | WIFI_LIST[] — pour le firmware caméra unifié |
 
@@ -68,8 +68,8 @@ Le fichier `serveur/ffp3/.env` existe aussi dans le dépôt (parfois versionné 
 
 | Composant | Fichier credentials / secrets | Template |
 |-----------|-------------------------------|----------|
-| n3pp4_2 | `firmwires/credentials.h` | `firmwires/credentials.h.example` ou `n3pp4_2/credentials.h.example` |
-| msp2_5 | `firmwires/credentials.h` | `firmwires/credentials.h.example` |
+| n3pp | `firmwires/credentials.h` | `firmwires/credentials.h.example` ou `n3pp/credentials.h.example` |
+| msp | `firmwires/credentials.h` | `firmwires/credentials.h.example` |
 | ffp5cs | `firmwires/ffp5cs/include/secrets.h` | `firmwires/ffp5cs/include/secrets.h.example` |
 | uploadphotosserver (msp1, n3pp, ffp3) | `firmwires/uploadphotosserver/include/credentials.h` | `uploadphotosserver/include/credentials.h.example` |
 | Serveur Slim (iot.olution.info) | `serveur/.env` | `serveur/.env.example` |

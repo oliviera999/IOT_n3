@@ -13,14 +13,14 @@ Tous les échanges sont **initiés par l’ESP** ; le serveur ne pousse jamais v
 
 | Initiateur | Firmware | Méthode | Endpoint (chemin) | Authentification | Rôle |
 |------------|----------|---------|-------------------|------------------|------|
-| ESP | n3pp4_2 | POST | `/n3pp/n3ppdatas/post-n3pp-data.php` | `api_key` (corps) | Envoi données serre |
-| ESP | n3pp4_2 | GET | `/n3pp/n3ppcontrol/n3pp-outputs-action.php` | — | Lecture état sorties |
-| ESP | n3pp4_2 | POST | `/n3pp/n3ppcontrol/n3pp-outputs-action.php` | — | Commande sorties |
-| ESP | n3pp4_2 | GET | `/ota/n3pp/metadata.json` (prod) ou `/ota/n3pp-test/metadata.json` (test) | — | OTA (métadonnées + binaire) |
-| ESP | msp2_5 | POST | `/msp1/msp1datas/post-msp1-data.php` | `api_key` (corps) | Envoi données météo |
-| ESP | msp2_5 | GET | `/msp1/msp1control/msp1-outputs-action.php` | — | Lecture état sorties |
-| ESP | msp2_5 | POST | `/msp1/msp1control/msp1-outputs-action.php` | — | Commande sorties |
-| ESP | msp2_5 | GET | `/ota/msp/metadata.json` (prod) ou `/ota/msp-test/metadata.json` (test) | — | OTA |
+| ESP | n3pp | POST | `/n3pp/n3ppdatas/post-n3pp-data.php` | `api_key` (corps) | Envoi données serre |
+| ESP | n3pp | GET | `/n3pp/n3ppcontrol/n3pp-outputs-action.php` | — | Lecture état sorties |
+| ESP | n3pp | POST | `/n3pp/n3ppcontrol/n3pp-outputs-action.php` | — | Commande sorties |
+| ESP | n3pp | GET | `/ota/n3pp/metadata.json` (prod) ou `/ota/n3pp-test/metadata.json` (test) | — | OTA (métadonnées + binaire) |
+| ESP | msp | POST | `/msp1/msp1datas/post-msp1-data.php` | `api_key` (corps) | Envoi données météo |
+| ESP | msp | GET | `/msp1/msp1control/msp1-outputs-action.php` | — | Lecture état sorties |
+| ESP | msp | POST | `/msp1/msp1control/msp1-outputs-action.php` | — | Commande sorties |
+| ESP | msp | GET | `/ota/msp/metadata.json` (prod) ou `/ota/msp-test/metadata.json` (test) | — | OTA |
 | ESP | uploadphotosserver | POST | `/msp1gallery/upload.php` ou `/n3ppgallery/upload.php` ou `/ffp3/ffp3gallery/upload.php` | Aucune | Upload photo |
 | ESP | ffp5cs | POST | `/ffp3/post-data` (ou `-test`, `3`, `3-test` selon profil) | `api_key` (corps) | Envoi données aquaponie |
 | ESP | ffp5cs | POST | `/ffp3/heartbeat` (id.) | `api_key` (corps) | Heartbeat / supervision |
@@ -43,8 +43,8 @@ Variantes d’environnement pour n3pp / msp : URLs test avec préfixes `n3pp-tes
 ```mermaid
 flowchart LR
   subgraph esp [ESP]
-    n3pp[n3pp4_2]
-    msp[msp2_5]
+    n3pp[n3pp]
+    msp[msp]
     cam[uploadphotosserver]
     ffp[ffp5cs]
   end
@@ -88,7 +88,7 @@ flowchart LR
 
 **HTTPS** :  
 - **ffp5cs** : requêtes courantes (post-data, heartbeat, outputs/state) en **HTTP** (`BASE_URL`), OTA en **HTTPS** (`BASE_URL_SECURE`). Documenté dans [audit_firmwares_serveur.md](audit_firmwares_serveur.md).  
-- **n3pp4_2, msp2_5, uploadphotosserver** : URLs en `http://iot.olution.info/...` ou selon déploiement (HTTPS si le site est servi en HTTPS).
+- **n3pp, msp, uploadphotosserver** : URLs en `http://iot.olution.info/...` ou selon déploiement (HTTPS si le site est servi en HTTPS).
 
 ---
 
@@ -97,7 +97,7 @@ flowchart LR
 | Firmware | Timeout HTTP (typique) | Retries | Comportement en échec |
 |----------|------------------------|--------|------------------------|
 | **ffp5cs** | 5 s (POST/heartbeat), 8 s (GET outputs/state) ; OTA 15–20 s | 2 tentatives par requête ; queue NVS pour POST en échec (ré-envoi ultérieur) | Offline-first : continue avec config locale, pas de blocage |
-| **n3pp4_2, msp2_5** | Dépend de la lib HTTP (n3_common) | Selon implémentation n3_common | Pas de détail dans le dépôt (main.cpp, pas de queue persistante décrite dans l’audit) |
+| **n3pp, msp** | Dépend de la lib HTTP (n3_common) | Selon implémentation n3_common | Pas de détail dans le dépôt (main.cpp, pas de queue persistante décrite dans l’audit) |
 | **uploadphotosserver** | Selon config (photo puis envoi) | — | Deep sleep après envoi (n3pp/ffp3) ; boucle sur msp1 |
 
 Références code : [firmwires/ffp5cs/include/config.h](firmwires/ffp5cs/include/config.h) (`NetworkConfig::HTTP_TIMEOUT_MS`, `MIN_DELAY_BETWEEN_REQUESTS_MS`), [firmwires/ffp5cs/src/web_client.cpp](firmwires/ffp5cs/src/web_client.cpp) (MAX_ATTEMPTS, queue NVS), [firmwires/ffp5cs/include/ota_config.h](firmwires/ffp5cs/include/ota_config.h) (OTA timeout).

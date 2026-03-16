@@ -50,7 +50,7 @@ $ErrorActionPreference = "Stop"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $root = (Resolve-Path (Join-Path $scriptDir "..")).Path
 if ((Get-Location).Path -ne $root) { Set-Location $root }
-if (-not (Test-Path "firmwires\n3pp4_2") -and (Test-Path ".gitmodules")) {
+if (-not (Test-Path "firmwires\n3pp") -and (Test-Path ".gitmodules")) {
     $gm = Get-Content ".gitmodules" -Raw
     if ($gm -match 'submodule "firmwires"') {
         Write-Host "Initialisation du submodule firmwires (n3_firmwires)..." -ForegroundColor Gray
@@ -63,7 +63,7 @@ if (-not (Test-Path "firmwires\n3pp4_2") -and (Test-Path ".gitmodules")) {
 # -----------------------------------------------------------------------------
 $TargetConfig = [ordered]@{
     "n3pp" = @{
-        ProjectDir   = "firmwires\n3pp4_2"
+        ProjectDir   = "firmwires\n3pp"
         PioEnv       = "esp32dev"
         OtaDest      = "serveur\ota\n3pp"
         MetadataPath = "serveur\ota\n3pp\metadata.json"
@@ -72,7 +72,7 @@ $TargetConfig = [ordered]@{
         AppMaxSize   = 1966080
     }
     "n3pp-test" = @{
-        ProjectDir   = "firmwires\n3pp4_2"
+        ProjectDir   = "firmwires\n3pp"
         PioEnv       = "esp32dev_test"
         OtaDest      = "serveur\ota\n3pp-test"
         MetadataPath = "serveur\ota\n3pp-test\metadata.json"
@@ -81,7 +81,7 @@ $TargetConfig = [ordered]@{
         AppMaxSize   = 1966080
     }
     "msp" = @{
-        ProjectDir   = "firmwires\msp2_5"
+        ProjectDir   = "firmwires\msp"
         PioEnv       = "esp32dev"
         OtaDest      = "serveur\ota\msp"
         MetadataPath = "serveur\ota\msp\metadata.json"
@@ -90,7 +90,7 @@ $TargetConfig = [ordered]@{
         AppMaxSize   = 1966080
     }
     "msp-test" = @{
-        ProjectDir   = "firmwires\msp2_5"
+        ProjectDir   = "firmwires\msp"
         PioEnv       = "esp32dev_test"
         OtaDest      = "serveur\ota\msp-test"
         MetadataPath = "serveur\ota\msp-test\metadata.json"

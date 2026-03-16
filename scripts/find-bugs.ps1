@@ -19,7 +19,7 @@
     Lance la vérification des pages distantes (check-server-pages.ps1). Nécessite accès réseau.
 
 .PARAMETER Firmwares
-    Compile les firmwares listés (n3pp4_2, msp2_5, ffp5cs) pour détecter les erreurs de build. Plus long.
+    Compile les firmwares listés (n3pp, msp, ffp5cs) pour détecter les erreurs de build. Plus long.
 
 .PARAMETER ReportDir
     Dossier des rapports (pour -Pages). Défaut : scripts/reports.
@@ -88,8 +88,8 @@ if ($Security) {
 
     # Recherche de secrets en dur dans le code source (hors vendor / managed_components)
     $searchDirs = @(
-        (Join-Path $root 'firmwires\n3pp4_2'),
-        (Join-Path $root 'firmwires\msp2_5'),
+        (Join-Path $root 'firmwires\n3pp'),
+        (Join-Path $root 'firmwires\msp'),
         (Join-Path $root 'firmwires\ffp5cs\src'),
         (Join-Path $root 'firmwires\ffp5cs\include'),
         (Join-Path $root 'firmwires\archive\uploadphotosserver_msp1'),
@@ -177,8 +177,8 @@ if ($Firmwares) {
     Write-Host '[4/4] Compilation des firmwares...' -ForegroundColor Yellow
     $firmwiresRoot = Join-Path $root 'firmwires'
     $envs = @(
-        @{ Project = 'n3pp4_2'; Env = 'esp32dev' }
-        @{ Project = 'msp2_5'; Env = 'esp32dev' }
+        @{ Project = 'n3pp'; Env = 'esp32dev' }
+        @{ Project = 'msp'; Env = 'esp32dev' }
         @{ Project = 'ffp5cs'; Env = 'wroom-test' }
     )
     foreach ($e in $envs) {

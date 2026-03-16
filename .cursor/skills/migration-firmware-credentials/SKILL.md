@@ -1,13 +1,13 @@
 ---
 name: migration-firmware-credentials
-description: Moderniser les firmwares legacy du projet n3 (n3pp4_2, msp2_5, ESP32-CAM) en externalisant les secrets dans credentials.h, en ajoutant de la validation capteurs, et en ameliorant la securite. Utiliser quand l'utilisateur veut securiser un firmware, externaliser des credentials, ou moderniser un firmware legacy.
+description: Moderniser les firmwares legacy du projet n3 (n3pp, msp, ESP32-CAM) en externalisant les secrets dans credentials.h, en ajoutant de la validation capteurs, et en ameliorant la securite. Utiliser quand l'utilisateur veut securiser un firmware, externaliser des credentials, ou moderniser un firmware legacy.
 ---
 
 # Migration firmwares legacy — Externalisation des secrets
 
 ## Etat actuel
 
-Les firmwares `n3pp4_2`, `msp2_5` et les 3 `uploadphotosserver_*` ont des secrets codes en dur :
+Les firmwares `n3pp`, `msp` et les 3 `uploadphotosserver_*` ont des secrets codes en dur :
 - WiFi SSID et mot de passe
 - Cle API serveur (`fdGTMoptd5CD2ert3`)
 - Identifiants SMTP (Gmail)
@@ -96,7 +96,7 @@ if (isnan(temp) || temp < -40.0 || temp > 80.0) {
 
 ### Migration vers JSON (a planifier)
 
-Les firmwares n3pp4_2 et msp2_5 utilisent `application/x-www-form-urlencoded`.
+Les firmwares n3pp et msp utilisent `application/x-www-form-urlencoded`.
 La migration vers JSON necessite un plan car le serveur doit etre mis a jour simultanement.
 Ne pas migrer sans coordination (voir skill `contrat-firmware-serveur`).
 

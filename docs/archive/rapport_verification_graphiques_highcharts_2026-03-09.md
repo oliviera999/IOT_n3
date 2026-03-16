@@ -171,7 +171,7 @@
 2. ⚠️ **Page serre** : Nombreuses valeurs à 0 pour TempAir et Humidite
    - Cela indique probablement des périodes où le capteur n'a pas pu lire correctement
    - Les graphiques afficheront des lignes à 0 pour ces périodes
-   - **Recommandation** : Vérifier la connexion du capteur DHT22 sur le firmware n3pp4_2
+   - **Recommandation** : Vérifier la connexion du capteur DHT22 sur le firmware n3pp
 
 3. ⚠️ **Page serre** : Nombreuses valeurs à 1 pour Humid1, Humid2, Humid4
    - Cela peut indiquer des capteurs déconnectés ou des lectures hors plage

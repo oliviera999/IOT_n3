@@ -29,8 +29,8 @@ Chaque firmware qui envoie des données ou est piloté à distance est relié à
 
 | Firmware (dans `firmwires/`) | Carte | Dossier serveur associé | Rôle du serveur |
 |------------------------------|--------|--------------------------|------------------|
-| **[n3pp4_2](firmwires/n3pp4_2/)** — N3PhasmesProto (serre / aquaponie) | ESP32 | **Module N3PP** ([serveur](serveur/README.md)) | Réception des données (`n3ppdatas`), contrôle des sorties (`n3ppcontrol`), galerie photos (`n3ppgallery`) |
-| **[msp2_5](firmwires/msp2_5/)** — MeteoStationPrototype (météo + tracker solaire) | ESP32 | **Module MSP1** ([serveur](serveur/README.md)) | Réception des données (`msp1datas`), contrôle (`msp1control`), galerie (`msp1gallery`) |
+| **[n3pp](firmwires/n3pp/)** — N3PhasmesProto (serre / aquaponie) | ESP32 | **Module N3PP** ([serveur](serveur/README.md)) | Réception des données (`n3ppdatas`), contrôle des sorties (`n3ppcontrol`), galerie photos (`n3ppgallery`) |
+| **[msp](firmwires/msp/)** — MeteoStationPrototype (météo + tracker solaire) | ESP32 | **Module MSP1** ([serveur](serveur/README.md)) | Réception des données (`msp1datas`), contrôle (`msp1control`), galerie (`msp1gallery`) |
 | **[uploadphotosserver](firmwires/uploadphotosserver/)** (unifié, envs msp1/n3pp/ffp3) | ESP32-CAM | **msp1gallery, n3ppgallery, ffp3gallery** | Envoi JPEG vers l’endpoint selon l’env de build. Un seul firmware avec 3 envs PlatformIO. |
 | **[ffp5cs](firmwires/ffp5cs/)** — Contrôleur aquaponie (WROOM/S3) | ESP32 / ESP32-S3 | **[serveur/ffp3](serveur/ffp3/)** | Même plateforme : FFP3 est le backend web (Slim 4) pour les données et le contrôle des ESP FFP5CS |
 | **[ratata](firmwires/ratata/)** — Kit ZYC0108-EN (voiture / robot) | UNO + ESP32-CAM | — | Pas de serveur dédié (démo locale, stream HTTP possible en direct) |
@@ -40,8 +40,8 @@ Chaque firmware qui envoie des données ou est piloté à distance est relié à
 
 En résumé (données et contrôle) :
 
-- **N3PP** (serre/aquaponie) : firmware `n3pp4_2` → **module N3PP** (routes `/n3pp/`, `/serre`)
-- **MSP1** (météo) : firmware `msp2_5` → **module MSP1** (routes `/msp1/`, `/meteo`)
+- **N3PP** (serre/aquaponie) : firmware `n3pp` → **module N3PP** (routes `/n3pp/`, `/serre`)
+- **MSP1** (météo) : firmware `msp` → **module MSP1** (routes `/msp1/`, `/meteo`)
 - **FFP3** (aquaponie avancée) : firmware `ffp5cs` → **serveur/ffp3**
 
 Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’upload indépendants ; les firmwares « uploadphotosserver » sont des variantes configurées pour l’une ou l’autre destination.

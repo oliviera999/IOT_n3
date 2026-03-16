@@ -2,7 +2,7 @@
 
 ## Contrat firmware / serveur
 
-| Élément | Firmware (n3pp4_2) | Serveur |
+| Élément | Firmware (n3pp) | Serveur |
 |--------|---------------------|---------|
 | **URL POST (test)** | `http://iot.olution.info/n3pp-test/n3ppdatas/post-n3pp-data.php` | `POST /n3pp-test/n3ppdatas/post-n3pp-data.php` → `N3ppPostDataController` |
 | **Clé API** | `API_KEY` dans `credentials.h` | `API_KEY` dans `.env` (racine serveur) |
@@ -15,7 +15,7 @@
 1. **Firmware**  
    - Utilise `#include "credentials.h"` et `API_KEY` (pas de clé en dur dans `main.cpp`).  
    - `credentials.h` n’est pas versionné ; le projet partagé a un `firmwires/credentials.h.example` avec `#define API_KEY "VOTRE_CLE_API"`.  
-   - **À faire** : dans `firmwires/n3pp4_2`, s’assurer que `credentials.h` (copie locale ou lien vers le partagé) contient `#define API_KEY "fdGTMoptd5CD2ert3"` pour correspondre au serveur.
+   - **À faire** : dans `firmwires/n3pp`, s’assurer que `credentials.h` (copie locale ou lien vers le partagé) contient `#define API_KEY "fdGTMoptd5CD2ert3"` pour correspondre au serveur.
 
 2. **Serveur**  
    - `N3ppPostDataController` exige `$_ENV['API_KEY']` ; si absent → 500, si différent du POST → 401.  

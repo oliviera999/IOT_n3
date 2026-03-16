@@ -105,8 +105,8 @@ La doc (`QUE_FAIRE_COTE_SERVEUR.md`) signale que les anciens scripts (`cronmsp1.
 
 ## 5. Ce qui est cohérent
 
-- **n3pp4_2** (main.cpp + .ino) : `/n3pp/n3ppdatas/post-n3pp-data.php`, `/n3pp/n3ppcontrol/n3pp-outputs-action.php` → routes présentes dans Slim ✅  
-- **msp2_5** : `/msp1/msp1datas/post-msp1-data.php`, `/msp1/msp1control/msp1-outputs-action.php` → routes présentes ✅  
+- **n3pp** (main.cpp + .ino) : `/n3pp/n3ppdatas/post-n3pp-data.php`, `/n3pp/n3ppcontrol/n3pp-outputs-action.php` → routes présentes dans Slim ✅  
+- **msp** : `/msp1/msp1datas/post-msp1-data.php`, `/msp1/msp1control/msp1-outputs-action.php` → routes présentes ✅  
 - **ffp5cs** (config.h) : `/ffp3/post-data`, `/ffp3/api/outputs/state`, `/ffp3/heartbeat` → OK **à condition** que la réécriture `/ffp3/` → racine soit active (voir 2.1)  
 - **uploadphotosserver_ffp3_1_5_deppsleep** : `/ffp3/ffp3gallery/upload.php` → route enregistrée dans Slim ✅  
 - **MSP/N3PP** : Contrôleurs et repositories (MspPostData, N3ppPostData, MspOutput, N3ppOutput) et tables `msp1Data`, `msp1Outputs`, `n3ppData`, `n3ppOutputs` sont alignés avec les routes et le contrat firmware ✅  

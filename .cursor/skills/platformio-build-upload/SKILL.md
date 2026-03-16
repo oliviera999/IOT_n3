@@ -13,7 +13,7 @@ Chaque sous-dossier contient un `platformio.ini` avec un ou plusieurs environnem
 
 ## Commandes essentielles
 
-Toujours executer depuis le dossier du firmware concerne (ex. `firmwires/msp2_5/`).
+Toujours executer depuis le dossier du firmware concerne (ex. `firmwires/msp/`).
 
 ### Compilation
 
