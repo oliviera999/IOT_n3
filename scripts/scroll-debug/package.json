@@ -1,0 +1,12 @@
+{
+  "name": "iot-scroll-debug",
+  "version": "1.0.0",
+  "description": "Script de scroll et debug des pages IoT (Playwright)",
+  "private": true,
+  "scripts": {
+    "scroll-debug": "node scroll-pages-debug.js"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

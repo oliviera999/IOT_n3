@@ -1,0 +1,370 @@
+<!DOCTYPE HTML>
+<html lang="fr">
+<head>
+    <title>Données station météo - Le potager</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#008B74" />
+        <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="stylesheet" href="/assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="/assets/css/noscript.css" /></noscript>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/assets/css/realtime-styles.css" />
+    <link rel="shortcut icon" type="image/png" href="/assets/logo.png"/>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png" />
+        <link rel="stylesheet" href="/assets/css/common-data.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+        <style>
+        .msp-sheets-section { margin: 20px 0; }
+        .msp-sheets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; max-width: 800px; margin: 0 auto; }
+        .msp-sheet-card { background: #f8f9fa; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; border: 1px solid #e0e0e0; width: 100%; }
+        .msp-sheet-card:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0,139,116,0.2); }
+        .msp-sheet-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 2px solid #008B74; }
+        .msp-sheet-card-header i { font-size: 1.5em; color: #008B74; }
+        .msp-sheet-card-title { font-size: 1.2em; font-weight: bold; color: #2c3e50; margin: 0; }
+        .msp-sheet-card-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1) inset; }
+        .msp-sheet-card-container iframe { width: 100%; height: 400px; border: none; display: block; }
+        @media (max-width: 768px) { .msp-sheets-grid { grid-template-columns: 1fr; } .msp-sheet-card-container iframe { height: 350px; } }
+    </style>
+</head>
+<body class="is-preload">    <div id="page-bg" aria-hidden="true"></div>
+        <div id="wrapper" class="fade-in">
+        <header id="header">
+            <a href="/" class="logo"><img src="/assets/logo.png" alt="n3 iot datas" /><span class="logo-text">IOT</span></a>
+        </header>
+        <nav id="nav">
+    <ul class="links">
+        <li class=""><a href="/">Accueil</a></li>
+        <li class=""><a href="/aquaponie">Aquaponie</a></li>
+        <li class=""><a href="/aquaponie-control">Contrôle</a></li>
+        <li class=""><a href="/tide-stats">Statistiques marées</a></li>
+        <li class="active"><a href="/meteo">Potager (MSP1)</a></li>
+        <li class=""><a href="/serre">Élevage (N3PP)</a></li>
+    </ul>
+</nav>
+        <div id="main">
+                <div class="modern-header">
+    <div class="header-content">
+        <div class="header-title">
+            <i class="fas fa-sun" aria-hidden="true"></i>            Le potager – Station météo
+        </div>
+        <p class="header-subtitle">Supervision des capteurs de la station météo (température, humidité, luminosité, eau, pluie).</p>        <p class="header-synthesis">📊 Synthèse du 05/03/2026 07:25 au 06/03/2026 07:25 — 21 mesures — 1 j, 0 h, 0 min</p>    </div>
+</div>
+
+    <article class="post featured">
+                    <div class="section-header" style="flex-wrap: wrap; gap: 10px;">
+                <i class="fas fa-chart-line"></i>
+                <h3>Dernière mesure</h3>
+            </div>
+            <div class="stats-grid">
+                                                <div class="stat-card temp">
+                    <i class="fas fa-temperature-low stat-card-icon"></i>
+                    <div class="stat-card-label">Temp. air ext.</div>
+                    <div class="stat-card-value"><span data-sensor="TempAirExt" data-decimals="1">12.2</span> <span class="stat-card-unit">°C</span></div>
+                    <div class="stat-card-secondary">Moy: 26.4 | Min: 8.8 | Max: 255.9</div>
+                </div>
+                                                                <div class="stat-card humidity">
+                    <i class="fas fa-cloud stat-card-icon"></i>
+                    <div class="stat-card-label">Humid. air ext.</div>
+                    <div class="stat-card-value"><span data-sensor="HumidAirExt" data-decimals="0">15</span> <span class="stat-card-unit">%</span></div>
+                    <div class="stat-card-secondary">Moy: 24% | Min: 15% | Max: 77%</div>
+                </div>
+                                                <div class="stat-card light">
+                    <i class="fas fa-sun stat-card-icon"></i>
+                    <div class="stat-card-label">Luminosité moy.</div>
+                    <div class="stat-card-value"><span data-sensor="LuminositeMoy" data-decimals="0">139</span></div>
+                    <div class="stat-card-secondary">Moy: 142 | Min: 68 | Max: 182</div>
+                </div>
+                                                <div class="stat-card water">
+                    <i class="fas fa-water stat-card-icon"></i>
+                    <div class="stat-card-label">Temp. eau</div>
+                    <div class="stat-card-value"><span data-sensor="TempEau" data-decimals="1">13.0</span> <span class="stat-card-unit">°C</span></div>
+                    <div class="stat-card-secondary">Moy: 13.5 | Min: 11.0 | Max: 15.0</div>
+                </div>
+                                                <div class="stat-card humidity">
+                    <i class="fas fa-seedling stat-card-icon"></i>
+                    <div class="stat-card-label">Humid. sol</div>
+                    <div class="stat-card-value"><span data-sensor="HumidSol" data-decimals="0">561</span> <span class="stat-card-unit">%</span></div>
+                    <div class="stat-card-secondary">Moy: 529% | Min: 143% | Max: 752%</div>
+                </div>
+                                                <div class="stat-card rain">
+                    <i class="fas fa-cloud-rain stat-card-icon"></i>
+                    <div class="stat-card-label">Pluie</div>
+                    <div class="stat-card-value"><span data-sensor="Pluie" data-decimals="0">1</span></div>
+                    <div class="stat-card-secondary">Moy: 1 | Min: 1 | Max: 1</div>
+                </div>
+                            </div>
+            <p style="font-size:0.9em;color:#7f8c8d;">Capteur : msp1 | Firmware : 2.5</p>        
+                <div class="section-header">
+            <i class="fas fa-chart-area"></i>
+            <h3>Graphiques</h3>
+        </div>
+        <div class="chart-container">
+            <p class="chart-container-title"><i class="fas fa-thermometer-half"></i> Températures &amp; Humidité</p>
+            <div id="chart-temperatures" style="min-height:350px;"></div>
+        </div>
+        <div class="chart-container">
+            <p class="chart-container-title"><i class="fas fa-sun"></i> Luminosité</p>
+            <div id="chart-lights" style="min-height:350px;"></div>
+        </div>
+        <div class="chart-container">
+            <p class="chart-container-title"><i class="fas fa-seedling"></i> Humidité du sol &amp; Eau</p>
+            <div id="chart-niveauxeaux" style="min-height:350px;"></div>
+        </div>
+        <div class="chart-container">
+            <p class="chart-container-title"><i class="fas fa-cog"></i> Autonomie &amp; Système</p>
+            <div id="chart-cycles" style="min-height:300px;"></div>
+        </div>
+        
+        <div class="filter-section">
+            <h3><i class="fas fa-filter"></i> Filtrage des données</h3>
+            <form method="POST" action="/meteo">
+                <input type="hidden" name="_csrf_token" value="a3e7cfdfcce9fccbf8201135a619f46045131cc8f1fe90c19e63ea6b4cba4c39">
+                <div>
+                    <label for="start_datetime">Début</label>
+                    <input type="datetime-local" id="start_datetime" name="start_datetime" value="2026-03-05T07:25">
+                </div>
+                <div>
+                    <label for="end_datetime">Fin</label>
+                    <input type="datetime-local" id="end_datetime" name="end_datetime" value="2026-03-06T07:25">
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Afficher</button>
+                <button type="submit" name="export_csv" value="1" class="btn btn-secondary"><i class="fas fa-download"></i> CSV</button>
+            </form>
+            <div class="quick-filters">
+                <span class="quick-filter-btn" onclick="setPeriod(1,'h')">1h</span>
+                <span class="quick-filter-btn" onclick="setPeriod(3,'h')">3h</span>
+                <span class="quick-filter-btn" onclick="setPeriod(6,'h')">6h</span>
+                <span class="quick-filter-btn" onclick="setPeriod(12,'h')">12h</span>
+                <span class="quick-filter-btn" onclick="setPeriod(1,'d')">1 jour</span>
+                <span class="quick-filter-btn" onclick="setPeriod(7,'d')">1 sem</span>
+                <span class="quick-filter-btn" onclick="setPeriod(30,'d')">1 mois</span>
+            </div>
+            <div class="period-info">
+                <span><i class="fas fa-database"></i> 21 mesures</span>
+                <span><i class="fas fa-clock"></i> 1 j, 0 h, 0 min</span>
+            </div>
+        </div>
+
+        <div class="system-health-panel">
+    <h3><i class="fas fa-heartbeat"></i> État du système</h3>
+    <div class="health-grid">
+                        <div class="health-item">
+                    <div class="health-item-label">Firmware</div>
+                    <div class="health-item-value">v2.5</div>
+                </div>
+                <div class="health-item">
+                    <div class="health-item-label">Serveur</div>
+                    <div class="health-item-value">v5.0.68</div>
+                </div>
+                <div class="health-item">
+                    <div class="health-item-label">Mesures affichées</div>
+                    <div class="health-item-value">21</div>
+                </div>
+                <div class="health-item">
+                    <div class="health-item-label">Environnement</div>
+                    <div class="health-item-value">prod</div>
+                </div>
+                </div>
+</div>
+
+        <div class="section-header">
+            <i class="fas fa-flask"></i>
+            <h3>Mesures manuelles</h3>
+        </div>
+        <div class="msp-sheets-section">
+            <div class="msp-sheets-grid">
+                <div class="msp-sheet-card">
+                    <div class="msp-sheet-card-header">
+                        <i class="fas fa-chart-line"></i>
+                        <h3 class="msp-sheet-card-title">Graphique des mesures</h3>
+                    </div>
+                    <div class="msp-sheet-card-container">
+                        <iframe seamless scrolling="no" loading="lazy"
+                            src="https://docs.google.com/spreadsheets/d/e/2PACX-1vT5i0I15n-Nef5J1LlY-MGYkPNQtmyzJJ08yObEc4dI_YCQrHFyEwxBx6vmwX-6MnqHwHVzDvupD_Qv/pubchart?oid=583144182&amp;format=interactive">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+                <div class="section-header">
+            <i class="fas fa-history"></i>
+            <h3>Historique (21 mesures)</h3>
+        </div>
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th><th>Date</th><th>T°int</th><th>T°ext</th><th>H%int</th><th>H%ext</th><th>Lum.</th><th>T°eau</th><th>H%sol</th><th>Pluie</th>
+                    </tr>
+                </thead>
+                <tbody>
+                                    </tbody>
+            </table>
+        </div>
+            </article>
+        </div>
+            <footer id="footer" style="text-align: center; padding: 1.5rem 2rem; margin-top: 2rem; color: #6c757d; font-size: 0.9em; border-top: 1px solid rgba(0,139,116,0.15); background: rgba(255,255,255,0.92);">
+        <div class="context-badges">
+            <span class="context-badge context-badge-prod"><i class="fas fa-globe"></i> Environnement production</span>
+            <span class="context-badge"><i class="fas fa-database"></i> msp1Data</span>
+            <span class="context-badge"><i class="fas fa-code-branch"></i> v5.0.68</span>
+            <span class="context-badge"><i class="fas fa-microchip"></i> Firmware v2.5</span>        </div>
+        <p style="margin:0;">Station météo (Le potager) | n3 IoT | &copy; 2025 olution</p>
+    </footer>
+    </div>
+
+            <script src="/assets/js/highcharts-defaults.js"></script>
+    <script src="/assets/js/chart-helpers.js"></script>
+    <script>
+    var reading_time = [1772694539000,1772697551000,1772700567000,1772703589000,1772709596000,1772712569000,1772718574000,1772721539000,1772727499000,1772730488000,1772733481000,1772736475000,1772739476000,1772745447000,1772748450000,1772751450000,1772766337000,1772769343000,1772772348000,1772775348000,1772778350000];
+    var TempAirInt = [255.9,10.6,14,18.3,21.5,21,30,21.5,22,19.7,17.4,15.8,null,15.2,14.8,14,12.8,13.4,12.2,13.3,null];
+    var TempAirExt = [8.8,9.8,12.3,16,19.9,18.1,23.6,20.1,18.5,17.3,15.5,14.4,14.5,14.7,14.3,13,11.3,255.9,11.9,12.2,12.2];
+    var HumidAirInt = [58,56,46,15,15,15,15,15,15,15,42,46,49,50,49,47,46,42,42,42,null];
+    var HumidAirExt = [15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,69,77,62,46,15];
+    var LuminositeMoy = [127,139,146,176,182,180,176,169,123,138,68,85,137,137,137,135,159,159,153,115,139];
+    var LuminositeA = [122,136,136,233,259,265,260,255,144,255,101,62,275,279,276,270,248,243,231,94,222];
+    var LuminositeB = [304,301,302,306,307,299,297,289,286,272,173,280,274,270,269,267,289,291,287,288,273];
+    var LuminositeC = [83,120,148,165,164,157,150,134,63,26,0,0,0,0,5,6,100,104,94,81,61];
+    var LuminositeD = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var HumidSol = [143,274,498,721,663,682,651,699,752,532,610,419,464,322,379,425,621,662,560,472,561];
+    var TempEau = [11,11,11.25,11.5,12.75,13,14.25,14.75,15,15,14.75,14.75,14.5,14.5,14.25,14.25,13.5,13.25,13.25,13,13];
+    var Pluie = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+    var PontDiv = [246,368,647,432,0,0,0,0,67,0,203,348,496,522,528,496,496,615,619,559,547];
+    var bootCount = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+    var ServoHB = [40,40,63,40,40,40,46,63,40,40,40,40,40,40,70,69,40,40,70,67,40];
+    var ServoGD = [77,67,77,22,62,79,98,63,123,76,123,111,19,8,23,104,97,86,20,86,73];
+    var resetMode = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+
+        Highcharts.stockChart('chart-temperatures', {
+        rangeSelector: { enabled: false },
+        title: { text: 'Températures & Humidité' },
+        yAxis: [
+            { title: { text: 'Température (°C)' }, opposite: false },
+            { title: { text: 'Humidité (%)' }, opposite: true }
+        ],
+        series: [
+            { name: 'Temp. int.', data: zipSeries(reading_time, TempAirInt), type: 'spline', color: '#e74c3c', yAxis: 0, tooltip: { valueSuffix: ' °C' }},
+            { name: 'Temp. ext.', data: zipSeries(reading_time, TempAirExt), type: 'spline', color: '#c0392b', yAxis: 0, tooltip: { valueSuffix: ' °C' }},
+            { name: 'Humid. int.', data: zipSeries(reading_time, HumidAirInt), type: 'spline', color: '#3498db', yAxis: 1, tooltip: { valueSuffix: ' %' }},
+            { name: 'Humid. ext.', data: zipSeries(reading_time, HumidAirExt), type: 'spline', color: '#2980b9', yAxis: 1, tooltip: { valueSuffix: ' %' }}
+        ],
+        chart: { backgroundColor: 'transparent' },
+        credits: { enabled: false }
+    });
+    Highcharts.stockChart('chart-lights', {
+        rangeSelector: { enabled: false },
+        title: { text: 'Luminosité' },
+        series: [
+            { name: 'Moy.', data: zipSeries(reading_time, LuminositeMoy), type: 'spline', color: '#f39c12', lineWidth: 3 },
+            { name: 'A', data: zipSeries(reading_time, LuminositeA), type: 'spline', color: '#e67e22', dashStyle: 'Dash' },
+            { name: 'B', data: zipSeries(reading_time, LuminositeB), type: 'spline', color: '#d35400', dashStyle: 'Dash' },
+            { name: 'C', data: zipSeries(reading_time, LuminositeC), type: 'spline', color: '#f1c40f', dashStyle: 'Dash' },
+            { name: 'D', data: zipSeries(reading_time, LuminositeD), type: 'spline', color: '#e74c3c', dashStyle: 'Dash' }
+        ],
+        chart: { backgroundColor: 'transparent' },
+        credits: { enabled: false }
+    });
+    Highcharts.stockChart('chart-niveauxeaux', {
+        rangeSelector: { enabled: false },
+        title: { text: 'Humidité du sol & Température eau' },
+        yAxis: [
+            { title: { text: 'Humidité sol / Pluie' }, opposite: false },
+            { title: { text: 'Temp. eau (°C)' }, opposite: true }
+        ],
+        series: [
+            { name: 'Humid. sol', data: zipSeries(reading_time, HumidSol), type: 'areaspline', color: '#27ae60', fillOpacity: 0.15, yAxis: 0 },
+            { name: 'Pluie', data: zipSeries(reading_time, Pluie), type: 'column', color: '#9b59b6', yAxis: 0 },
+            { name: 'Temp. eau', data: zipSeries(reading_time, TempEau), type: 'spline', color: '#008B74', yAxis: 1, tooltip: { valueSuffix: ' °C' }},
+            { name: 'Reset', data: zipSeries(reading_time, resetMode), type: 'column', color: '#bdc3c7', yAxis: 0 }
+        ],
+        chart: { backgroundColor: 'transparent' },
+        credits: { enabled: false }
+    });
+    Highcharts.stockChart('chart-cycles', {
+        rangeSelector: { enabled: false },
+        title: { text: 'Autonomie & Système' },
+        yAxis: [
+            { title: { text: 'Cycles / Servos' }, opposite: false },
+            { title: { text: 'Batterie' }, opposite: true }
+        ],
+        series: [
+            { name: 'bootCount', data: zipSeries(reading_time, bootCount), type: 'spline', color: '#2c3e50', yAxis: 0 },
+            { name: 'PontDiv', data: zipSeries(reading_time, PontDiv), type: 'spline', color: '#e74c3c', yAxis: 1 },
+            { name: 'ServoHB', data: zipSeries(reading_time, ServoHB), type: 'spline', color: '#3498db', yAxis: 0 },
+            { name: 'ServoGD', data: zipSeries(reading_time, ServoGD), type: 'spline', color: '#f39c12', yAxis: 0 }
+        ],
+        chart: { backgroundColor: 'transparent' },
+        credits: { enabled: false }
+    });
+        </script>
+
+    <script src="/assets/js/toast-notifications.js"></script>
+    <script src="/assets/js/chart-updater-generic.js"></script>
+    <script src="/assets/js/realtime-updater.js"></script>
+        <script>
+(function() {
+    window.chartUpdater = new ChartUpdaterGeneric({
+        chartIds: ["chart-temperatures","chart-lights","chart-niveauxeaux","chart-cycles"],
+        debug: true,
+        sensorMap: {
+            "TempAirInt":{"chartId":"chart-temperatures","seriesIndex":0},
+            "TempAirExt":{"chartId":"chart-temperatures","seriesIndex":1},
+            "HumidAirInt":{"chartId":"chart-temperatures","seriesIndex":2},
+            "HumidAirExt":{"chartId":"chart-temperatures","seriesIndex":3},
+            "LuminositeMoy":{"chartId":"chart-lights","seriesIndex":0},
+            "LuminositeA":{"chartId":"chart-lights","seriesIndex":1},
+            "LuminositeB":{"chartId":"chart-lights","seriesIndex":2},
+            "LuminositeC":{"chartId":"chart-lights","seriesIndex":3},
+            "LuminositeD":{"chartId":"chart-lights","seriesIndex":4},
+            "HumidSol":{"chartId":"chart-niveauxeaux","seriesIndex":0},
+            "Pluie":{"chartId":"chart-niveauxeaux","seriesIndex":1},
+            "TempEau":{"chartId":"chart-niveauxeaux","seriesIndex":2},
+            "resetMode":{"chartId":"chart-niveauxeaux","seriesIndex":3},
+            "bootCount":{"chartId":"chart-cycles","seriesIndex":0},
+            "PontDiv":{"chartId":"chart-cycles","seriesIndex":1},
+            "ServoHB":{"chartId":"chart-cycles","seriesIndex":2},
+            "ServoGD":{"chartId":"chart-cycles","seriesIndex":3}
+        }
+    });
+    setTimeout(function() { chartUpdater.init(); }, 150);
+})();
+</script>
+        <script>
+(function() {
+    var apiBase = '/msp1/api/realtime';
+    window.realtimeUpdater = new RealtimeUpdater({
+        apiBasePath: apiBase,
+        pollInterval: 15000,
+        onNewData: function(readings) {
+            if (!readings || readings.length === 0) return;
+            var last = readings[readings.length - 1];
+            var sensors = last.sensors || last;
+            document.querySelectorAll('[data-sensor]').forEach(function(el) {
+                var key = el.getAttribute('data-sensor');
+                var val = sensors[key];
+                if (val === undefined || val === null) return;
+                var dec = el.getAttribute('data-decimals');
+                if (dec !== null) {
+                    var n = parseFloat(val);
+                    el.textContent = !isNaN(n) ? n.toFixed(parseInt(dec, 10) || 0) : val;
+                } else {
+                    el.textContent = val;
+                }
+            });
+        }
+    });
+    realtimeUpdater.start();
+})();
+</script>
+</body>
+</html>
