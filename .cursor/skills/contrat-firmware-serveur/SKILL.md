@@ -17,7 +17,7 @@ Les firmwares et le serveur partagent un **contrat d'interface** : endpoints, ch
 |----------|-----------------|---------|------|
 | n3pp | `firmwires/n3pp/` | `serveur/` (routes N3pp) | Cle API simple |
 | msp | `firmwires/msp/` | `serveur/` (routes Msp) | Cle API simple |
-| ffp5cs | `firmwires/ffp5cs/` | `serveur/ffp3/` | api_key (actuel) ; HMAC-SHA256 (cible) |
+| ffp5cs | `firmwires/ffp5cs/` | serveur unifié (archive `serveur/archives/ffp3/`) | api_key (actuel) ; HMAC-SHA256 (cible) |
 | ESP32-CAM (x3) | `firmwires/uploadphotosserver_*/` | `serveur/` (GalleryUpload) | Cle API |
 
 ## Workflow : modification d'un contrat existant
@@ -46,7 +46,7 @@ Check-list :
 
 ### Etape 4 — Documenter
 
-- Pour FFP3 : mettre a jour la doc dans `serveur/ffp3/docs/`
+- Pour FFP3 : mettre a jour la doc dans `serveur/docs/` ou `serveur/archives/ffp3/docs/`
 - Pour MSP/N3PP : ajouter un commentaire dans le Controller si le contrat evolue
 - Si une constante est partagee, la documenter dans les deux fichiers source
 

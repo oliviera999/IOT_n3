@@ -79,7 +79,7 @@ Les liens de navigation vers MSP1 (Potager) et N3PP (Élevage) utilisent toujour
 ---
 
 ### 3. Templates FFP3 (optionnel)
-**Fichier** : `serveur/ffp3/templates/home.twig`
+**Fichier** : `serveur/archives/ffp3/templates/home.twig`
 
 **Lignes à modifier** :
 - **Ligne 206** : Menu navigation MSP1

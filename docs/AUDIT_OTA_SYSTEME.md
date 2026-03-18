@@ -472,7 +472,7 @@ Add-Content -Path "ota-audit.jsonl" -Value $auditEntry
 | `serveur/ota/n3pp-test/metadata.json`     | Métadonnées OTA n3pp test                 |
 | `serveur/ota/msp/metadata.json`           | Métadonnées OTA msp prod                  |
 | `serveur/ota/cam/metadata.json`           | Métadonnées OTA caméras (3 cibles)        |
-| `serveur/ffp3/ota/metadata.json`          | Métadonnées OTA ffp5cs (HTTPS)            |
+| `serveur/ota/metadata.json`          | Métadonnées OTA ffp5cs (HTTPS)            |
 | `firmwares/n3pp/src/main.cpp`          | Code OTA client n3pp                      |
 | `firmwares/msp/src/main.cpp`           | Code OTA client msp                       |
 | `firmwares/uploadphotosserver/src/main.cpp`| Code OTA client caméras                  |

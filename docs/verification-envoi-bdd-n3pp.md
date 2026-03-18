@@ -19,8 +19,8 @@
 
 2. **Serveur**  
    - `N3ppPostDataController` exige `$_ENV['API_KEY']` ; si absent → 500, si différent du POST → 401.  
-   - Chargement du `.env` : `Env::load()` lit le fichier à la **racine du dépôt serveur** (`serveur/.env`), pas `serveur/ffp3/.env`.  
-   - Un `.env` présent dans le repo a été vu dans `serveur/ffp3/.env` avec `API_KEY=fdGTMoptd5CD2ert3`. En production, le front unique utilise en général un `.env` à la racine de `serveur/` (souvent non versionné).  
+   - Chargement du `.env` : `Env::load()` lit le fichier à la **racine du dépôt serveur** (`serveur/.env`), pas `serveur/archives/ffp3/.env`.  
+   - Un `.env` présent dans le repo a été vu dans `serveur/archives/ffp3/.env` avec `API_KEY=fdGTMoptd5CD2ert3`. En production, le front unique utilise en général un `.env` à la racine de `serveur/` (souvent non versionné).  
    - **À faire** : sur iot.olution.info, vérifier que le `.env` effectivement chargé par l’app (racine `serveur/`) contient `API_KEY=fdGTMoptd5CD2ert3`.
 
 3. **Log moniteur (terminals/69858.txt)**  

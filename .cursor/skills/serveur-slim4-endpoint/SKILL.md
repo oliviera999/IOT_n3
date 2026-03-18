@@ -10,7 +10,7 @@ description: Creer ou modifier des endpoints dans le serveur PHP Slim 4 unifie (
 Le serveur est une application **Slim 4 unifiee** dans `serveur/`.
 
 **Unification** : privilegier les classes abstraites, templates de base (`data_page.twig`, `_control_base.twig`), helpers de routes et services partages pour garder le code serveur le plus unifie possible, sans nuire aux specificites des pages ou des modules (ffp3, msp1, n3pp).
-Exception : `serveur/ffp3/` est un sous-module autonome (sa propre app Slim 4).
+Exception : l’archive FFP3 est dans `serveur/archives/ffp3/` ; le code actif FFP3 est dans le serveur unifié (`serveur/src/`, `serveur/config/`).
 
 ### Serveur principal (serveur/)
 
@@ -30,9 +30,9 @@ serveur/
 └── tests/                    # PHPUnit
 ```
 
-### FFP3 (serveur/ffp3/)
+### FFP3 (serveur unifié + archives)
 
-App autonome avec sa propre structure. Voir `serveur/ffp3/README.md`.
+Code actif dans le serveur unifié (routes, controllers dans `serveur/src/`, `serveur/config/`). Archive et doc dans `serveur/archives/ffp3/` et extrait dans `serveur/analyse-ffp3/`. Voir `serveur/archives/ffp3/README.md`.
 
 ## Creer un nouvel endpoint
 

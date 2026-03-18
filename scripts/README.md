@@ -6,8 +6,8 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 
 | Script | Rôle |
 |--------|------|
-| `publish_ota.ps1` | Compile (optionnel) et publie les firmwares OTA (n3pp, msp, cam-msp1, cam-n3pp, cam-ffp3) vers `serveur/ota/`. |
-| `deploy_ota.ps1` | **Déploiement OTA unifié** : lance `publish_ota.ps1` (racine), et optionnellement la publication FFP5CS. Options : `-Targets`, `-IncludeFfp5cs`, `-Ffp5csOnly`, `-Build`, `-BuildFs`, `-DryRun`, `-SkipCommit`. |
+| `publish_ota.ps1` | Publie vers `serveur/ota/` : n3pp, msp, cam + cibles **ffp5-** (ffp5cs). Ex. `-Targets ffp5-wroom-prod,... -Build`. |
+| `deploy_ota.ps1` | Orchestre `publish_ota.ps1` ; `-IncludeFfp5cs` ajoute les 4 cibles ffp5 ; `-Ffp5csOnly` = ffp5 uniquement. |
 | `publish-cycle.ps1` | Cycle de publication serveur : incrémente VERSION, CHANGELOG, commit, push. Usage : `-Component serveur -Message "description"`. |
 
 ### Déploiement OTA (détail)
@@ -15,8 +15,7 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 - **Cibles racine** (n3pp, msp, cam-*) : `.\scripts\publish_ota.ps1` ou `.\scripts\deploy_ota.ps1`  
   → Binaires vers `serveur/ota/`, metadata SHA-256, signature ECDSA optionnelle. Après push, le CRON serveur déploie ; les ESP récupèrent la mise à jour via l’URL metadata.
 
-- **FFP5CS** (aquaponie) : `.\scripts\deploy_ota.ps1 -IncludeFfp5cs` ou depuis `firmwires/ffp5cs` : `.\scripts\publish_ota.ps1`  
-  → Binaires + LittleFS vers `ffp3/ota/`, metadata compact &lt; 2048 octets. Voir `firmwires/ffp5cs/docs/technical/OTA_PUBLISH.md`.
+- **FFP5CS** : `.\scripts\deploy_ota.ps1 -IncludeFfp5cs -Build` ou `.\scripts\publish_ota.ps1 -Targets ffp5-wroom-prod,... -Build` ; metadata racine `serveur/ota/metadata.json`, URLs **/ota/**. Voir `firmwires/ffp5cs/docs/technical/OTA_PUBLISH.md`.
 
 - **Exemples** :  
   `.\scripts\deploy_ota.ps1 -Build`  
@@ -38,9 +37,9 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 | Script | Rôle |
 |--------|------|
 | `deploy_ota.ps1` | Déploiement OTA : publie les firmwares vers `serveur/ota/` et optionnellement FFP5CS vers `ffp3/ota/`. Voir section « Déploiement OTA » ci-dessus. |
-| `deploy-server.ps1` | Workflow : `git pull` serveur, commit+push serveur (et parent) si modifs, puis `DEPLOY_NOW.sh` dans `serveur/ffp3/`. Options : `-Message "..."`, `-NoPush`. À exécuter depuis la racine IOT_n3. Requiert Git Bash. |
+| `deploy-server.ps1` | Workflow : `git pull` serveur, commit+push serveur (et parent) si modifs, puis `DEPLOY_NOW.sh` dans `serveur/archives/ffp3/` ou `serveur/analyse-ffp3/`. Options : `-Message "..."`, `-NoPush`. À exécuter depuis la racine IOT_n3. Requiert Git Bash. |
 
-**Déploiement distant (FFP3) :** Le script `serveur/ffp3/deploy-server.ps1` effectue un déploiement SSH vers iot.olution.info (git fetch, composer, chmod). À exécuter depuis `serveur/ffp3/`. En production, un CRON fait déjà `git pull` sur n3_serveur ; les scripts permettent un déploiement manuel ou une mise à jour des dépendances (composer, cache).
+**Déploiement distant (FFP3) :** Le script `serveur/archives/ffp3/deploy-server.ps1` effectue un déploiement SSH vers iot.olution.info (git fetch, composer, chmod). À exécuter depuis `serveur/archives/ffp3/`. En production, un CRON fait déjà `git pull` sur n3_serveur ; les scripts permettent un déploiement manuel ou une mise à jour des dépendances (composer, cache).
 
 ## Tests et diagnostic
 

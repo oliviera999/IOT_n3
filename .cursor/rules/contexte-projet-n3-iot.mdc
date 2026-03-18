@@ -21,7 +21,7 @@ alwaysApply: true
 - **Structure du workspace**
   - `firmwires/` : firmwares ESP32, ESP32-CAM, Arduino UNO (PlatformIO).
   - `serveur/` : serveur unifie PHP (Slim 4) — front controller unique gerant ffp3, msp1, n3pp et galeries.
-  - `serveur/site initial/` : **ne pas modifier** — ancienne version des fichiers serveur, conservee pour consultation (reference, comparaison, historique).
+  - `serveur/archives/site-initial/` : **ne pas modifier** — ancienne version des fichiers serveur, conservee pour consultation (reference, comparaison, historique).
   - `docs/` : inventaire des appareils (`inventaire_appareils.md`).
 
 - **Submodules Git**

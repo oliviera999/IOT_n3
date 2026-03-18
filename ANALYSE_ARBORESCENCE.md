@@ -163,7 +163,7 @@ La galerie photos : routes **`/n3ppgallery/`** (voir ci-dessous).
 
 Présence de **error_log** et de fichiers « old » / « 2 » indiquant des évolutions et du legacy.
 
-#### C. FFP3 – `serveur/ffp3/`
+#### C. FFP3 – `serveur/archives/ffp3/`
 
 Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
@@ -189,18 +189,18 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
 - **Fonctionnalités :** ingestion données capteurs (POST avec clé API + HMAC-SHA256), dashboard (Highcharts, CSV), surveillance aquaponie, contrôle GPIO, sync ESP32 ↔ serveur, tâches planifiées (CRON), logging (Monolog).
 
-- **Dépôt Git :** `serveur/ffp3/` est un dossier versionné dans le dépôt **n3_serveur** (ffp3 a été fusionné avec historique via `git subtree add` ; ce n’est plus un sous-dépôt séparé).
+- **Dépôt Git :** `serveur/archives/ffp3/` est un dossier versionné dans le dépôt **n3_serveur** (ffp3 a été fusionné avec historique via `git subtree add` ; ce n’est plus un sous-dépôt séparé).
 
 ### 4.3 Fichiers communs / divers
 
 - **error_log** : présents dans plusieurs sous-dossiers (msp1, n3pp, galeries) – à ne pas versionner en production.
 - **Fichiers « old » / « 2 »** : variantes ou anciennes versions (ex. `n3pp-outputsold.php`, `n3pp-databaseold.php`, `n3pp-outputs2.php`) – à clarifier ou archiver.
 
-### 4.4 Dossier `serveur/site initial/`
+### 4.4 Dossier `serveur/archives/site-initial/`
 
 - **Rôle** : archive d’une ancienne version des fichiers serveur (ex. ffp3_prov4).
 - **Règle** : **ne pas modifier** ce dossier. Il est conservé pour **consultation uniquement** (référence, comparaison avec la version actuelle, historique, dépannage).
-- Les évolutions et corrections se font dans les dossiers actuels du serveur (msp1, n3pp, ffp3, galeries), pas dans `site initial/`.
+- Les évolutions et corrections se font dans les dossiers actuels du serveur (msp1, n3pp, ffp3, galeries), pas dans `archives/site-initial/`.
 
 ### 4.5 Synthèse serveur
 
@@ -208,7 +208,7 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 |--------|------|------|
 | `serveur/public/index.php` | Slim 4 | Front controller unique |
 | Modules msp1, n3pp | Slim 4 | Controllers `src/Controller/Msp/`, `N3pp/` — données, contrôle, galeries |
-| `serveur/ffp3/` | Slim 4 (dossier) | Sous-projet historique, scripts, doc ; code actif dans `serveur/src/` |
+| `serveur/archives/ffp3/` | Slim 4 (dossier) | Sous-projet historique, scripts, doc ; code actif dans `serveur/src/` |
 
 ---
 
@@ -263,10 +263,10 @@ c:\IOT_n3\
     ├── public\index.php     # Front controller Slim 4 unique
     ├── src\Controller\     # Msp, N3pp, Ffp3, Gallery
     ├── config\              # routes_msp1_n3pp.php, routes_helpers.php
-    ├── site initial\        # Archive — consultation uniquement
+    ├── archives\            # site-initial, ffp3 (archives — consultation uniquement)
+    ├── analyse-ffp3\        # Extrait utile FFP3 pour analyse
     ├── msp1gallery\         # Routes /msp1gallery/ (upload photos)
-    ├── n3ppgallery\        # Routes /n3ppgallery/ (upload photos)
-    └── ffp3\                # Sous-projet historique (scripts, doc)
+    └── n3ppgallery\        # Routes /n3ppgallery/ (upload photos)
 ```
 
 *Note :* Le dossier **serveur/** dans IOT_n3 est un clone du dépôt **n3_serveur** (submodule) ; ffp3 n’est plus un sous-dépôt séparé mais un dossier versionné dans n3_serveur.

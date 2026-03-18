@@ -1,6 +1,6 @@
 # Comparaison des champs modifiables – Pages de contrôle n3pp (serre / élevage)
 
-Comparaison entre la page de contrôle du **site initial** (`serveur/site initial/n3pp/n3ppcontrol/`) et celle du **site actuel** (Slim 4, `N3ppOutputController` + template `n3pp_control.twig`).
+Comparaison entre la page de contrôle du **site initial** (`serveur/archives/site-initial/n3pp/n3ppcontrol/`) et celle du **site actuel** (Slim 4, `N3ppOutputController` + template `n3pp_control.twig`).
 
 ---
 
@@ -84,9 +84,9 @@ En résumé : le site actuel offre plus de sorties actionneurs (toutes, pas seul
 ## 4. Fichiers de référence
 
 - **Site initial**  
-  - Page : `serveur/site initial/n3pp/n3ppcontrol/securecontrol/n3pp-outputs.php`  
-  - API : `serveur/site initial/n3pp/n3ppcontrol/n3pp-outputs-action.php`  
-  - BDD : `serveur/site initial/n3pp/n3ppcontrol/n3pp-database.php`  
+  - Page : `serveur/archives/site-initial/n3pp/n3ppcontrol/securecontrol/n3pp-outputs.php`  
+  - API : `serveur/archives/site-initial/n3pp/n3ppcontrol/n3pp-outputs-action.php`  
+  - BDD : `serveur/archives/site-initial/n3pp/n3ppcontrol/n3pp-database.php`  
 
 - **Site actuel**  
   - Template : `serveur/templates/n3pp_control.twig`  

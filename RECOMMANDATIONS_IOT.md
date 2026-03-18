@@ -142,7 +142,7 @@ D’après le [RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md) :
 **Structure actuelle (galeries à la racine de `serveur/`) :**
 - `serveur/msp1gallery/` (upload.php, msp1-gallery.php) → URL `/msp1gallery/upload.php`
 - `serveur/n3ppgallery/` (upload.php, n3pp-gallery.php, triphotos.php) → URL `/n3ppgallery/upload.php`. **triphotos.php** modifie/déplace des fichiers : le protéger en production (cron, token `TRIPHOTOS_SECRET`, ou accès restreint).
-- FFP3 : galerie intégrée dans l’app Slim (routes dans `serveur/ffp3/`).
+- FFP3 : galerie intégrée dans l’app Slim (routes dans le serveur unifié (archive FFP3 dans `serveur/archives/ffp3/`)).
 
 Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_deppsleep** envoient respectivement vers `/msp1gallery/upload.php` et `/n3ppgallery/upload.php`. Vérifier que le serveur web (Apache/Nginx) expose bien ces chemins à la racine du site (ex. `https://iot.olution.info/msp1gallery/`, `https://iot.olution.info/n3ppgallery/`).
 
@@ -258,7 +258,7 @@ Le firmware **ffp5cs** appelle des APIs ESP-IDF directement (éviter `String` Ar
 
 - **Registre central :** le fichier **firmwires/firmwares.manifest.json** recense tous les projets firmware (chemin, carte, environnement PlatformIO, lien serveur, cible OTA). C’est la source de vérité pour lister les firmwares et, à terme, pour faire évoluer les scripts (build, OTA, inventaire).
 - **Liste et versions :** depuis la racine IOT_n3, exécuter `.\scripts\firmwires-list.ps1` pour afficher le tableau des firmwares ; `-WithVersion` ajoute la version extraite du code, `-Json` sortie JSON.
-- **Publication OTA :** `.\scripts\publish_ota.ps1` (n3pp, msp, cam-msp1, cam-n3pp, cam-ffp3) ; ffp5cs utilise son propre script dans `firmwires/ffp5cs/scripts/`. Après publication OTA, committer la référence du sous-module serveur dans le dépôt parent.
+- **Publication OTA :** `.\scripts\publish_ota.ps1` (n3pp, msp, cam + cibles **ffp5-** pour ffp5cs). Tout est versionné dans **serveur/ota/** (dépôt n3_serveur). Le script `firmwires/ffp5cs/scripts/publish_ota.ps1` délègue au script racine (cibles ffp5 uniquement). Après publication, committer la référence du sous-module **serveur** dans le dépôt parent.
 - **Inventaire :** tenir à jour **docs/inventaire_appareils.md** (identifiant n3-*, type de firmware, emplacement, dernière version). La sortie de `firmwires-list.ps1 -WithVersion` peut aider à aligner les versions connues.
 - **Migration déjà en place :** firmwires est le submodule **n3_firmwires**. En cas de clone sans migration effectuée, voir [SUBMODULES_SETUP.md](SUBMODULES_SETUP.md) et `scripts/migrate-firmwires-to-submodule.ps1`.
 
@@ -268,7 +268,7 @@ Le firmware **ffp5cs** appelle des APIs ESP-IDF directement (éviter `String` Ar
 
 - **Présentation salle aérée n³ :** [https://n3.olution.info](https://n3.olution.info)  
 - **Backend IoT :** [https://iot.olution.info](https://iot.olution.info)  
-- **Documentation projet :** [README](README.md), [ANALYSE_ARBORESCENCE](ANALYSE_ARBORESCENCE.md), [docs/inventaire_appareils](docs/inventaire_appareils.md), [firmwires/README](firmwires/README.md), [firmwires/RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md), [serveur/ffp3/README](serveur/ffp3/README.md) (ffp3 fait partie du dépôt n3_serveur).
+- **Documentation projet :** [README](README.md), [ANALYSE_ARBORESCENCE](ANALYSE_ARBORESCENCE.md), [docs/inventaire_appareils](docs/inventaire_appareils.md), [firmwires/README](firmwires/README.md), [firmwires/RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md), [serveur/archives/ffp3/README](serveur/archives/ffp3/README.md) (ffp3 fait partie du dépôt n3_serveur).
 
 ---
 
