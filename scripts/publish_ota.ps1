@@ -19,8 +19,10 @@
 #   cam-msp1  -> serveur/ota/cam/msp1/    (camera meteo, ESP32-CAM)
 #   cam-n3pp  -> serveur/ota/cam/n3pp/    (camera serre, ESP32-CAM)
 #   cam-ffp3  -> serveur/ota/cam/ffp3/    (camera aquaponie, ESP32-CAM)
-#
-# Le firmware ffp5cs conserve son propre script (firmwires/ffp5cs/scripts/publish_ota.ps1).
+#   ffp5-wroom-prod / ffp5-wroom-beta / ffp5-s3-prod / ffp5-s3-test
+#             -> serveur/ota/esp32-wroom/, esp32-wroom-beta/, esp32-s3/, esp32-s3-test/
+#             + serveur/ota/metadata.json (canaux prod/test, MD5 — format ffp5cs)
+#   URLs publiques : https://iot.olution.info/ota/... (firmware ffp5cs OTA_BASE_PATH = /ota/)
 #
 # Prerequis : build deja effectue pour les cibles voulues, ou utiliser -Build.
 # Executer depuis la racine du projet IOT_n3.
@@ -125,6 +127,51 @@ $TargetConfig = [ordered]@{
         MetadataKey  = "ffp3"
         AppMaxSize   = 1966080
     }
+    "ffp5-wroom-prod" = @{
+        Ffp5         = $true
+        ProjectDir   = "firmwires\ffp5cs"
+        PioEnv       = "wroom-prod"
+        Ffp5Subfolder = "esp32-wroom"
+        Ffp5Channel  = "prod"
+        Ffp5MetaKey  = "esp32-wroom"
+        IncludeFsFfp5 = $false
+        AppMaxSize   = 1966080
+        FsMaxSize    = 65536
+    }
+    "ffp5-wroom-beta" = @{
+        Ffp5         = $true
+        ProjectDir   = "firmwires\ffp5cs"
+        PioEnv       = "wroom-beta"
+        Ffp5Subfolder = "esp32-wroom-beta"
+        Ffp5Channel  = "test"
+        Ffp5MetaKey  = "esp32-wroom"
+        # Meme partition OTA sans SPIFFS que wroom-prod (pas de littlefs)
+        IncludeFsFfp5 = $false
+        AppMaxSize   = 1966080
+        FsMaxSize    = 65536
+    }
+    "ffp5-s3-prod" = @{
+        Ffp5         = $true
+        ProjectDir   = "firmwires\ffp5cs"
+        PioEnv       = "wroom-s3-prod"
+        Ffp5Subfolder = "esp32-s3"
+        Ffp5Channel  = "prod"
+        Ffp5MetaKey  = "esp32-s3"
+        IncludeFsFfp5 = $true
+        AppMaxSize   = 7307264
+        FsMaxSize    = 2097152
+    }
+    "ffp5-s3-test" = @{
+        Ffp5         = $true
+        ProjectDir   = "firmwires\ffp5cs"
+        PioEnv       = "wroom-s3-test"
+        Ffp5Subfolder = "esp32-s3-test"
+        Ffp5Channel  = "test"
+        Ffp5MetaKey  = "esp32-s3"
+        IncludeFsFfp5 = $true
+        AppMaxSize   = 7307264
+        FsMaxSize    = 2097152
+    }
 }
 
 # -----------------------------------------------------------------------------
@@ -228,6 +275,18 @@ function Get-FirmwareVersion {
         return $null
     }
 
+    if ($TargetName -like "ffp5-*") {
+        $ch = Join-Path $projectDir "include\config.h"
+        if (-not (Test-Path $ch)) {
+            Write-Host "  Erreur : $ch introuvable" -ForegroundColor Red
+            return $null
+        }
+        $c = Get-Content -Path $ch -Raw
+        if ($c -match 'VERSION\s*=\s*"([^"]+)"') { return $Matches[1] }
+        Write-Host "  Erreur : VERSION introuvable dans config.h (ffp5cs)" -ForegroundColor Red
+        return $null
+    }
+
     return $null
 }
 
@@ -294,12 +353,20 @@ if ($Build) {
         if ($builtEnvs.ContainsKey($key)) { continue }
 
         Write-Host "  Compilation $targetName ($($cfg.ProjectDir) -e $($cfg.PioEnv))..." -ForegroundColor Gray
-        Push-Location $cfg.ProjectDir
+        Push-Location (Join-Path $root $cfg.ProjectDir)
         try {
             pio run -e $cfg.PioEnv
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "Erreur : build $targetName a echoue." -ForegroundColor Red
                 exit 1
+            }
+            if ($cfg.Ffp5 -and $cfg.IncludeFsFfp5) {
+                Write-Host "  Build filesystem ($($cfg.PioEnv))..." -ForegroundColor Gray
+                pio run -e $cfg.PioEnv -t buildfs
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Host "Erreur : buildfs $targetName a echoue." -ForegroundColor Red
+                    exit 1
+                }
             }
         } finally {
             Pop-Location
@@ -316,6 +383,7 @@ if ($Build) {
 Write-Host "=== Publication OTA (HTTPS + SHA-256) ===" -ForegroundColor Cyan
 
 $artifacts = @()
+$ffp5Artifacts = @()
 
 foreach ($targetName in $Targets) {
     $cfg = $TargetConfig[$targetName]
@@ -326,6 +394,74 @@ foreach ($targetName in $Targets) {
 
     Write-Host ""
     Write-Host "--- $targetName ---" -ForegroundColor Cyan
+
+    if ($cfg.Ffp5) {
+        $srcBin = [System.IO.Path]::Combine($root, $cfg.ProjectDir, ".pio", "build", $cfg.PioEnv, "firmware.bin")
+        if (-not (Test-Path $srcBin)) {
+            Write-Host "  Avertissement : $srcBin introuvable. Compilez (-Build) ou excluez cette cible." -ForegroundColor Yellow
+            continue
+        }
+        $version = Get-FirmwareVersion -TargetName $targetName -Config $cfg
+        $vtxt = [System.IO.Path]::Combine($root, $cfg.ProjectDir, ".pio", "build", $cfg.PioEnv, "version.txt")
+        if (Test-Path $vtxt) {
+            $vt = (Get-Content $vtxt -Raw).Trim()
+            if (-not [string]::IsNullOrWhiteSpace($vt)) { $version = $vt }
+        }
+        if (-not $version) {
+            Write-Host "  Avertissement : version introuvable, cible ignoree." -ForegroundColor Yellow
+            continue
+        }
+        Write-Host "  Version : $version (ffp5cs, MD5 OTA)" -ForegroundColor White
+        $subfolder = $cfg.Ffp5Subfolder
+        $destDir = Join-Path $root "serveur\ota\$subfolder"
+        if (-not (Test-Path $destDir)) {
+            New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+        }
+        $destBin = Join-Path $destDir "firmware.bin"
+        Copy-Item -Path $srcBin -Destination $destBin -Force
+        $size = (Get-Item $destBin).Length
+        if (-not $SkipValidate -and $size -gt $cfg.AppMaxSize) {
+            Write-Host "  Erreur : firmware ($size) > partition ($($cfg.AppMaxSize))" -ForegroundColor Red
+            exit 1
+        }
+        $md5 = (Get-FileHash -Path $destBin -Algorithm MD5).Hash.ToLowerInvariant()
+        $OtaBaseUrl = "https://iot.olution.info/ota"
+        $binUrl = "$OtaBaseUrl/$subfolder/firmware.bin"
+        $fsUrl = $null
+        $fsSize = 0
+        $fsMd5 = ""
+        if ($cfg.IncludeFsFfp5) {
+            $fsSrc = [System.IO.Path]::Combine($root, $cfg.ProjectDir, ".pio", "build", $cfg.PioEnv, "littlefs.bin")
+            if (Test-Path $fsSrc) {
+                $fsDest = Join-Path $destDir "littlefs.bin"
+                Copy-Item -Path $fsSrc -Destination $fsDest -Force
+                $fsSize = (Get-Item $fsDest).Length
+                if (-not $SkipValidate -and $fsSize -gt $cfg.FsMaxSize) {
+                    Write-Host "  Erreur : littlefs ($fsSize) > partition ($($cfg.FsMaxSize))" -ForegroundColor Red
+                    exit 1
+                }
+                $fsMd5 = (Get-FileHash -Path $fsDest -Algorithm MD5).Hash.ToLowerInvariant()
+                $fsUrl = "$OtaBaseUrl/$subfolder/littlefs.bin"
+            } else {
+                Write-Host "  Avertissement : littlefs.bin absent (pio run -t buildfs)" -ForegroundColor Yellow
+            }
+        }
+        $ffp5Artifacts += @{
+            TargetName   = $targetName
+            Channel      = $cfg.Ffp5Channel
+            Subfolder    = $subfolder
+            MetadataKey  = $cfg.Ffp5MetaKey
+            Version      = $version
+            BinUrl       = $binUrl
+            Size         = $size
+            Md5          = $md5
+            FsUrl        = $fsUrl
+            FsSize       = $fsSize
+            FsMd5        = $fsMd5
+        }
+        Write-Host "  Copie -> serveur\ota\$subfolder\ (MD5 $md5)" -ForegroundColor Green
+        continue
+    }
 
     # Localiser le firmware.bin compile
     $srcBin = Join-Path $cfg.ProjectDir ".pio\build\$($cfg.PioEnv)\firmware.bin"
@@ -390,7 +526,7 @@ foreach ($targetName in $Targets) {
     }
 }
 
-if ($artifacts.Count -eq 0) {
+if ($artifacts.Count -eq 0 -and $ffp5Artifacts.Count -eq 0) {
     Write-Host ""
     Write-Host "Erreur : aucun binaire publie. Compilez les cibles ou verifiez -Targets." -ForegroundColor Red
     exit 1
@@ -470,6 +606,75 @@ foreach ($metaPath in $metaGroups.Keys) {
     }
 }
 
+if ($ffp5Artifacts.Count -gt 0) {
+    Write-Host ""
+    Write-Host "=== Mise a jour serveur/ota/metadata.json (ffp5cs) ===" -ForegroundColor Cyan
+    $metaPathFfp = Join-Path $root "serveur\ota\metadata.json"
+    $metaF = $null
+    if (Test-Path $metaPathFfp) {
+        try {
+            $metaF = Get-Content -Path $metaPathFfp -Raw -Encoding UTF8 | ConvertFrom-Json
+        } catch {
+            $metaF = [PSCustomObject]@{ channels = [PSCustomObject]@{} }
+        }
+    } else {
+        $metaF = [PSCustomObject]@{ version = ""; bin_url = ""; size = 0; md5 = ""; channels = [PSCustomObject]@{} }
+    }
+    if (-not $metaF.PSObject.Properties["channels"]) {
+        $metaF | Add-Member -NotePropertyName "channels" -NotePropertyValue ([PSCustomObject]@{}) -Force
+    }
+    if (-not $metaF.channels.PSObject.Properties["prod"]) {
+        $metaF.channels | Add-Member -NotePropertyName "prod" -NotePropertyValue ([PSCustomObject]@{}) -Force
+    }
+    if (-not $metaF.channels.PSObject.Properties["test"]) {
+        $metaF.channels | Add-Member -NotePropertyName "test" -NotePropertyValue ([PSCustomObject]@{}) -Force
+    }
+    $prodDefaultEntry = $null
+    foreach ($fa in $ffp5Artifacts) {
+        $ep = @{ version = $fa.Version; bin_url = $fa.BinUrl; size = $fa.Size; md5 = $fa.Md5 }
+        if ($fa.FsUrl) {
+            $ep["filesystem_url"] = $fa.FsUrl
+            $ep["filesystem_size"] = $fa.FsSize
+            $ep["filesystem_md5"] = $fa.FsMd5
+        }
+        $ent = [PSCustomObject]$ep
+        $chObj = $metaF.channels.($fa.Channel)
+        $mk = $fa.MetadataKey
+        if (-not $chObj.PSObject.Properties[$mk]) {
+            $chObj | Add-Member -NotePropertyName $mk -NotePropertyValue $ent -Force
+        } else {
+            $chObj.$mk = $ent
+        }
+        if ($fa.Channel -eq "prod" -and $mk -eq "esp32-wroom") { $prodDefaultEntry = $ent }
+        if ($fa.Channel -eq "prod" -and -not $prodDefaultEntry) { $prodDefaultEntry = $ent }
+    }
+    if ($metaF.channels.prod.PSObject.Properties["default"]) {
+        $metaF.channels.prod.PSObject.Properties.Remove("default")
+    }
+    if ($metaF.channels.test.PSObject.Properties["default"]) {
+        $metaF.channels.test.PSObject.Properties.Remove("default")
+    }
+    if ($prodDefaultEntry) {
+        $metaF.version = $prodDefaultEntry.version
+        $metaF.bin_url = $prodDefaultEntry.bin_url
+        $metaF.size = $prodDefaultEntry.size
+        $metaF.md5 = $prodDefaultEntry.md5
+    } elseif ($ffp5Artifacts.Count -gt 0) {
+        $f0 = $ffp5Artifacts[0]
+        $metaF.version = $f0.Version
+        $metaF.bin_url = $f0.BinUrl
+        $metaF.size = $f0.Size
+        $metaF.md5 = $f0.Md5
+    }
+    $formattedF = $metaF | ConvertTo-Json -Depth 6 -Compress
+    [System.IO.File]::WriteAllText($metaPathFfp, $formattedF, [System.Text.UTF8Encoding]::new($false))
+    $msF = (Get-Item $metaPathFfp).Length
+    Write-Host "  Mis a jour : serveur/ota/metadata.json ($msF bytes)" -ForegroundColor Green
+    if ($msF -gt 2048) {
+        Write-Host "  ATTENTION : metadata > 2048 octets (ffp5cs firmware < 12.25)" -ForegroundColor Yellow
+    }
+}
+
 # -----------------------------------------------------------------------------
 # Log d'audit
 # -----------------------------------------------------------------------------
@@ -481,6 +686,17 @@ foreach ($a in $artifacts) {
         version     = $a.Version
         sha256      = $a.Sha256
         signed      = ($null -ne $a.Signature)
+        dry_run     = $DryRun.IsPresent
+        deployer    = $env:USERNAME
+    } | ConvertTo-Json -Compress
+    Add-Content -Path $auditLog -Value $auditEntry -Encoding UTF8
+}
+foreach ($fa in $ffp5Artifacts) {
+    $auditEntry = [PSCustomObject]@{
+        timestamp   = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+        target      = $fa.TargetName
+        version     = $fa.Version
+        md5_ffp5    = $fa.Md5
         dry_run     = $DryRun.IsPresent
         deployer    = $env:USERNAME
     } | ConvertTo-Json -Compress
@@ -503,6 +719,11 @@ foreach ($a in $artifacts) {
     Write-Host ("{0,-12} {1,-8} {2,10} {3,-8} {4}" -f `
         $a.TargetName, $a.Version, "$($a.Size) o", $signed, $sha256Short) -ForegroundColor White
 }
+foreach ($fa in $ffp5Artifacts) {
+    $md5s = $fa.Md5.Substring(0, 16) + "..."
+    Write-Host ("{0,-12} {1,-8} {2,10} {3,-8} {4}" -f `
+        $fa.TargetName, $fa.Version, "$($fa.Size) o", "md5", $md5s) -ForegroundColor White
+}
 Write-Host ("-" * 80)
 
 # -----------------------------------------------------------------------------
@@ -524,7 +745,10 @@ if ($SkipCommit -or $DryRun) {
 Write-Host ""
 Write-Host "=== Commit serveur ===" -ForegroundColor Cyan
 $serveurCommitted = $false
-$versionList = ($artifacts | ForEach-Object { "$($_.TargetName)=$($_.Version)" }) -join ", "
+$verParts = @()
+if ($artifacts.Count -gt 0) { $verParts += $artifacts | ForEach-Object { "$($_.TargetName)=$($_.Version)" } }
+if ($ffp5Artifacts.Count -gt 0) { $verParts += $ffp5Artifacts | ForEach-Object { "$($_.TargetName)=$($_.Version)" } }
+$versionList = $verParts -join ", "
 Push-Location serveur
 try {
     git add ota/
