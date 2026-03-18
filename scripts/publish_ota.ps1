@@ -564,7 +564,12 @@ if ($serveurCommitted) {
             Write-Host "Erreur : git commit depot parent a echoue." -ForegroundColor Red
             exit 1
         }
-        Write-Host "Commit depot parent reussi (ref serveur mise a jour)." -ForegroundColor Green
+        git push
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Erreur : git push depot parent a echoue." -ForegroundColor Red
+            exit 1
+        }
+        Write-Host "Commit et push depot parent reussis (ref serveur mise a jour)." -ForegroundColor Green
     } else {
         Write-Host "Aucun changement de ref serveur, rien a committer dans le depot parent." -ForegroundColor Gray
     }

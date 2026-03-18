@@ -17,7 +17,9 @@ if (typeof Highcharts !== 'undefined') {
         },
         chart: {
             backgroundColor: 'transparent',
-            style: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }
+            style: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+            marginBottom: 48,
+            spacingBottom: 6
         },
         credits: { enabled: false },
         rangeSelector: { enabled: false },
