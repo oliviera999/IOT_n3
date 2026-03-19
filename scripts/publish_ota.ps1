@@ -49,7 +49,7 @@ $ErrorActionPreference = "Stop"
 # -----------------------------------------------------------------------------
 # Racine IOT_n3 et initialisation submodule firmwires si besoin
 # -----------------------------------------------------------------------------
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Split-Path -Parent $MyInvocation.MyCommand.Path) }
 $root = (Resolve-Path (Join-Path $scriptDir "..")).Path
 if ((Get-Location).Path -ne $root) { Set-Location $root }
 if (-not (Test-Path "firmwires\n3pp") -and (Test-Path ".gitmodules")) {
@@ -355,7 +355,7 @@ if ($Build) {
         Write-Host "  Compilation $targetName ($($cfg.ProjectDir) -e $($cfg.PioEnv))..." -ForegroundColor Gray
         Push-Location (Join-Path $root $cfg.ProjectDir)
         try {
-            pio run -e $cfg.PioEnv
+            if ($cfg.Ffp5) { pio run -e $cfg.PioEnv -j 1 } else { pio run -e $cfg.PioEnv }
             if ($LASTEXITCODE -ne 0) {
                 Write-Host "Erreur : build $targetName a echoue." -ForegroundColor Red
                 exit 1
