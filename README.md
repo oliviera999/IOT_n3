@@ -44,7 +44,7 @@ En résumé (données et contrôle) :
 - **MSP1** (météo) : firmware `msp` → **module MSP1** (routes `/msp1/`, `/meteo`)
 - **FFP3** (aquaponie avancée) : firmware `ffp5cs` → **serveur/ffp3**
 
-Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’upload indépendants ; les firmwares « uploadphotosserver » sont des variantes configurées pour l’une ou l’autre destination.
+Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’upload indépendants ; les firmwares « uploadphotosserver » sont des variantes configurées pour l’une ou l’autre destination. Les uploads caméra envoient le header `X-Api-Key` ; la validation serveur doit être vérifiée/renforcée selon l’endpoint (voir `docs/audit_firmware_camera_2026-03.md`).
 
 ---
 
