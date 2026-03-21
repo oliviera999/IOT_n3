@@ -26,7 +26,7 @@ alwaysApply: true
   - Documenter l'API/endpoint dans la doc du serveur concerne.
 
 - **README des sous-projets**
-  - `firmwires/README.md` : reference pour les firmwares (compilation, cartes, structure, **scripts de monitoring et workflow**). Section « Scripts de monitoring et erase-flash » : reference FFP5CS et scripts racine (monitor_Nmin, erase_flash_monitor, analyze_log_generic).
+  - `firmwires/README.md` : reference pour les firmwares (compilation, cartes, structure, **scripts de monitoring et workflow**). Section « Scripts de monitoring et erase-flash » : reference FFP5CS ; scripts racine multi-projets documentes comme non versionnes pour l instant ; build/redirection Windows (`C:\pio-builds`) et `scripts/clean-firmware-builds.ps1` (racine IOT_n3).
   - `serveur/README.md` : reference pour le serveur unifie (installation, config, architecture, endpoints).
   - Ces README sont la source de verite pour leur perimetre — ne pas les contredire.
 
