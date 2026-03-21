@@ -52,6 +52,15 @@ $ErrorActionPreference = "Stop"
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Split-Path -Parent $MyInvocation.MyCommand.Path) }
 $root = (Resolve-Path (Join-Path $scriptDir "..")).Path
 if ((Get-Location).Path -ne $root) { Set-Location $root }
+
+$pioHelpers = Join-Path $root "firmwires\scripts\Get-PioBuildHelpers.ps1"
+if (Test-Path -LiteralPath $pioHelpers) {
+    . $pioHelpers
+} else {
+    Write-Host "Erreur : $pioHelpers introuvable (submodule firmwires a jour ?)." -ForegroundColor Red
+    exit 1
+}
+
 if (-not (Test-Path "firmwires\n3pp") -and (Test-Path ".gitmodules")) {
     $gm = Get-Content ".gitmodules" -Raw
     if ($gm -match 'submodule "firmwires"') {
@@ -396,14 +405,15 @@ foreach ($targetName in $Targets) {
     Write-Host "--- $targetName ---" -ForegroundColor Cyan
 
     if ($cfg.Ffp5) {
-        $srcBin = [System.IO.Path]::Combine($root, $cfg.ProjectDir, ".pio", "build", $cfg.PioEnv, "firmware.bin")
-        if (-not (Test-Path $srcBin)) {
+        $projAbs = [System.IO.Path]::GetFullPath((Join-Path $root $cfg.ProjectDir))
+        $srcBin = Get-N3PioFirmwareBin -ProjectRoot $projAbs -Environment $cfg.PioEnv
+        if (-not (Test-Path -LiteralPath $srcBin)) {
             Write-Host "  Avertissement : $srcBin introuvable. Compilez (-Build) ou excluez cette cible." -ForegroundColor Yellow
             continue
         }
         $version = Get-FirmwareVersion -TargetName $targetName -Config $cfg
-        $vtxt = [System.IO.Path]::Combine($root, $cfg.ProjectDir, ".pio", "build", $cfg.PioEnv, "version.txt")
-        if (Test-Path $vtxt) {
+        $vtxt = Get-N3PioVersionTxt -ProjectRoot $projAbs -Environment $cfg.PioEnv
+        if (Test-Path -LiteralPath $vtxt) {
             $vt = (Get-Content $vtxt -Raw).Trim()
             if (-not [string]::IsNullOrWhiteSpace($vt)) { $version = $vt }
         }
@@ -431,8 +441,8 @@ foreach ($targetName in $Targets) {
         $fsSize = 0
         $fsMd5 = ""
         if ($cfg.IncludeFsFfp5) {
-            $fsSrc = [System.IO.Path]::Combine($root, $cfg.ProjectDir, ".pio", "build", $cfg.PioEnv, "littlefs.bin")
-            if (Test-Path $fsSrc) {
+            $fsSrc = Get-N3PioLittlefsBin -ProjectRoot $projAbs -Environment $cfg.PioEnv
+            if (Test-Path -LiteralPath $fsSrc) {
                 $fsDest = Join-Path $destDir "littlefs.bin"
                 Copy-Item -Path $fsSrc -Destination $fsDest -Force
                 $fsSize = (Get-Item $fsDest).Length
@@ -463,9 +473,10 @@ foreach ($targetName in $Targets) {
         continue
     }
 
-    # Localiser le firmware.bin compile
-    $srcBin = Join-Path $cfg.ProjectDir ".pio\build\$($cfg.PioEnv)\firmware.bin"
-    if (-not (Test-Path $srcBin)) {
+    # Localiser le firmware.bin compile (redirection C:\pio-builds ou .pio/build)
+    $projAbs = [System.IO.Path]::GetFullPath((Join-Path $root $cfg.ProjectDir))
+    $srcBin = Get-N3PioFirmwareBin -ProjectRoot $projAbs -Environment $cfg.PioEnv
+    if (-not (Test-Path -LiteralPath $srcBin)) {
         Write-Host "  Avertissement : $srcBin introuvable. Compilez d abord ou utilisez -Build." -ForegroundColor Yellow
         continue
     }

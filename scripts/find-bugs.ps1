@@ -48,6 +48,11 @@ $root = if ($PSScriptRoot) {
     (Get-Location).Path
 }
 
+$pioHelpers = Join-Path $root 'firmwires\scripts\Get-PioBuildHelpers.ps1'
+if (Test-Path -LiteralPath $pioHelpers) {
+    . $pioHelpers
+}
+
 $issues = [System.Collections.ArrayList]::new()
 $warnings = [System.Collections.ArrayList]::new()
 $okItems = [System.Collections.ArrayList]::new()
@@ -186,6 +191,9 @@ if ($Firmwares) {
         if (-not (Test-Path $projDir)) {
             Add-Warning "Firmware $($e.Project) non trouve - ignore"
             continue
+        }
+        if (Get-Command Write-N3PioWorkspaceAdvice -ErrorAction SilentlyContinue) {
+            Write-N3PioWorkspaceAdvice -ProjectRoot $projDir
         }
         Push-Location $projDir
         try {
