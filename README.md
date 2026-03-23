@@ -31,7 +31,7 @@ Chaque firmware qui envoie des données ou est piloté à distance est relié à
 |------------------------------|--------|--------------------------|------------------|
 | **[n3pp](firmwires/n3pp/)** — N3PhasmesProto (serre / aquaponie) | ESP32 | **Module N3PP** ([serveur](serveur/README.md)) | Réception des données (`n3ppdatas`), contrôle des sorties (`n3ppcontrol`), galerie photos (`n3ppgallery`) |
 | **[msp](firmwires/msp/)** — MeteoStationPrototype (météo + tracker solaire) | ESP32 | **Module MSP1** ([serveur](serveur/README.md)) | Réception des données (`msp1datas`), contrôle (`msp1control`), galerie (`msp1gallery`) |
-| **[uploadphotosserver](firmwires/uploadphotosserver/)** (unifié, envs msp1/n3pp/ffp3) | ESP32-CAM | **msp1gallery, n3ppgallery, ffp3gallery** | Envoi JPEG vers l’endpoint selon l’env de build. Un seul firmware avec 3 envs PlatformIO. |
+| **[uploadphotosserver](firmwires/uploadphotosserver/)** (unifié, envs msp1/n3pp/ffp3) | ESP32-CAM | **msp1gallery, n3ppgallery, ffp3gallery** | Envoi JPEG vers l’endpoint selon l’env de build + contrôle distant au réveil (GET paramètres depuis `UploadPhoto*Outputs`, POST version firmware). Un seul firmware avec 3 envs PlatformIO. |
 | **[ffp5cs](firmwires/ffp5cs/)** — Contrôleur aquaponie (WROOM/S3) | ESP32 / ESP32-S3 | **Serveur unifié** ([serveur/](serveur/)) | FFP3 : backend web (Slim 4) pour les données et le contrôle des ESP FFP5CS ; archive dans [serveur/archives/ffp3/](serveur/archives/ffp3/) |
 | **[ratata](firmwires/ratata/)** — Kit ZYC0108-EN (voiture / robot) | UNO + ESP32-CAM | — | Pas de serveur dédié (démo locale, stream HTTP possible en direct) |
 | **[LVGL_Widgets](firmwires/LVGL_Widgets/)** — Interface écran tactile | ESP32-S3 | — | Pas de serveur dédié |
