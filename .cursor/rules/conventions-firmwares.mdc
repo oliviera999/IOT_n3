@@ -44,10 +44,11 @@ alwaysApply: false
 
 - **OTA et version**
   - Incrementer la version a chaque modification du firmware.
-  - Lors de la publication OTA : mettre a jour le metadata.json correspondant (scripts publish_ota extraient la version du code ; synchroniser si derive). Voir `firmwires/docs/WIFI_OTA_REFERENCE.md`.
+  - Lors de la publication OTA : mettre a jour le metadata.json correspondant (scripts publish_ota extraient la version du code ; synchroniser si derive). Voir `scripts/publish_ota.ps1` (racine IOT_n3) et `firmwires/ffp5cs/docs/technical/OTA_PUBLISH.md`.
 
 - **Workflow de validation et scripts**
   - Pour un workflow complet (erase, flash, monitor N min, analyse du log), s'inspirer de **ffp5cs** : script `ffp5cs/erase_flash_fs_monitor_5min_analyze.ps1`, puis `analyze_log.ps1` / `analyze_log_exhaustive.ps1`. Voir `firmwires/README.md` section « Scripts de monitoring et erase-flash ».
+  - Pour un diagnostic crash/reboot long, utiliser `ffp5cs/monitor_until_crash.ps1` (wrapper PowerShell de `tools/monitor/monitor_until_crash.py`).
   - **ffp5cs** : utiliser les scripts dans `ffp5cs/` (workflow, monitor_5min, analyse, rapport diagnostic). Regles cœur dans `ffp5cs/.cursor/rules/` (offline-first, robustesse, pas de blocage > 3s, verification apres modification).
   - **Autres firmwares** (n3pp, msp, uploadphotosserver) : scripts racine multi-projets prevus mais **non versionnes pour l instant** ; utiliser `pio run -t upload` / `pio device monitor` ou calquer le workflow **ffp5cs** (`erase_flash_fs_monitor_5min_analyze.ps1`, `monitor_5min.ps1`, analyses dans `ffp5cs/logs/`).
   - Bugs complexes (WDT, heap, reseau) : approche **debug systematique** (hypotheses, verification une par une, correction, rejouer scenario + monitor + analyse de log).

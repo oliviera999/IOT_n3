@@ -15,6 +15,7 @@ alwaysApply: false
 
 - **Monitoring seul**
   - **ffp5cs** : `ffp5cs/monitor_5min.ps1` (duree, port, env). Logs et analyses dans le **dossier dédié** `ffp5cs/logs/` (plus à la racine du firmware).
+  - **ffp5cs crash/reboot** : `ffp5cs/monitor_until_crash.ps1` pour capturer un reboot/panic puis générer le rapport d'analyse.
   - **Autres projets** : `pio device monitor -e <env>` depuis le dossier du firmware.
 
 - **Analyse des logs**
