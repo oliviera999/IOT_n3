@@ -5,7 +5,7 @@
 # metadata.json, puis commit + push dans le depot serveur (sous-module).
 #
 # Securite Phase 1 :
-#   - URLs HTTPS
+#   - URLs OTA selon compatibilite firmware (HTTP pour firmwares legacy n3pp/msp/cam, HTTPS pour ffp5cs)
 #   - Hash SHA-256 (remplace MD5)
 #   - Signature ECDSA P-256 du binaire (optionnel, active via -SignKey)
 #   - Champ min_version pour protection anti-downgrade
@@ -22,7 +22,9 @@
 #   ffp5-wroom-prod / ffp5-wroom-beta / ffp5-s3-prod / ffp5-s3-test
 #             -> serveur/ota/esp32-wroom/, esp32-wroom-beta/, esp32-s3/, esp32-s3-test/
 #             + serveur/ota/metadata.json (canaux prod/test, MD5 — format ffp5cs)
-#   URLs publiques : https://iot.olution.info/ota/... (firmware ffp5cs OTA_BASE_PATH = /ota/)
+#   URLs publiques :
+#     - n3pp/msp/cam : http://iot.olution.info/ota/... (compatibilite n3_ota legacy)
+#     - ffp5cs       : https://iot.olution.info/ota/... (OTA_BASE_PATH = /ota/)
 #
 # Prerequis : build deja effectue pour les cibles voulues, ou utiliser -Build.
 # Executer depuis la racine du projet IOT_n3.
@@ -78,7 +80,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "esp32dev"
         OtaDest      = "serveur\ota\n3pp"
         MetadataPath = "serveur\ota\n3pp\metadata.json"
-        OtaUrl       = "https://iot.olution.info/ota/n3pp/firmware.bin"
+        OtaUrl       = "http://iot.olution.info/ota/n3pp/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -87,7 +89,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "esp32dev_test"
         OtaDest      = "serveur\ota\n3pp-test"
         MetadataPath = "serveur\ota\n3pp-test\metadata.json"
-        OtaUrl       = "https://iot.olution.info/ota/n3pp-test/firmware.bin"
+        OtaUrl       = "http://iot.olution.info/ota/n3pp-test/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -96,7 +98,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "esp32dev"
         OtaDest      = "serveur\ota\msp"
         MetadataPath = "serveur\ota\msp\metadata.json"
-        OtaUrl       = "https://iot.olution.info/ota/msp/firmware.bin"
+        OtaUrl       = "http://iot.olution.info/ota/msp/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -105,7 +107,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "esp32dev_test"
         OtaDest      = "serveur\ota\msp-test"
         MetadataPath = "serveur\ota\msp-test\metadata.json"
-        OtaUrl       = "https://iot.olution.info/ota/msp-test/firmware.bin"
+        OtaUrl       = "http://iot.olution.info/ota/msp-test/firmware.bin"
         MetadataKey  = $null
         AppMaxSize   = 1966080
     }
@@ -114,7 +116,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "msp1"
         OtaDest      = "serveur\ota\cam\msp1"
         MetadataPath = "serveur\ota\cam\metadata.json"
-        OtaUrl       = "https://iot.olution.info/ota/cam/msp1/firmware.bin"
+        OtaUrl       = "http://iot.olution.info/ota/cam/msp1/firmware.bin"
         MetadataKey  = "msp1"
         AppMaxSize   = 1966080
     }
@@ -123,7 +125,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "n3pp"
         OtaDest      = "serveur\ota\cam\n3pp"
         MetadataPath = "serveur\ota\cam\metadata.json"
-        OtaUrl       = "https://iot.olution.info/ota/cam/n3pp/firmware.bin"
+        OtaUrl       = "http://iot.olution.info/ota/cam/n3pp/firmware.bin"
         MetadataKey  = "n3pp"
         AppMaxSize   = 1966080
     }
@@ -132,7 +134,7 @@ $TargetConfig = [ordered]@{
         PioEnv       = "ffp3"
         OtaDest      = "serveur\ota\cam\ffp3"
         MetadataPath = "serveur\ota\cam\metadata.json"
-        OtaUrl       = "https://iot.olution.info/ota/cam/ffp3/firmware.bin"
+        OtaUrl       = "http://iot.olution.info/ota/cam/ffp3/firmware.bin"
         MetadataKey  = "ffp3"
         AppMaxSize   = 1966080
     }
@@ -389,7 +391,7 @@ if ($Build) {
 # -----------------------------------------------------------------------------
 # Publication : copie des binaires + calcul SHA-256 + signature ECDSA
 # -----------------------------------------------------------------------------
-Write-Host "=== Publication OTA (HTTPS + SHA-256) ===" -ForegroundColor Cyan
+Write-Host "=== Publication OTA (HTTP/HTTPS + SHA-256) ===" -ForegroundColor Cyan
 
 $artifacts = @()
 $ffp5Artifacts = @()
@@ -547,7 +549,7 @@ if ($artifacts.Count -eq 0 -and $ffp5Artifacts.Count -eq 0) {
 # Mise a jour des metadata.json
 # -----------------------------------------------------------------------------
 Write-Host ""
-Write-Host "=== Mise a jour metadata (HTTPS + SHA-256 + min_version) ===" -ForegroundColor Cyan
+Write-Host "=== Mise a jour metadata (URL OTA + SHA-256 + min_version) ===" -ForegroundColor Cyan
 
 # Regrouper les artifacts par fichier metadata (les 3 cam partagent le meme)
 $metaGroups = @{}
