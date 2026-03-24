@@ -112,8 +112,10 @@ if ($Component -eq 'serveur') {
 ---
 
 "@
-    $repl = '$1' + $newBlock + '$2'
-    $changelogContent = [regex]::Replace($changelogContent, '(\r?\n---\r?\n\r?\n)(## \[)', $repl, 1)
+    # Inserer la nouvelle entree avant la premiere section versionnee "## [x.y.z]".
+    # IMPORTANT: utiliser un objet Regex + count=1 pour eviter toute duplication.
+    $sectionRegex = [regex]::new('(?m)^(## \[)')
+    $changelogContent = $sectionRegex.Replace($changelogContent, $newBlock + '$1', 1)
     Set-Content -Path $changelogFile -Value $changelogContent -NoNewline
 
     Push-Location $serveurDir
