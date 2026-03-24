@@ -45,3 +45,8 @@
 {"timestamp":"2026-03-24T13:21:45Z","target":"ffp5-wroom-prod","version":"13.31","md5_ffp5":"9f9c3a83107fc75e8302433a20409c3e","dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-03-24T13:26:09Z","target":"msp","version":"2.33","sha256":"a0b07dc7f7c356c0010953bcbee03ff2eecd4429b293ba3e791233b329db9303","signed":true,"dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-03-24T13:27:24Z","target":"ffp5-wroom-prod","version":"13.34","md5_ffp5":"ee56202b3f7643f06c2c275697cfc617","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-03-24T13:47:41Z","target":"msp","version":"2.35","sha256":"1735641d8c284d9ee3197264ed8dc8d994aefcd7a2b6dbb17e7a6df9b191d756","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-03-24T13:52:50Z","target":"n3pp","version":"4.34","sha256":"6f73efa2a9517bb0bf18f00f6acb2ba0f03143f29c9a7518cbfb06966400e710","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-03-24T14:10:29Z","target":"msp","version":"2.36","sha256":"9e85dfc10ee705931f642fe412f52ef6f7d79740218acbd4973139fb401abcfd","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-03-24T14:11:24Z","target":"ffp5-wroom-beta","version":"13.35","md5_ffp5":"5875851504abc67c0cd0ffa8e9cda8b6","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-03-24T14:11:34Z","target":"ffp5-wroom-prod","version":"13.35","md5_ffp5":"d944e6186f950e05b26115af28bfeaa4","dry_run":false,"deployer":"olivi"}
