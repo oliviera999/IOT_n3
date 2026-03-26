@@ -1,0 +1,20 @@
+{
+  "name": "browser-audit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "audit:charts": "node check-charts.js",
+    "audit:charts:prod": "node check-charts.js --baseUrl https://iot.olution.info"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "playwright": "^1.58.2"
+  },
+  "dependencies": {
+    "highcharts": "^12.5.0"
+  }
+}
