@@ -9,10 +9,17 @@ description: Ecrire et executer les tests PHPUnit du serveur PHP IoT n3. Utilise
 
 ```bash
 cd serveur
+# Option recommandee (stack Docker locale)
+powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action up
+powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action test
+
+# Option hors Docker
 php vendor/bin/phpunit
 # ou via le script wrapper
 php tools/run-phpunit.php
 ```
+
+`phpunit.xml` est aligne avec le schema PHPUnit 10.5+ ; en cas de warning de schema deprecie, executer `vendor/bin/phpunit --migrate-configuration`.
 
 ## Structure des tests
 
@@ -130,5 +137,6 @@ En plus de PHPUnit, le dossier `serveur/tools/` contient des scripts utiles :
 - `check_tables_server.php` — verifie les tables BDD
 - `diagnostic_esp32.php` — diagnostic de connectivite firmware
 - `diagnostic_500_errors.php` — analyse des erreurs HTTP 500
+- `local-smoke-test.ps1` — validation HTTP/API/upload locale (orchestree par `local-docker.ps1 -Action smoke`)
 
 Ces scripts ne sont pas des tests unitaires mais des outils de diagnostic a lancer manuellement.

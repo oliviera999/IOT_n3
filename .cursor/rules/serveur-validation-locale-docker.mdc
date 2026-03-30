@@ -1,0 +1,35 @@
+---
+description: Validation locale serveur via stack Docker (app, db, phpMyAdmin)
+globs: serveur/**
+alwaysApply: false
+---
+
+# Validation locale serveur (Docker)
+
+- Pour toute modification serveur touchant routes, BDD, auth, galeries ou tests, privilegier la stack Docker locale de `serveur/`.
+
+- **Prerequis** :
+  - Docker Desktop demarre (si besoin : `docker desktop start`).
+
+- **Workflow recommande** (depuis `serveur/`) :
+  - `powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action up`
+  - `powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action smoke`
+  - `powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action test`
+  - Actions utiles : `ps`, `logs`, `shell`, `restart`, `down`.
+
+- **URLs locales de reference** :
+  - app : `http://127.0.0.1:8082`
+  - phpMyAdmin : `http://127.0.0.1:8083`
+  - MySQL hote : `127.0.0.1:3307`
+
+- **Schema SQL d'init modifie** (`serveur/docker/mysql/init/`) :
+  - si les changements ne sont pas rejoues, reconstruire avec reset de volume (`down -v` puis `up`) selon la procedure documentee.
+
+- **Secrets** :
+  - `.env.docker.example` est un modele local de dev.
+  - Ne jamais y mettre de secrets reels (alignement avec `securite-et-secrets.mdc`).
+
+- **Cache DI** :
+  - en Docker local, le script d'entree nettoie `var/cache/di` au demarrage pour eviter les artefacts de cache entre host Windows et conteneur Linux.
+
+- Pour les details de commandes et cas limites, se referer a `serveur/README.md` (section **Test local complet (Docker)**).

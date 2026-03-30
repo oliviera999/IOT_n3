@@ -68,6 +68,7 @@ Verifier dans les logs firmware :
 **Code 500** :
 - Erreur cote serveur (BDD, config, exception PHP)
 - Consulter le **cronlog production** : https://iot.olution.info/public/cronlog.txt — chercher la reference d'erreur (ex. `[bb3262da436c]`) si l'utilisateur l'a fournie, ou les dernieres lignes `[ERROR] Exception non geree` / `Erreur insertion`. Voir `serveur/docs/DEBUG_ERREURS_SERVEUR.md` et la regle `debug-serveur.mdc`.
+- Pour reproduire et valider cote serveur en local avec BDD reelle, utiliser la stack Docker du serveur (`serveur/tools/local-docker.ps1`, actions `up`, `smoke`, `test`).
 
 ### 4. Couche applicative / contrat
 

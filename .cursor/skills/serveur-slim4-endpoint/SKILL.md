@@ -143,6 +143,19 @@ curl -X POST http://localhost:8080/mon-endpoint \
   -d '{"api_key":"test","field1":"value1"}'
 ```
 
+## Validation locale recommandee (Docker)
+
+Apres ajout/modification d'endpoint, de payload JSON, d'auth ou de logique BDD :
+
+```bash
+cd serveur
+powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action up
+powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action smoke
+powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action test
+```
+
+Le detail du workflow local est documente dans `serveur/README.md` (section Docker) et dans la regle `.cursor/rules/serveur-validation-locale-docker.mdc`.
+
 ## Checklist nouvel endpoint
 
 - [ ] Controller cree dans le bon namespace

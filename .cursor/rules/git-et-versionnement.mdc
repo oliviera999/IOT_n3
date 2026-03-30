@@ -21,8 +21,9 @@ alwaysApply: true
        - Serveur : `serveur/VERSION`, `serveur/CHANGELOG.md`, `README.md` racine si le contrat change.
        - Transversal : `RECOMMANDATIONS_IOT.md`, `docs/inventaire_appareils.md` si un appareil ou endpoint est ajoute/modifie.
     3. **Tester localement avant de deployer** :
-       - Pour toute modification du composant `serveur`, lancer un test via le serveur local PHP (`php -S`) avant commit/push/deploiement.
-       - Verifier au minimum les routes/pages impactees, le chargement des assets (`/assets/css/main.css`, JS, images) et l'absence d'erreur fatale.
+       - Pour toute modification du composant `serveur` touchant BDD, routes de donnees, auth, galeries ou contrat API (`post-data`, `heartbeat`, endpoints upload), **privilegier la stack Docker locale** (`serveur/tools/local-docker.ps1`) : `up` -> `smoke` -> `test`.
+       - Le test via serveur local PHP (`php -S`) reste autorise pour un smoke UI rapide (routage/templates/assets), mais il n'est pas suffisant pour valider les flux MySQL/API complets.
+       - Verifier au minimum les routes/pages impactees, le chargement des assets (`/assets/css/main.css`, JS, images), l'absence d'erreur fatale et l'execution des tests pertinents.
        - Ne pas deployer le serveur sans avoir valide ce test local, sauf impossibilite explicite documentee a l'utilisateur.
     4. **Commiter** dans le depot du composant (submodule ou racine) avec un message au format `[composant] description`.
     5. **Commiter la reference du submodule** dans le depot parent IOT_n3 si un submodule a ete modifie.
@@ -61,7 +62,7 @@ alwaysApply: true
   - Format : `[composant] description` (ex. `[n3pp] correction lecture DHT`, `[serveur] ajout route msp1`).
 
 - **Fichiers a ne JAMAIS commiter**
-  - `error_log`, `.pio/`, `credentials.h`, `secrets.h`, `desktop.ini`, `.env` contenant des secrets reels, fichiers temporaires de build.
+  - `error_log`, `.pio/`, `credentials.h`, `secrets.h`, `desktop.ini`, `.env` contenant des secrets reels, `.phpunit.cache/`, fichiers temporaires de build.
   - Verifier le `.gitignore` racine et ceux des sous-dossiers.
 
 - **Versionnage des sous-projets**
