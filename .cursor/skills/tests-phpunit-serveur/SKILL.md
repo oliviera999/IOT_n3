@@ -11,6 +11,7 @@ description: Ecrire et executer les tests PHPUnit du serveur PHP IoT n3. Utilise
 cd serveur
 # Option recommandee (stack Docker locale)
 powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action up
+powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action smoke   # optionnel, HTTP/API
 powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action test
 
 # Option hors Docker
@@ -25,6 +26,12 @@ php tools/run-phpunit.php
 
 ```
 serveur/tests/
+├── AssetWhitelistCoherenceTest.php      # cohérence whitelist assets
+├── RoutesConfigSecurityTest.php         # chemins publics vs routes sensibles
+├── TwigPartialsCoherenceTest.php        # partials Twig référencés
+├── Controller/
+│   ├── AbstractPostDataControllerTest.php
+│   └── AuthControllerRedirectTest.php
 ├── Middleware/
 │   └── EnvironmentMiddlewareTest.php
 ├── Repository/
@@ -43,7 +50,7 @@ serveur/tests/
     └── SystemHealthServiceTest.php
 ```
 
-Namespace : `Tests\` (PSR-4, defini dans `composer.json` → `autoload-dev`).
+Namespace : `Tests\` (PSR-4, defini dans `composer.json` → `autoload-dev`). La suite compte plusieurs dizaines de cas (ordre de grandeur **~67 tests** ; voir sortie PHPUnit).
 
 ## Ecrire un nouveau test
 
@@ -107,11 +114,12 @@ $repository = new MonRepository($pdo);
 
 | Zone | Couverture actuelle | Priorite |
 |------|-------------------|----------|
-| Services | Bonne (8 tests) | Maintenir |
-| Security | Correcte (CSRF, signature) | Ajouter auth |
-| Repositories | Faible (1 test) | Augmenter |
-| Controllers | Aucun test | Haute — ajouter les cas critiques |
-| Middleware | 1 test (environment) | Ajouter auth middleware |
+| Services | Bonne (8 fichiers de test) | Maintenir |
+| Security | Correcte (CSRF, signature) | Renforcer si nouveaux flux sensibles |
+| Config / cohérence | `RoutesConfigSecurityTest`, `TwigPartialsCoherenceTest`, `AssetWhitelistCoherenceTest` | Maintenir |
+| Repositories | Faible (1 fichier) | Augmenter |
+| Controllers | Partielle (`AbstractPostDataControllerTest`, `AuthControllerRedirectTest`) | Etendre aux autres contrôleurs / cas critiques |
+| Middleware | 1 test (environment) | Ajouter tests middleware auth si evolutions |
 
 ### Tests controllers — approche recommandee
 
@@ -137,6 +145,7 @@ En plus de PHPUnit, le dossier `serveur/tools/` contient des scripts utiles :
 - `check_tables_server.php` — verifie les tables BDD
 - `diagnostic_esp32.php` — diagnostic de connectivite firmware
 - `diagnostic_500_errors.php` — analyse des erreurs HTTP 500
-- `local-smoke-test.ps1` — validation HTTP/API/upload locale (orchestree par `local-docker.ps1 -Action smoke`)
+- `local-smoke-test.ps1` — validation HTTP/API/upload locale (orchestree par `local-docker.ps1 -Action smoke`). Paramètre **`-TimeoutSec`** (defaut **60**) pour les pages lourdes ou machines lentes.
+- `verify_environments.php` — coherence PROD/TEST/S3 et connexion BDD via **`.env`** (`Database::getConnection()` ; Docker local : `DB_HOST=db`).
 
 Ces scripts ne sont pas des tests unitaires mais des outils de diagnostic a lancer manuellement.
