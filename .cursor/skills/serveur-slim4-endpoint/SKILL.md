@@ -12,6 +12,10 @@ Le serveur est une application **Slim 4 unifiee** dans `serveur/`.
 **Unification** : privilegier les classes abstraites, templates de base (`data_page.twig`, `_control_base.twig`), helpers de routes et services partages pour garder le code serveur le plus unifie possible, sans nuire aux specificites des pages ou des modules (ffp3, msp1, n3pp).
 Exception : l’archive FFP3 est dans `serveur/archives/ffp3/` ; le code actif FFP3 est dans le serveur unifié (`serveur/src/`, `serveur/config/`).
 
+### Base de donnees locale (tests realistes)
+
+Pour valider pages et services avec un volume proche de la production : stack Docker (`tools/local-docker.ps1`) puis import d'un export MySQL via `tools/import-mysql-dump-to-local-docker.ps1` (voir `serveur/README.md`). Le schéma reste celui de `docker/mysql/init/` ; les colonnes divergentes (ex. production) sont mappees par `docker/mysql/sync-import-staging-to-local.sql`.
+
 ### Serveur principal (serveur/)
 
 ```

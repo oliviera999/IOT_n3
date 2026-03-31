@@ -18,14 +18,22 @@ powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action test
 php vendor/bin/phpunit
 # ou via le script wrapper
 php tools/run-phpunit.php
+
+# Suites dédiées (composer.json)
+composer test:unit           # exclut tests/Integration
+composer test:integration  # uniquement tests/Integration (MySQL / snapshot)
 ```
 
-`phpunit.xml` est aligne avec le schema PHPUnit 10.5+ ; en cas de warning de schema deprecie, executer `vendor/bin/phpunit --migrate-configuration`.
+`phpunit.xml` définit deux suites **Unit** et **Integration** ; sans `--testsuite`, PHPUnit exécute les deux. Aligné schéma PHPUnit 10.5+ ; en cas de warning de schéma déprécié, exécuter `vendor/bin/phpunit --migrate-configuration`.
 
 ## Structure des tests
 
 ```
 serveur/tests/
+├── Integration/
+│   ├── IntegrationDbTestCase.php              # PDO, seuil snapshot, isolation ENV prod
+│   ├── RealDatasetDockerDbTest.php            # volumétrie / Boards / msp1Data
+│   └── SensorRepositoriesSnapshotIntegrationTest.php  # SensorRead, Msp, N3pp, BoardRepository
 ├── AssetWhitelistCoherenceTest.php      # cohérence whitelist assets
 ├── RoutesConfigSecurityTest.php         # chemins publics vs routes sensibles
 ├── TwigPartialsCoherenceTest.php        # partials Twig référencés
@@ -50,7 +58,13 @@ serveur/tests/
     └── SystemHealthServiceTest.php
 ```
 
-Namespace : `Tests\` (PSR-4, defini dans `composer.json` → `autoload-dev`). La suite compte plusieurs dizaines de cas (ordre de grandeur **~67 tests** ; voir sortie PHPUnit).
+Namespace : `Tests\` (PSR-4, defini dans `composer.json` → `autoload-dev`). Ordre de grandeur **~67 tests Unit** + **~9 tests Integration** (voir sortie PHPUnit).
+
+### Tests d'integration BDD (Docker)
+
+- Etendre `IntegrationDbTestCase` (`#[BackupGlobals(false)]` pour eviter les restaurations PHPUnit de `$_ENV` incoherent avec `TableConfig`) ; `setUp` force `TableConfig` en `prod` puis `tearDown` restaure `$_ENV['ENV']`.
+- Sans import volumineux ou sans `DB_*`, les methodes font `markTestSkipped`.
+- Pour activer les assertions « snapshot » : `tools/import-mysql-dump-to-local-docker.ps1` (voir `serveur/README.md`), puis `composer test:integration` ou `local-docker.ps1 -Action test`.
 
 ## Ecrire un nouveau test
 
@@ -146,6 +160,7 @@ En plus de PHPUnit, le dossier `serveur/tools/` contient des scripts utiles :
 - `diagnostic_esp32.php` — diagnostic de connectivite firmware
 - `diagnostic_500_errors.php` — analyse des erreurs HTTP 500
 - `local-smoke-test.ps1` — validation HTTP/API/upload locale (orchestree par `local-docker.ps1 -Action smoke`). Paramètre **`-TimeoutSec`** (defaut **60**) pour les pages lourdes ou machines lentes.
+- `import-mysql-dump-to-local-docker.ps1` — import dump phpMyAdmin vers base staging puis synchro mappee vers `iot_n3_local` (donnees reelles pour tests etendus).
 - `verify_environments.php` — coherence PROD/TEST/S3 et connexion BDD via **`.env`** (`Database::getConnection()` ; Docker local : `DB_HOST=db`).
 
 Ces scripts ne sont pas des tests unitaires mais des outils de diagnostic a lancer manuellement.

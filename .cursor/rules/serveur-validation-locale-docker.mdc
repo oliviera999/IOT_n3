@@ -25,6 +25,9 @@ alwaysApply: false
 - **Schema SQL d'init modifie** (`serveur/docker/mysql/init/`) :
   - si les changements ne sont pas rejoues, reconstruire avec reset de volume (`down -v` puis `up`) selon la procedure documentee.
 
+- **Donnees reelles pour tests etendus** :
+  - importer un dump phpMyAdmin dans la stack locale via `serveur/tools/import-mysql-dump-to-local-docker.ps1` (`-DumpPath` vers le `.sql`) : import dans `iot_n3_import_staging` puis synchro mappee vers `iot_n3_local` (`serveur/docker/mysql/sync-import-staging-to-local.sql`). Ne pas versionner le dump. Voir `serveur/README.md` (sous-section import production).
+
 - **Secrets** :
   - `.env.docker.example` est un modele local de dev.
   - Ne jamais y mettre de secrets reels (alignement avec `securite-et-secrets.mdc`).
