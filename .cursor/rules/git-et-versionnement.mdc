@@ -21,7 +21,7 @@ alwaysApply: true
        - Serveur : `serveur/VERSION`, `serveur/CHANGELOG.md`, `README.md` racine si le contrat change.
        - Transversal : `RECOMMANDATIONS_IOT.md`, `docs/inventaire_appareils.md` si un appareil ou endpoint est ajoute/modifie.
     3. **Tester localement avant de deployer** :
-       - Pour toute modification du composant `serveur` touchant BDD, routes de donnees, auth, galeries ou contrat API (`post-data`, `heartbeat`, endpoints upload), **privilegier la stack Docker locale** (`serveur/tools/local-docker.ps1`) : `up` -> `smoke` -> `test`.
+       - Pour toute modification du composant `serveur` touchant BDD, routes de donnees, auth, galeries ou contrat API (`post-data`, `heartbeat`, endpoints upload), **privilegier la stack Docker locale** (`serveur/tools/local-docker.ps1`) : `up` -> `smoke` -> `test`. Smoke : `local-smoke-test.ps1` avec **`-AuthMode`** `token` / `session` / `both` et cas negatifs si besoin (voir `serveur/README.md`). Validation firmware **ffp5cs** associee : `firmwires/ffp5cs/scripts/run_wroom_beta_local_test_suite.ps1` et regle `serveur-validation-locale-docker.mdc`.
        - Le test via serveur local PHP (`php -S`) reste autorise pour un smoke UI rapide (routage/templates/assets), mais il n'est pas suffisant pour valider les flux MySQL/API complets.
        - Verifier au minimum les routes/pages impactees, le chargement des assets (`/assets/css/main.css`, JS, images), l'absence d'erreur fatale et l'execution des tests pertinents.
        - Ne pas deployer le serveur sans avoir valide ce test local, sauf impossibilite explicite documentee a l'utilisateur.

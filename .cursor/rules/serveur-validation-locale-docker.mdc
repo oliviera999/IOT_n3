@@ -10,12 +10,25 @@ alwaysApply: false
 
 - **Prerequis** :
   - Docker Desktop demarre (si besoin : `docker desktop start`).
+  - Verification rapide : `docker version` doit afficher une section **Server** ; sinon le moteur n est pas joignable (pipe Windows / contexte `desktop-linux`).
 
 - **Workflow recommande** (depuis `serveur/`) :
   - `powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action up`
   - `powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action smoke`
   - `powershell -ExecutionPolicy Bypass -File .\tools\local-docker.ps1 -Action test`
   - Actions utiles : `ps`, `logs`, `shell`, `restart`, `down`.
+
+- **Smoke HTTP (`tools/local-smoke-test.ps1`)** :
+  - Parametre **`-AuthMode`** : `token` / `session` / `both` (pages protegees + API selon le besoin).
+  - **`-RunNegativeAuthChecks`** : verifier les refus d acces attendus.
+  - Identifiants / jetons : **`-AdminToken`**, **`-AdminUsername`**, **`-AdminPassword`**, **`-ApiKey`** (ne pas coder en dur ; alignement `securite-et-secrets.mdc`).
+  - Delai requetes : **`-TimeoutSec`** (defaut 60).
+
+- **Integration firmware FFP5CS `wroom-beta-local`** :
+  - Batterie orchestrée : `firmwires/ffp5cs/scripts/run_wroom_beta_local_test_suite.ps1` (campagnes quick/full, scenarios JSON).
+  - Secrets locaux optionnels : copier `firmwires/ffp5cs/scripts/.beta-local-test.env.example` vers `.beta-local-test.env` (non versionne).
+  - Script Docker + serie : `firmwires/ffp5cs/scripts/test_wroom_beta_local_docker_integration.ps1` (reutilise le smoke serveur ci-dessus).
+  - Detail : `firmwires/ffp5cs/docs/README.md`, inventaire `firmwires/ffp5cs/docs/INVENTAIRE_SCRIPTS_FFP5CS.md`.
 
 - **URLs locales de reference** :
   - app : `http://127.0.0.1:8082`

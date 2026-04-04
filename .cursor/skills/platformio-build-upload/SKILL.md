@@ -91,3 +91,11 @@ pio project config           # Affiche la config complete
 | `Upload failed: could not open port` | Port occupe ou mauvais driver | Fermer le monitor, verifier les drivers |
 | `Error: esp_tool failed` | Mode boot non active | Maintenir BOOT pendant reset sur certains ESP32 |
 | `fatal error: credentials.h: No such file` | Fichier secrets manquant | Copier `credentials.h.example` → `credentials.h` et remplir |
+
+## FFP5CS — profil `wroom-beta-local` et tests contre serveur local
+
+- Environnement **PlatformIO** `wroom-beta-local` : clone de `wroom-beta` avec endpoints locaux (`USE_LOCAL_SERVER_ENDPOINTS`). Details et override URL : `firmwires/ffp5cs/docs/README.md`.
+- **Unites** : depuis `firmwires/ffp5cs`, `.\scripts\test_unit_all.ps1` (inclut notamment les tests URL serveur).
+- **Integration Docker + smoke** : `.\scripts\test_wroom_beta_local_docker_integration.ps1` (stack `serveur/tools/local-docker.ps1` up au prealable).
+- **Batterie** : `.\scripts\run_wroom_beta_local_test_suite.ps1` (`-Campaign quick|full`, `-Auth token|session|both`) ; secrets optionnels dans `scripts/.beta-local-test.env` (modele `.beta-local-test.env.example`).
+- Vue d ensemble scripts : `firmwires/README.md` (section FFP5CS) et `firmwires/ffp5cs/docs/INVENTAIRE_SCRIPTS_FFP5CS.md`.

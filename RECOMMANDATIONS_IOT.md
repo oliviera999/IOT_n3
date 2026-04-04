@@ -1,6 +1,6 @@
 # Recommandations techniques – IoT de la salle aérée n³
 
-*Dernière mise à jour : mars 2026.*
+*Dernière mise à jour : avril 2026.*
 
 **Contexte :** [La salle aérée n³](https://n3.olution.info) (Nature, Numérique, Nomade) — Lycée Lyautey de Casablanca. Espace pédagogique en plein air : aquaponie, jardins, station météo, objets connectés et robotique.
 
@@ -163,6 +163,20 @@ Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_depps
 
 4. **OTA**  
    - Les projets upload photos et ffp5cs utilisent l’OTA. Documenter la procédure de mise à jour à distance (URL, mot de passe OTA) et la réserver à un usage encadré (éviter les mises à jour accidentelles depuis la classe).
+
+---
+
+### 2.6bis Validation locale du serveur (Docker) et batterie FFP5CS
+
+**Objectif :** valider routes, BDD, auth et uploads **sans production**, puis enchaîner avec un firmware **ffp5cs** ciblant la machine locale.
+
+**Recommandations :**
+
+1. **Stack Docker** — Depuis `serveur/` : `tools/local-docker.ps1` (`up`, `smoke`, `test`). Prérequis : Docker Desktop démarré ; `docker version` doit afficher le serveur. Voir `serveur/README.md` et la règle `.cursor/rules/serveur-validation-locale-docker.mdc`.
+
+2. **Smoke HTTP** — `tools/local-smoke-test.ps1` : modes d’auth `token` / `session` / `both`, option de cas négatifs ; ne pas versionner de jetons ou mots de passe réels (`.env` local, variables d’environnement).
+
+3. **FFP5CS `wroom-beta-local`** — Profil PlatformIO dédié + scripts sous `firmwires/ffp5cs/scripts/` (`test_wroom_beta_local_serial.ps1`, `test_wroom_beta_local_docker_integration.ps1`, `run_wroom_beta_local_test_suite.ps1`). Fichier optionnel non versionné `scripts/.beta-local-test.env` (modèle `.beta-local-test.env.example`). Documentation : `firmwires/ffp5cs/docs/README.md`, inventaire `INVENTAIRE_SCRIPTS_FFP5CS.md`.
 
 ---
 

@@ -159,7 +159,7 @@ En plus de PHPUnit, le dossier `serveur/tools/` contient des scripts utiles :
 - `check_tables_server.php` — verifie les tables BDD
 - `diagnostic_esp32.php` — diagnostic de connectivite firmware
 - `diagnostic_500_errors.php` — analyse des erreurs HTTP 500
-- `local-smoke-test.ps1` — validation HTTP/API/upload locale (orchestree par `local-docker.ps1 -Action smoke`). Paramètre **`-TimeoutSec`** (defaut **60**) pour les pages lourdes ou machines lentes.
+- `local-smoke-test.ps1` — validation HTTP/API/upload locale (orchestree par `local-docker.ps1 -Action smoke`). **`-TimeoutSec`** (defaut **60**). **`-AuthMode`** `token` | `session` | `both` ; **`-RunNegativeAuthChecks`** ; identifiants **`-AdminToken`**, **`-AdminUsername`**, **`-AdminPassword`**, **`-ApiKey`** (passer par variables d environnement ou secrets locaux, pas de valeurs reelles dans le depot). Voir `serveur/README.md` (section Docker).
 - `import-mysql-dump-to-local-docker.ps1` — import dump phpMyAdmin vers base staging puis synchro mappee vers `iot_n3_local` (donnees reelles pour tests etendus).
 - `verify_environments.php` — coherence PROD/TEST/S3 et connexion BDD via **`.env`** (`Database::getConnection()` ; Docker local : `DB_HOST=db`).
 

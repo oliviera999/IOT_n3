@@ -106,8 +106,11 @@ curl -X POST https://iot.olution.info/ffp3/post-data \
 ### Scripts de diagnostic existants
 
 Verifier s'il existe des scripts dans `serveur/tools/` :
+- `local-docker.ps1` / `local-smoke-test.ps1` — reproduction locale avec BDD (actions `up`, `smoke` avec `-AuthMode`, `test`).
 - `diagnostic_serveur_distant.ps1` ou similaire
 - Scripts de verification d'environnement
+
+**FFP5CS contre stack locale** : `firmwires/ffp5cs/scripts/test_wroom_beta_local_docker_integration.ps1` et `run_wroom_beta_local_test_suite.ps1` enchainent build/upload optionnel, Docker et smoke pour valider post-data / heartbeat / auth sans toucher a la production.
 
 ## Arbre de decision
 

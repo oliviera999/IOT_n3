@@ -11,6 +11,7 @@ alwaysApply: false
 
 - **Workflow complet (erase + flash + monitor + analyse)**
   - **ffp5cs** : utiliser `ffp5cs/erase_flash_fs_monitor_5min_analyze.ps1` (options `-Port`, `-Environment`, `-DurationMinutes`, `-SkipBuild`). Enchaîne erase, upload firmware, upload LittleFS (sauf wroom-prod), monitor N min, puis `analyze_log.ps1` et `generate_diagnostic_report.ps1`.
+  - **ffp5cs — validation `wroom-beta-local` contre serveur Docker** : unites PlatformIO (`test_unit_all.ps1`), test serie `scripts/test_wroom_beta_local_serial.ps1`, integration Docker `scripts/test_wroom_beta_local_docker_integration.ps1`, batterie `scripts/run_wroom_beta_local_test_suite.ps1` + `wroom_beta_local_test_scenarios.json` ; secrets locaux via `scripts/.beta-local-test.env` (modele `.beta-local-test.env.example`). Prerequis : Docker Desktop actif, stack `serveur/tools/local-docker.ps1 -Action up`. Voir `firmwires/ffp5cs/docs/README.md`.
   - **Autres firmwares** : scripts multi-projets `firmwires/erase_flash_monitor.ps1` / `firmwires/monitor_Nmin.ps1` **non versionnes pour l instant** ; utiliser `pio run -t upload` / `pio device monitor` par projet ou s appuyer sur le workflow **ffp5cs** comme reference.
 
 - **Monitoring seul**
