@@ -13,6 +13,13 @@ Format : [version] - date - description.
 - Submodule **serveur** **5.1.3** : POST FFP3 atomique (PR #12), HMAC en-têtes `X-Sig-*`, auto-création table OTA (PR #15) ; marées/tide conservées.
 - Submodule **firmwires** : ffp5cs **13.83** — fallback niveaux timeout (#17), file SD S3 (#11), garde-fou HTTPS (#13).
 
+### Validation build (phase 3)
+
+- Builds OK : n3pp, msp, uploadphotosserver (msp1/n3pp/ffp3), ffp5cs `wroom-test`.
+- `wroom-prod` : échec attendu sans `secrets_config.h` (static_assert WEB_AUTH_PASS).
+- PHPUnit serveur : 135 tests, 284 assertions ; tests unitaires natifs ffp5cs OK.
+- Jonction `.pio/build` → `C:\pio-builds` pour `checkprogsize` Windows (`pio_redirect_build_dir.py`).
+
 ### Firmwires — build et publication phase 1
 
 - Submodule **firmwires** : n3pp **4.39**, msp **2.43**, uploadphotosserver **2.39** (modules caméra, `n3_outputs_json`, poissonglouton).
