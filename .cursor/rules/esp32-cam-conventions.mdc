@@ -44,7 +44,7 @@ Les anciens répertoires sont dans `firmwires/archive/` (référence historique,
 - Toujours libérer le framebuffer (`esp_camera_fb_return(fb)`) **après** l'envoi HTTP, pas avant.
 - Ne pas accéder à `fb->buf` / `fb->len` après `esp_camera_fb_return()` — use-after-free.
 
-## OTA distant (HTTP)
+## OTA distant (HTTP + integrite)
 
 - **Toutes les cibles** supportent l'OTA distant (pas d'ArduinoOTA local).
 - Métadonnées : `GET http://iot.olution.info/ota/cam/metadata.json`
@@ -52,15 +52,15 @@ Les anciens répertoires sont dans `firmwires/archive/` (référence historique,
 - Format du `metadata.json` :
   ```json
   {
-    "msp1": { "version": "2.0", "url": "http://…/firmware.bin", "md5": "" },
+    "msp1": { "version": "2.0", "url": "http://…/firmware.bin", "sha256": "<hex64>", "signature": "<base64 optionnel>" },
     "n3pp": { … },
     "ffp3": { … }
   }
   ```
 - Vérification de version sémantique (MAJOR.MINOR.PATCH) — téléchargement si remote > local.
-- **Toutes les cibles** : vérification OTA à chaque réveil (`OTA_CHECK_EVERY_N_BOOTS = 1`) via `RTC_DATA_ATTR`.
+- **Toutes les cibles** : vérification OTA toutes les 2h cumulées de deep sleep (RTC).
 - En cas d'échec (réseau, JSON invalide, cible absente) : continue normalement sans bloquer.
-- Implémentation : `n3_common` (n3_ota) comme n3pp/msp ; `HTTPUpdate` + `ArduinoJson`.
+- Implémentation : `n3_common` (n3_ota) comme n3pp/msp ; verification `sha256` obligatoire et verification signature ECDSA si `signature` presente.
 
 ### Déploiement d'une mise à jour OTA
 
@@ -72,7 +72,7 @@ Les anciens répertoires sont dans `firmwires/archive/` (référence historique,
 
 ## Sécurité
 
-- Les uploads photo ne sont actuellement pas authentifiés — à corriger si exposé sur Internet.
+- Les uploads photo sont authentifiés via `X-Api-Key` (validé côté serveur dans `GalleryUploadController`).
 - Les identifiants WiFi sont externalisés dans `credentials.h` (pas en dur dans le code).
 - Ne pas versionner `credentials.h` — seul `credentials.h.example` est versionné.
 

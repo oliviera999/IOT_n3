@@ -66,6 +66,10 @@ alwaysApply: true
   - Verifier le `.gitignore` racine et ceux des sous-dossiers.
 
 - **Versionnage des sous-projets**
-  - Firmwares (dans firmwires / n3_firmwires) : ffp5cs dans `include/config.h` + `VERSION.md` ; n3pp, msp, uploadphotosserver_* dans la constante `version` du `main.cpp`.
+  - Firmwares (dans firmwires / n3_firmwires) :
+    - ffp5cs : `include/config.h` (`FIRMWARE_VERSION`) + `VERSION.md`.
+    - n3pp : `include/n3pp_config.h` (`FIRMWARE_VERSION`) + `VERSION.md` (depuis v4.38, audit 2026-05).
+    - msp : `include/msp_config.h` (`FIRMWARE_VERSION`) + `VERSION.md` (depuis v2.42, audit 2026-05).
+    - uploadphotosserver_* : constante `version` dans `main.cpp` (legacy).
   - Serveur (n3_serveur) : version dans `VERSION` + `CHANGELOG.md` (Semantic Versioning).
   - **Incrementer la version a chaque modification**, meme mineure.

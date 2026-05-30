@@ -18,23 +18,25 @@
 | **OTA metadata URL** | `http://iot.olution.info/ota/cam/metadata.json` | idem | idem |
 | **Payload** | multipart/form-data, champ `imageFile`, boundary `RandomNerdTutorials` | idem | idem |
 | **Auth côté firmware** | Header `X-Api-Key` | idem | idem |
-| **Auth côté serveur** | **Aucune** (routes publiques) | idem | idem |
+| **Auth côté serveur** | `X-Api-Key` validé | idem | idem |
 | **Taille max serveur** | 5 Mo | 5 Mo | 5 Mo |
 | **Types acceptés serveur** | image/jpeg, image/jpg | idem | idem |
-| **FIRMWARE_VERSION** | 2.11 (commune) | idem | idem |
+| **FIRMWARE_VERSION** | 2.38 (commune) | idem | idem |
 | **XCLK freq** | 5 MHz | 5 MHz | 5 MHz |
 | **EEPROM compteur SD** | 4 octets | 4 octets | 4 octets |
 | **Créneau horaire** | 6h–22h | idem | idem |
 
-**Constantes communes** : `SERVER_NAME=iot.olution.info`, `SERVER_PORT=80`, `UPLOAD_CHUNK_SIZE=4096`, `OTA_CHECK_EVERY_N_BOOTS=6`, `WIFI_CONNECT_TIMEOUT_MS=5000`.
+**Constantes communes** : `SERVER_NAME=iot.olution.info`, `SERVER_PORT=80`, `UPLOAD_CHUNK_SIZE=4096`, vérification OTA périodique toutes les 2h (RTC), `WIFI_CONNECT_TIMEOUT_MS=5000`.
 
 ## 1.b Statut de synchronisation (mise à jour 20/03/2026)
 
 Cette section reflète l'état réel actuel en mode "état + écarts connus".
 
-- **Corrigé côté firmware** : C-01 (`TIME_TO_SLEEP=600`), M-08 (`OTA_CHECK_EVERY_N_BOOTS=6`), E-01 (retries de connexion upload), E-02 (lecture/contrôle du code HTTP), E-04 (compteur SD sur 4 octets), E-05 (gestion explicite du cas WiFi indisponible), F-01 (suppression de `ESP Mail Client`).
-- **Corrigé côté documentation** : version caméra alignée en `2.11` dans l'inventaire et la doc racine.
-- **Écarts connus restant à traiter** : C-02 (validation serveur du header `X-Api-Key` selon endpoint), C-03 (OTA encore en HTTP sans vérification d'intégrité MD5/signature), M-06 (transport HTTP en clair).
+- **Corrigé côté firmware** : C-01 (`TIME_TO_SLEEP=600`), E-01 (retries upload), E-02 (contrôle HTTP), E-04 (compteur SD robuste), E-05 (gestion explicite WiFi indisponible), bug use-after-free WiFi SSID corrigé.
+- **Corrigé côté sécurité OTA** : vérification `sha256` obligatoire et vérification signature ECDSA optionnelle (si `signature` présente dans metadata).
+- **Corrigé côté serveur** : validation `X-Api-Key` upload/contrôle, validation `board`/`sensor` sur endpoints de contrôle, code `202` pour photos basculées en corbeille auto.
+- **Corrigé côté documentation** : version caméra alignée en `2.38` dans l'inventaire et la doc racine.
+- **Écarts connus restant à traiter** : M-06 (transport HTTP en clair ; intégrité OTA assurée mais chiffrement non activé).
 - **Lecture recommandée** : considérer les sections 2 à 6 comme le constat initial d'audit + backlog, puis appliquer cette section 1.b comme référence de statut actuel.
 
 ---

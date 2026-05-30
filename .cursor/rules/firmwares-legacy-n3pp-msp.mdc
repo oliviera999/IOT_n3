@@ -6,35 +6,52 @@ alwaysApply: false
 
 # Firmwares legacy — n3pp et msp
 
-Ces deux firmwares partagent une architecture identique mais avec des capteurs et actionneurs differents. Ils utilisent la bibliotheque **libn3_iot** (drivers DHT, analogique, DS18B20, registre de capteurs).
+Ces deux firmwares partagent une architecture identique mais avec des capteurs et actionneurs differents. Ils s'appuient sur les bibliotheques partagees sous `firmwires/shared/` (`n3_data`, `n3_hmac`, `n3_wifi`, `n3_common`/`n3_ota`, `n3_analog_sensors`, `n3_battery`, `n3_sleep`, `n3_display`, `n3_mail`, `n3_time`, `n3_outputs_json`). La lib `libn3_iot` (drivers DHT, analogique, DS18B20) reste disponible comme couche de compat mais n'est plus la base preferentielle.
 
 - **Architecture commune**
-  - Cycle : `Wificonnect()` → `variablestoesp()` → lecture capteurs → `datatobdd()` → `sommeil()`
-  - Deep sleep avec reveil timer (3000s) + GPIO 4.
-  - OLED SSD1306 pour affichage local.
-  - ESP Mail Client pour alertes SMTP.
+  - Source canonique des globales : `firmwires/n3pp/src/n3pp_globals.cpp` (depuis v4.38) et `firmwires/msp/src/main.cpp` (msp_globals via headers).
+  - Cycle : `Wificonnect()` → `variablestoesp()` → `lectureCapteurs()` → `datatobdd()` → `automatismes()` (n3pp seulement) → envoi periodique → `sommeil()`.
+  - **Bloc periodique `intervalDatas` AVANT `sommeil()`** (correctif phase 1 audit : sinon mort en deep sleep).
+  - Pas de `server.begin()` dans le `loop()` : la variable `AsyncWebServer server` est conservee pour compat mais aucune route n'est enregistree.
+  - Deep sleep timer (`N3_DEFAULT_FREQ_WAKE_UP_S` = 300 s par defaut) + reveil GPIO 4.
+  - OLED SSD1306 pour affichage local (n3_display).
+  - ESP Mail Client pour alertes SMTP (n3_mail).
 
 - **Secrets externalises**
-  - WiFi SSID/password, cle API, identifiants SMTP sont dans `credentials.h` (non versionne) inclus via `credentials.h.example`.
-  - Utiliser `firmwires/credentials.h` (ou `credentials.h.example` comme modele) pour n3pp et msp.
+  - WiFi SSID/password, cle API, identifiants SMTP, `API_SIG_SECRET` HMAC sont dans `firmwires/credentials.h` (non versionne).
+  - Modele : `firmwires/credentials.h.example`. Les `credentials.h.example` dans `firmwires/n3pp/` et `firmwires/msp/` ne sont que des stubs renvoyant vers la racine.
 
 - **Format de communication**
   - POST : `application/x-www-form-urlencoded` (pas JSON).
-  - GET : parsing JSON de la reponse du serveur.
+  - GET : parsing JSON de la reponse du serveur via `n3_outputs_json` (`readIntByKey`, `tryReadIntByKey`, `readStringByKey`).
   - Endpoints legacy avec `.php` : `/n3pp/n3ppdatas/post-n3pp-data.php`, `/msp1/msp1datas/post-msp1-data.php`.
+  - Alias modernes (depuis Phase 4 audit 2026-05) : `/n3pp/post-data`, `/msp1/post-data`, `/n3pp/heartbeat`, `/msp1/heartbeat`.
+
+- **Authentification (depuis Phase 4 audit 2026-05)**
+  - Le firmware envoie automatiquement `timestamp` + `signature` (HMAC-SHA256 du timestamp avec `API_SIG_SECRET`) au POST si `API_SIG_SECRET` est defini dans credentials.h ET que `rtc.getEpoch()` est sync (> 2020-01-01).
+  - Le serveur valide via `HmacAuthTrait` (MspPostDataController / N3ppPostDataController). Fallback `api_key` si HMAC absent.
+  - `LegacyHeartbeatHandler` cote serveur applique la meme logique sur `/heartbeat`.
+  - Voir `serveur/docs/API_MSP1_N3PP.md` pour le contrat complet.
 
 - **Capteurs — validation requise**
   - Toujours verifier `isnan()` apres lecture DHT.
   - **Fallback si invalide** : temperature = 20.0f, humidite = 50.0f (harmonise msp, n3pp, ffp5cs).
-  - Valider les plages de valeurs (temperature -40 a 80°C, humidite 0–100 %).
-  - Les capteurs sol analogiques (humidite, luminosite) peuvent retourner 0 ou 4095 si deconnectes.
+  - Bornes physiques DHT : -40..80 C, 0..100 %.
+  - Capteurs sol analogiques (humidite, luminosite) : detecter raw ≤ 5 ou ≥ 4080 comme "capteur deconnecte" (helper `readSoilSensor` dans n3pp).
+  - DS18B20 (msp) : tester `DEVICE_DISCONNECTED_C`, plage -20..70 C, retry une fois, fallback 20 C.
+  - Capteur pluie msp : raw ≤ 3 considere comme "deconnecte" (sentinelle 1).
+
+- **OTA**
+  - Lib `n3_common/n3_ota` (>= 1.3.0) verifie le `sha256` du firmware avant le flash et la `signature` ECDSA P-256 si presente.
+  - Cle publique : `firmwires/shared/n3_common/src/n3_ota_pubkey.h`.
+  - Publication : `scripts/publish_ota.ps1 -Target n3pp|msp -Sign`.
+  - Doc : `serveur/docs/OTA_N3PP_MSP.md`.
 
 - **Modifications**
-  - Ne pas moderniser ces firmwares en bloc sans plan explicite.
-  - Changements acceptables sans plan : correction de bugs, externalisation des secrets, ajout de validation capteurs.
-  - Changements qui necessitent un plan : migration JSON, changement d'endpoint, ajout HMAC.
+  - Changements acceptables sans plan : correction de bugs, validation capteurs, ajout de logs.
+  - Changements qui necessitent un plan : modification du contrat serveur (champs POST, GPIO, codes HTTP), suppression d'un endpoint legacy.
   - Toute modification doit maintenir la compatibilite avec les endpoints serveur existants.
 
 - **Differences**
-  - n3pp : board=3, 4 capteurs sol, pompe arrosage, alertes automatiques.
-  - msp : board=2, 2 DHT (int/ext), DS18B20, tracker solaire (servos), capteur pluie.
+  - n3pp : board=3, 4 capteurs sol, pompe arrosage, alertes automatiques, cooldown 5 min sur arrosage auto.
+  - msp : board=2, 2 DHT (int/ext), DS18B20, tracker solaire (servos), capteur pluie analogique, GPIO 111 = mode servo auto.

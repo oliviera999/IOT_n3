@@ -21,7 +21,7 @@ alwaysApply: false
 
 - **Analyse des logs**
   - **ffp5cs** : `analyze_log.ps1` (detaillée, specifique FFP5CS/FFP3), `analyze_log_exhaustive.ps1` (crashes, WDT, heap, reseau, reboots), `generate_diagnostic_report.ps1` (rapport serveur + mails). Toutes les sorties (fichiers .log, _analysis.txt, rapports .md) sont écrites dans `ffp5cs/logs/`.
-  - **Generique** : `firmwires/scripts/analyze_log_generic.ps1` prevu pour n3pp, msp, uploadphotosserver — **non versionne pour l instant** ; analyser les logs manuellement ou s inspirer des scripts ffp5cs.
+  - **Generique** : `firmwires/scripts/analyze_log_generic.ps1` (versionne) — utilisable pour n3pp, msp, uploadphotosserver. Recoit `-LogFile <chemin>` et produit un rapport texte (crashes, WDT, heap, reseau).
 
 - **Regles alignees ffp5cs**
   - Apres modification du code firmware : verifier par un cycle erase/flash/monitor/analyse si le changement touche reseau, NVS, taches ou watchdog.
