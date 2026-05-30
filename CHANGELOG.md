@@ -8,6 +8,11 @@ Format : [version] - date - description.
 
 ## [2026.05] - 2026-05-30
 
+### Intégration PR critiques (phase 2)
+
+- Submodule **serveur** **5.1.3** : POST FFP3 atomique (PR #12), HMAC en-têtes `X-Sig-*`, auto-création table OTA (PR #15) ; marées/tide conservées.
+- Submodule **firmwires** : ffp5cs **13.83** — fallback niveaux timeout (#17), file SD S3 (#11), garde-fou HTTPS (#13).
+
 ### Firmwires — build et publication phase 1
 
 - Submodule **firmwires** : n3pp **4.39**, msp **2.43**, uploadphotosserver **2.39** (modules caméra, `n3_outputs_json`, poissonglouton).
