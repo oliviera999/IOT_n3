@@ -1,0 +1,39 @@
+---
+description: Crons serveur n3 — orchestrateur unique, crontab production, run-cron.php
+globs: serveur/run-cron.php,serveur/src/Command/**,serveur/docs/deployment/CRON.md
+alwaysApply: false
+---
+
+# Crons serveur n3
+
+## Architecture
+
+- **Un seul point d'entrée applicatif** : [`serveur/run-cron.php`](serveur/run-cron.php) (CLI uniquement).
+- **Orchestrateur** : [`serveur/src/Command/CronOrchestrator.php`](serveur/src/Command/CronOrchestrator.php).
+- **Ne pas** recréer de scripts PHP autonomes (`cronpompe.php`, `CleanDataCommand`, `ProcessTasksCommand` séparés).
+- **Ne pas** exposer `run-cron.php` via HTTP sans authentification.
+
+## Crontab production (iot.olution.info)
+
+```cron
+* * * * * cd /home4/oliviera/iot.olution.info && /usr/bin/git pull origin master >> /dev/null 2>&1
+*/5 * * * * cd /home4/oliviera/iot.olution.info && /usr/bin/php run-cron.php >> /dev/null 2>&1
+```
+
+## Modification du comportement cron
+
+1. Éditer `CronOrchestrator` (ou `RestartPumpCommand` si redémarrage pompe uniquement).
+2. Ajouter/mettre à jour tests dans `serveur/tests/Command/`.
+3. Documenter dans [`serveur/docs/deployment/CRON.md`](serveur/docs/deployment/CRON.md).
+4. Incrémenter `serveur/VERSION` + `CHANGELOG.md`.
+5. Variables `.env` : `CRON_HOURLY_INTERVAL_SECONDS`, `AQUA_LOW_LEVEL_THRESHOLD`, `TIDE_STDDEV_THRESHOLD`, `CLEAN_*`.
+
+## Logs
+
+- Applicatif : `cronlog.txt` (Monolog) — [production](https://iot.olution.info/public/cronlog.txt)
+- Wrapper CLI : `error_log` PHP, préfixe `[run-cron]`
+
+## Hors périmètre orchestrateur
+
+- MSP1 / N3PP : traitement à la réception POST (pas de cron dédié).
+- `triphotos.php` galeries : legacy, protéger par token si réintroduit.

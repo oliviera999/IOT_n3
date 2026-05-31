@@ -32,6 +32,7 @@ alwaysApply: true
 
 - **Deploiement automatique en production**
   - Un **CRON s'execute toutes les minutes** sur le serveur de production (iot.olution.info) et fait un `git pull` sur le depot **n3_serveur**.
+  - Un **CRON applicatif FFP3** s'execute toutes les **5 minutes** : `php run-cron.php` (orchestrateur `CronOrchestrator`). Voir `serveur/docs/deployment/CRON.md`.
   - **Consequence** : une fois le code pousse sur GitHub (via publish-cycle ou manuellement), il est deploye en production **en moins d'une minute**, sans action supplementaire.
   - L'agent n'a PAS besoin d'attendre, de faire SSH, ni d'executer un script de deploiement distant. Le push vers GitHub **est** le deploiement.
   - **Cache DI** : si les definitions de dependances (`config/dependencies.php`) ou des classes de controllers changent, le cache DI compile (`var/cache/di/CompiledContainer.php`) peut devenir obsolete. Dans ce cas, pousser un script de maintenance temporaire (`public/maintenance/clear-di-cache.php`) pour le vider via HTTP, puis le supprimer du depot.

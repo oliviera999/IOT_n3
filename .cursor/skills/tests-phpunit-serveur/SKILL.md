@@ -44,6 +44,9 @@ serveur/tests/
 │   └── EnvironmentMiddlewareTest.php
 ├── Repository/
 │   └── SensorReadRepositoryTest.php
+├── Command/
+│   ├── CronOrchestratorTest.php
+│   └── RestartPumpCommandTest.php
 ├── Security/
 │   ├── CsrfServiceTest.php
 │   └── SignatureValidatorTest.php
