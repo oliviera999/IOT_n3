@@ -17,7 +17,7 @@ Ce document recense les appareils (ESP32, ESP32-CAM, etc.) déployés ou prévus
 | n3-cam-msp-01 | uploadphotosserver (msp1) | ESP32-CAM | Station météo | `/msp1gallery/upload.php` | 2.38 | X-Api-Key header |
 | n3-cam-n3pp-01 | uploadphotosserver (n3pp) | ESP32-CAM | Serre | `/n3ppgallery/upload.php` | 2.38 | X-Api-Key header |
 | n3-cam-ffp3-01 | uploadphotosserver (ffp3) | ESP32-CAM | Aquaponie | `/ffp3/ffp3gallery/upload.php` | 2.38 | X-Api-Key header |
-| n3-pgl-01 | poissonglouton | ESP32-S3 (display/headless) | Poubelle recyclage plastique | `/pgl/post-data` | 0.1.0 | API key + HMAC |
+| n3-pgl-01 | poissonglouton | ESP32-S3 (display/headless) | Poubelle recyclage plastique | `/pgl/post-data`, `/pgl/heartbeat` | 0.1.2 | API key |
 
 Note: le firmware caméra envoie `X-Api-Key` et la validation serveur est active sur les endpoints upload/controle galeries.
 
