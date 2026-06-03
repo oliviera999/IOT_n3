@@ -6,6 +6,15 @@ Format : [version] - date - description.
 
 ---
 
+## [2026.06] - 2026-06-03
+
+### Intégration PR #9 — nourrissage distant FFP5CS
+
+- Submodule **firmwires** : ffp5cs **13.92** — `FeedingSlotMatcher` ; `markCurrentFeedingSlotAsDone()` marque tous les créneaux actifs (heure partagée ou rattrapage H+1) ; test natif `test_feeding_slots`.
+- Branche **pio-build** alignée sur **master** (`n3_firmwires`).
+
+---
+
 ## [2026.05] - 2026-05-30
 
 ### Intégration PR critiques (phase 2)
