@@ -8,6 +8,7 @@
 # Usage (depuis la racine IOT_n3) :
 #   .\scripts\clean-firmware-builds.ps1 -WhatIf
 #   .\scripts\clean-firmware-builds.ps1
+#   .\scripts\clean-firmware-builds.ps1 -SyncPioBuilds
 #   .\scripts\clean-firmware-builds.ps1 -IncludePioBuildsRoot -IncludeLegacyFfp5Mirror
 #
 # Variables :
@@ -17,8 +18,13 @@
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [switch]$IncludePioBuildsRoot,
+    [switch]$SyncPioBuilds,
     [switch]$IncludeLegacyFfp5Mirror
 )
+
+if ($SyncPioBuilds) {
+    $IncludePioBuildsRoot = $true
+}
 
 $ErrorActionPreference = "Stop"
 
