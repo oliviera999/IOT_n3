@@ -57,6 +57,14 @@ $timestamp = Get-Date -Format 'yyyy-MM-dd'
 $timestampFull = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 $reportPath = Join-Path $reportDirAbs "audit-serveur-complet-$timestamp.md"
 
+# Version serveur (lue depuis le submodule, plus de valeur codee en dur)
+$serveurVersionFile = Join-Path $root 'serveur/VERSION'
+$serveurVersion = if (Test-Path $serveurVersionFile) {
+    (Get-Content $serveurVersionFile -Raw).Trim()
+} else {
+    'inconnue (submodule serveur non initialise)'
+}
+
 # Compteurs globaux
 $script:totalOk = 0
 $script:totalWarn = 0
@@ -262,14 +270,15 @@ Write-Host ""
 Write-Host "  Pages protegees (200 ou 302 vers /login attendu)..." -ForegroundColor Gray
 foreach ($p in $pagesProtected) {
     $r = Test-Url -Path $p -ExpectedCode 0 -NoRedirect
-    if ($r.HttpCode -eq 200 -or $r.HttpCode -eq 302 -or $r.HttpCode -eq 301) {
+    # Page protegee : 200 (contenu) comme 301/302 (redirection vers /login) sont acceptables.
+    if ($r.HttpCode -eq 301 -or $r.HttpCode -eq 302) {
+        # Test-Url a comptabilise un avertissement : le reclasser en OK.
         $r.Status = 'OK'
+        $script:totalWarn--
         $script:totalOk++
-        if ($r.HttpCode -ge 300) {
-            $script:totalWarn--
-            $script:totalOk--
-            $script:totalOk++
-        }
+    } elseif ($r.HttpCode -eq 200) {
+        # Deja comptabilise en OK par Test-Url : ne pas recompter.
+        $r.Status = 'OK'
     }
     [void]$pagesResults.Add($r)
 }
@@ -746,7 +755,7 @@ $summaryMd = @"
 
 - **Date** : $timestampFull
 - **Serveur** : $BaseUrl
-- **Version serveur** : 5.0.69
+- **Version serveur** : $serveurVersion
 
 ## Resume executif
 

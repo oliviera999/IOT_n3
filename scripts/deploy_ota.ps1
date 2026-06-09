@@ -21,6 +21,7 @@ param(
     [switch]$DryRun,
     [switch]$SkipValidate,
     [switch]$NoSign,
+    [switch]$RequireSign,
     [switch]$SkipSubmoduleUpdate
 )
 
@@ -63,6 +64,7 @@ $publishArgs = @{
     DryRun       = $DryRun
     SkipValidate = $SkipValidate
     NoSign       = $NoSign
+    RequireSign  = $RequireSign
 }
 & (Join-Path $scriptDir "publish_ota.ps1") @publishArgs
 if ($LASTEXITCODE -ne 0) {

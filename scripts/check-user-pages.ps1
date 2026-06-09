@@ -1,13 +1,22 @@
 # Script pour verifier les pages specifiques demandees par l'utilisateur
 $ErrorActionPreference = 'Stop'
 
+# Racine du depot (parent du dossier scripts) pour fiabiliser les chemins relatifs
+$root = if ($PSScriptRoot) {
+    (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+} else {
+    (Get-Location).Path
+}
+
 $baseUrl = 'https://iot.olution.info'
+# Note : /msp1/.../msp1-data.php et /n3pp/.../n3pp-data.php sont des redirections 301
+# (legacy -> /meteo et /serre). On verifie directement les pages cibles actuelles.
 $pagesToCheck = @(
     @{ Name = 'Home page'; Url = '/' },
     @{ Name = 'Aquaponie landscape view'; Url = '/aquaponie' },
     @{ Name = 'Aquaponie classic view'; Url = '/aquaponie-alt' },
-    @{ Name = 'MSP1 weather data'; Url = '/msp1/msp1datas/msp1-data.php' },
-    @{ Name = 'N3PP greenhouse data'; Url = '/n3pp/n3ppdatas/n3pp-data.php' },
+    @{ Name = 'Meteo (MSP1)'; Url = '/meteo' },
+    @{ Name = 'Serre (N3PP)'; Url = '/serre' },
     @{ Name = 'MSP1 photo gallery'; Url = '/gallery/msp1' },
     @{ Name = 'N3PP photo gallery'; Url = '/gallery/n3pp' },
     @{ Name = 'FFP3 photo gallery'; Url = '/gallery/ffp3' }
@@ -99,7 +108,11 @@ if ($errorCount -gt 0) {
 
 # Export JSON
 $timestamp = Get-Date -Format 'yyyy-MM-dd-HHmmss'
-$reportPath = "scripts/reports/user-pages-check-$timestamp.json"
+$reportDir = Join-Path $root 'scripts/reports'
+if (-not (Test-Path $reportDir)) {
+    New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+}
+$reportPath = Join-Path $reportDir "user-pages-check-$timestamp.json"
 $results | ConvertTo-Json -Depth 3 | Set-Content -Path $reportPath -Encoding UTF8
 Write-Host ""
 Write-Host "Rapport JSON : $reportPath" -ForegroundColor Green

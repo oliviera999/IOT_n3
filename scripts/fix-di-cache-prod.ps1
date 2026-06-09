@@ -90,11 +90,13 @@ if (-not $SkipVerify) {
     Write-Host ""
     Write-Host "Étape 3 : Vérification des pages" -ForegroundColor Yellow
     
+    # /msp1/.../msp1-data.php et /n3pp/.../n3pp-data.php redirigent (301) vers /meteo et /serre :
+    # on verifie directement les pages cibles (sinon Invoke-WebRequest suit le 301 et masque l'etat).
     $pagesToCheck = @(
         @{ Name = 'Aquaponie landscape'; Url = '/aquaponie' },
         @{ Name = 'Aquaponie classic'; Url = '/aquaponie-alt' },
-        @{ Name = 'MSP1 data'; Url = '/msp1/msp1datas/msp1-data.php' },
-        @{ Name = 'N3PP data'; Url = '/n3pp/n3ppdatas/n3pp-data.php' }
+        @{ Name = 'Meteo (MSP1)'; Url = '/meteo' },
+        @{ Name = 'Serre (N3PP)'; Url = '/serre' }
     )
     
     $allOk = $true
