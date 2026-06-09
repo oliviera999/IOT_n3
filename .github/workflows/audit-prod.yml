@@ -1,0 +1,81 @@
+# Audit planifié de la production (scripts/ catégorie A — read-only, sans secret).
+# Lance les audits HTTP de iot.olution.info et publie les rapports en artifact.
+# Aucun secret requis : uniquement des requêtes sortantes + parsing.
+name: Audit prod (scripts)
+
+on:
+  schedule:
+    - cron: '0 6 * * *'        # tous les jours à 06:00 UTC (ajuster au besoin)
+  workflow_dispatch:            # exécution manuelle depuis l'onglet Actions
+    inputs:
+      base_url:
+        description: "URL de base à auditer"
+        default: "https://iot.olution.info"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-prod-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASE_URL: ${{ github.event.inputs.base_url || 'https://iot.olution.info' }}
+    steps:
+      - name: Checkout (sans submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      # Best-effort : récupère serveur/VERSION pour que le rapport affiche la vraie version.
+      # Dépôt public ; en cas d'échec, l'audit continue (version "inconnue").
+      - name: Init submodule serveur (best-effort)
+        continue-on-error: true
+        run: git submodule update --init serveur
+
+      - name: Préparer le dossier de sortie
+        run: mkdir -p audit-output
+
+      - name: Audit serveur complet (PowerShell)
+        shell: pwsh
+        continue-on-error: true
+        run: ./scripts/audit-serveur-complet.ps1 -BaseUrl "$env:BASE_URL" -ReportDir audit-output
+
+      - name: Vérification pages + logs + correctifs (PowerShell)
+        shell: pwsh
+        continue-on-error: true
+        run: ./scripts/check-server-pages.ps1 -BaseUrl "$env:BASE_URL" -ReportDir audit-output -ExportJson
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Audit Highcharts réel (Playwright)
+        continue-on-error: true
+        working-directory: scripts/browser-audit
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+          node check-charts.js --baseUrl "$BASE_URL"
+
+      - name: Rassembler les sorties browser-audit
+        if: always()
+        run: |
+          mkdir -p audit-output/browser-audit
+          cp scripts/browser-audit/report.json audit-output/browser-audit/ 2>/dev/null || true
+          cp -r scripts/browser-audit/screenshots audit-output/browser-audit/ 2>/dev/null || true
+
+      - name: Publier les rapports en artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-prod-${{ github.run_id }}
+          path: audit-output
+          if-no-files-found: warn
+          retention-days: 30
