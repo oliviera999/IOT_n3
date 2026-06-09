@@ -2,6 +2,8 @@
 
 Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf indication contraire.
 
+> Audit du dossier (état, utilité, cohérence, obsolescence) : voir [AUDIT_SCRIPTS.md](AUDIT_SCRIPTS.md).
+
 ## Publication
 
 | Script | Rôle |
