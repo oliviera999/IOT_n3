@@ -88,7 +88,6 @@ if (-not $NoPush) {
     Push-Location $serveurDir
     try {
         $status = git status --porcelain 2>$null
-        $branch = git rev-parse --abbrev-ref HEAD 2>$null
         $upstream = git rev-parse --abbrev-ref '@{u}' 2>$null
         $commitsAhead = 0
         if ($upstream) {
