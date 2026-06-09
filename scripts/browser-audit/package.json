@@ -1,11 +1,13 @@
 {
   "name": "browser-audit",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "1.1.0",
+  "description": "Audits navigateur (Playwright) des pages IoT : rendu Highcharts et scroll/console/screenshots.",
+  "main": "check-charts.js",
   "scripts": {
     "audit:charts": "node check-charts.js",
-    "audit:charts:prod": "node check-charts.js --baseUrl https://iot.olution.info"
+    "audit:charts:prod": "node check-charts.js --baseUrl https://iot.olution.info",
+    "scroll-debug": "node scroll-pages-debug.js",
+    "scroll-debug:prod": "node scroll-pages-debug.js --baseUrl https://iot.olution.info"
   },
   "keywords": [],
   "author": "",

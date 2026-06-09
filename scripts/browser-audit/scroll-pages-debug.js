@@ -184,7 +184,7 @@ function generateReport(results, outputPath) {
     lines.push('');
   }
 
-  lines.push('---', '*Généré par scripts/scroll-debug/scroll-pages-debug.js*');
+  lines.push('---', '*Généré par scripts/browser-audit/scroll-pages-debug.js*');
 
   fs.writeFileSync(outputPath, lines.join('\n'), 'utf8');
 }

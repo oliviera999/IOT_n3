@@ -42,10 +42,10 @@ $root = if ($PSScriptRoot) {
     (Get-Location).Path
 }
 
-$scrollDebugDir = Join-Path $root 'scripts\scroll-debug'
+$scrollDebugDir = Join-Path $root 'scripts\browser-audit'
 
 if (-not (Test-Path $scrollDebugDir)) {
-    Write-Host "Erreur: Le dossier scripts/scroll-debug est introuvable." -ForegroundColor Red
+    Write-Host "Erreur: Le dossier scripts/browser-audit est introuvable." -ForegroundColor Red
     exit 1
 }
 

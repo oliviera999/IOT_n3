@@ -47,7 +47,7 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 | `test-highcharts-rendering.ps1` | Smoke test statique (regex) du rendu Highcharts. Pour une vérification réelle (exécution JS), préférer `browser-audit/`. |
 | `test-realtime-api.ps1` | Test de l’API temps réel. |
 | `find-bugs.ps1` | Recherche de bugs dans le code. |
-| `browser-audit/` | Audit Highcharts réel (Playwright) : lit `window.Highcharts` (séries, points), screenshots. `npm run audit:charts`. |
+| `browser-audit/` | Projet Node (Playwright) regroupant les audits navigateur : `check-charts.js` (lit `window.Highcharts` — séries, points) et `scroll-pages-debug.js` (scroll, console, screenshots). `npm run audit:charts` / `npm run scroll-debug`. |
 
 ## Maintenance
 
@@ -74,8 +74,9 @@ Conservés pour historique dans `scripts/archive/` (voir [archive/README.md](arc
 
 | Script | Rôle |
 |--------|------|
-| `scroll-pages-debug.ps1` | Debug du scroll sur les pages. |
-| `scroll-debug/` | Package Node pour le debug scroll. |
+| `scroll-pages-debug.ps1` | Wrapper PowerShell du debug scroll (délègue à `browser-audit/scroll-pages-debug.js`). |
+
+> Le code Node du debug scroll vit désormais dans `browser-audit/` (fusion de l'ancien `scroll-debug/`).
 
 ---
 
