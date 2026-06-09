@@ -86,10 +86,11 @@ try {
 } catch {
     Write-Host "✗ Erreur lors du vidage du cache via l'interface admin" -ForegroundColor Red
     Write-Host "  $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "`n⚠ Action manuelle requise :" -ForegroundColor Yellow
-    Write-Host "  1. Connectez-vous au serveur via SSH ou cPanel" -ForegroundColor White
-    Write-Host "  2. Exécutez : rm -rf /home/olution/www/iot.olution.info/serveur/var/cache/di/*" -ForegroundColor White
-    Write-Host "  3. Testez à nouveau : https://iot.olution.info/meteo" -ForegroundColor White
+    Write-Host "`n⚠ Action manuelle requise (au choix) :" -ForegroundColor Yellow
+    Write-Host "  a. Via HTTP (sans SSH) : https://iot.olution.info/public/maintenance/clear-di-cache.php" -ForegroundColor White
+    Write-Host "     (vide var/cache/di et var/cache/twig, puis opcache_reset)" -ForegroundColor Gray
+    Write-Host "  b. Via SSH : rm -rf /home4/oliviera/iot.olution.info/var/cache/di/*" -ForegroundColor White
+    Write-Host "  Puis testez : https://iot.olution.info/meteo" -ForegroundColor White
     exit 1
 }
 

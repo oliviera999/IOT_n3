@@ -57,7 +57,7 @@ if (-not $nodeCmd) {
     Write-Host ""
     Write-Host "Alternative sans Node: utilisez les scripts d'audit HTTP existants:" -ForegroundColor Gray
     Write-Host "  .\scripts\check-server-pages.ps1" -ForegroundColor Gray
-    Write-Host "  .\scripts\audit-iot-pages-v2.ps1" -ForegroundColor Gray
+    Write-Host "  .\scripts\audit-serveur-complet.ps1" -ForegroundColor Gray
     exit 1
 }
 

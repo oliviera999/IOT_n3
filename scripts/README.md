@@ -6,7 +6,7 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 
 | Script | Rôle |
 |--------|------|
-| `publish_ota.ps1` | Publie vers `serveur/ota/` : n3pp, msp, cam + cibles **ffp5-** (ffp5cs). Ex. `-Targets ffp5-wroom-prod,... -Build`. |
+| `publish_ota.ps1` | Publie vers `serveur/ota/` : n3pp, msp, cam + cibles **ffp5-** (ffp5cs). Ex. `-Targets ffp5-wroom-prod,... -Build`. `-RequireSign` refuse de publier sans signature ECDSA (n3pp/msp/cam). |
 | `deploy_ota.ps1` | Orchestre `publish_ota.ps1` ; `-IncludeFfp5cs` ajoute les 4 cibles ffp5 ; `-Ffp5csOnly` = ffp5 uniquement. |
 | `publish-cycle.ps1` | Cycle de publication serveur : incrémente VERSION, CHANGELOG, commit, push. Usage : `-Component serveur -Message "description"`. |
 
@@ -28,28 +28,26 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 |--------|------|
 | `audit-serveur-complet.ps1` | Audit exhaustif du serveur distant : pages, APIs, sécurité, logs. Rapport dans `docs/`. |
 | `check-server-pages.ps1` | Vérifie les pages FFP3/MSP1/N3PP, galeries, APIs ; propose des correctifs. Rapport dans `scripts/reports/`. |
-| `check-user-pages.ps1` | Vérification rapide de 8 pages utilisateur (home, aquaponie, galeries). |
-| `audit-iot-pages.ps1` | *(Obsolète)* 3 pages hardcodées, variante curl. Préférer `check-server-pages.ps1`. |
-| `audit-iot-pages-v2.ps1` | *(Obsolète)* Même 3 pages, variante Invoke-WebRequest. Préférer `check-server-pages.ps1`. |
+| `check-user-pages.ps1` | Vérification rapide de 8 pages utilisateur (home, aquaponie, meteo, serre, galeries). |
 
 ## Déploiement
 
 | Script | Rôle |
 |--------|------|
 | `deploy_ota.ps1` | Déploiement OTA : publie les firmwares vers `serveur/ota/` et optionnellement FFP5CS vers `ffp3/ota/`. Voir section « Déploiement OTA » ci-dessus. |
-| `deploy-server.ps1` | Workflow : `git pull` serveur, commit+push serveur (et parent) si modifs, puis `DEPLOY_NOW.sh` dans `serveur/archives/ffp3/` ou `serveur/analyse-ffp3/`. Options : `-Message "..."`, `-NoPush`. À exécuter depuis la racine IOT_n3. Requiert Git Bash. |
+| `deploy-server.ps1` | Workflow : `git pull` serveur, commit+push serveur (et parent) si modifs, puis `DEPLOY_NOW.sh` **auto-détecté** sous `serveur/analyse-ffp3/` (ou `archives/ffp3/`, `ffp3/`) si présent. Options : `-Message "..."`, `-NoPush`. À exécuter depuis la racine IOT_n3. Requiert Git Bash. |
 
-**Déploiement distant (FFP3) :** Le script `serveur/archives/ffp3/deploy-server.ps1` effectue un déploiement SSH vers iot.olution.info (git fetch, composer, chmod). À exécuter depuis `serveur/archives/ffp3/`. En production, un CRON fait déjà `git pull` sur n3_serveur ; les scripts permettent un déploiement manuel ou une mise à jour des dépendances (composer, cache).
+**Déploiement distant (FFP3) :** Le déploiement réel se fait côté serveur via SSH (`serveur/analyse-ffp3/DEPLOY_NOW.sh` : `git pull`, composer, chmod). En production, un CRON fait déjà `git pull` sur n3_serveur ; les scripts permettent un déploiement manuel ou une mise à jour des dépendances (composer, cache).
 
 ## Tests et diagnostic
 
 | Script | Rôle |
 |--------|------|
-| `test-pages-curl.ps1` | Tests des pages via curl. |
-| `test-highcharts-rendering.ps1` | Test du rendu des graphiques Highcharts. |
+| `test-pages-curl.ps1` | Tests des pages via curl (statuts/redirections attendus). |
+| `test-highcharts-rendering.ps1` | Smoke test statique (regex) du rendu Highcharts. Pour une vérification réelle (exécution JS), préférer `browser-audit/`. |
 | `test-realtime-api.ps1` | Test de l’API temps réel. |
 | `find-bugs.ps1` | Recherche de bugs dans le code. |
-| `inspect-chart-data.ps1` | Inspection des données des graphiques. |
+| `browser-audit/` | Audit Highcharts réel (Playwright) : lit `window.Highcharts` (séries, points), screenshots. `npm run audit:charts`. |
 
 ## Maintenance
 
@@ -65,13 +63,12 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 |--------|------|
 | `firmwires-list.ps1` | Liste les firmwares et leur état. |
 
-### Archive (scripts one-shot, migration effectuée)
+### Archive (scripts obsolètes / one-shot)
 
-Les scripts suivants sont dans `scripts/archive/`, conservés pour historique :
+Conservés pour historique dans `scripts/archive/` (voir [archive/README.md](archive/README.md)) :
 
-- `migrate-firmwires-to-submodule.ps1` — Migration firmwares → submodule
-- `remove-ffp5cs-submodule-in-firmwires.ps1` — Migration ffp5cs
-- `run-subtree-add-ffp5cs.ps1` — Opération subtree ffp5cs
+- Migrations Git one-shot : `migrate-firmwires-to-submodule.ps1`, `remove-ffp5cs-submodule-in-firmwires.ps1`, `run-subtree-add-ffp5cs.ps1`, `README-subtree-ffp5cs.md`, `fermer-pr-integrees.ps1`.
+- Audits remplacés : `audit-iot-pages.ps1`, `audit-iot-pages-v2.ps1` (→ `check-server-pages.ps1`), `inspect-chart-data.ps1` (→ `test-highcharts-rendering.ps1` + `browser-audit/`).
 
 ## Debug (scroll)
 
