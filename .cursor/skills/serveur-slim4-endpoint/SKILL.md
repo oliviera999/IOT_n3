@@ -9,8 +9,8 @@ description: Creer ou modifier des endpoints dans le serveur PHP Slim 4 unifie (
 
 Le serveur est une application **Slim 4 unifiee** dans `serveur/`.
 
-**Unification** : privilegier les classes abstraites, templates de base (`data_page.twig`, `_control_base.twig`), helpers de routes et services partages pour garder le code serveur le plus unifie possible, sans nuire aux specificites des pages ou des modules (ffp3, msp1, n3pp).
-Exception : l’archive FFP3 est dans `serveur/archives/ffp3/` ; le code actif FFP3 est dans le serveur unifié (`serveur/src/`, `serveur/config/`).
+**Unification** : privilegier les classes abstraites, templates de base (`data_page.twig`, `_control_base.twig`), helpers de routes et services partages pour garder le code serveur le plus unifie possible, sans nuire aux specificites des pages ou des modules (ffp3, msp1, n3pp, pgl).
+Le code actif FFP3 est dans le serveur unifié (`serveur/src/`, `serveur/config/`) ; un extrait d'analyse est conservé dans `serveur/analyse-ffp3/` (lecture seule). Il n'existe pas de dossier `serveur/archives/`.
 
 ### Base de donnees locale (tests realistes)
 
@@ -34,9 +34,9 @@ serveur/
 └── tests/                    # PHPUnit
 ```
 
-### FFP3 (serveur unifié + archives)
+### FFP3 (serveur unifié)
 
-Code actif dans le serveur unifié (routes, controllers dans `serveur/src/`, `serveur/config/`). Archive et doc dans `serveur/archives/ffp3/` et extrait dans `serveur/analyse-ffp3/`. Voir `serveur/archives/ffp3/README.md`.
+Code actif dans le serveur unifié (routes, controllers dans `serveur/src/`, `serveur/config/`). Extrait d'analyse/doc dans `serveur/analyse-ffp3/`. Voir `serveur/analyse-ffp3/README.md` et `serveur/README.md`.
 
 ## Creer un nouvel endpoint
 

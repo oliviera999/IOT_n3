@@ -30,9 +30,9 @@ Document de référence : emplacements des fichiers contenant identifiants WiFi,
 | Fichier | Rôle |
 |--------|------|
 | `serveur/.env.example` | Template BDD, API_KEY, emails, GPIO, galeries, tokens — **fichier chargé** = `serveur/.env` (racine du dépôt serveur) |
-| `serveur/archives/ffp3/.env.example` | Variante FFP3 (même structure, sans GALLERY_* si déjà en racine) |
+| `serveur/.env.docker.example` | Variante pour la stack Docker locale (`tools/local-docker.ps1`) |
 | `serveur/env.test.example` | Template environnement TEST (ENV=test, API_KEY, BDD) |
-| `serveur/archives/ffp3/env.test.example` | Idem, pour le sous-dossier ffp3 |
+| `serveur/analyse-ffp3/ENVIRONNEMENT_TEST.md` | Doc de l'environnement de test FFP3 (extrait d'analyse) |
 
 ### 1.4 Serveur — fichier réel chargé par l’application
 
@@ -42,7 +42,7 @@ L’application Slim charge **un seul** `.env` :
 |--------|------|
 | `serveur/.env` | **Racine du dépôt serveur** : c’est ce fichier qui est chargé par `App\Config\Env::load()` (depuis `public/index.php`). À créer à partir de `serveur/.env.example`. |
 
-Le fichier `serveur/archives/ffp3/.env` existe aussi dans le dépôt (parfois versionné selon le README FFP3) : il peut servir de **référence ou déploiement** mais **n’est pas** celui lu par le front controller Slim (qui lit uniquement la racine `serveur/`).
+Le front controller Slim lit **uniquement** le `.env` à la racine `serveur/` (plus de `.env` dans un sous-dossier `archives/ffp3/`, ce dossier n'existe plus).
 
 ---
 
@@ -59,8 +59,8 @@ Le fichier `serveur/archives/ffp3/.env` existe aussi dans le dépôt (parfois ve
 
 | Fichier | Problème |
 |--------|----------|
-| `firmwires/ffp5cs/include/config.h` | `ApiConfig::API_KEY = "fdGTMoptd5CD2ert3"` est **versionné**. Règles projet : externaliser dans `secrets.h` (non versionné). |
-| `serveur/archives/ffp3/.env` | Contient des **valeurs réelles** (DB, API_KEY, emails, API_SIG_SECRET, etc.). Si ce fichier est versionné, ne pas y mettre de secrets réels en production ; préférer un `.env` à la racine `serveur/` non versionné. |
+| `firmwires/ffp5cs/include/config.h` | Vérifier qu'aucune `API_KEY` n'est **versionnée** en clair. Règles projet : externaliser dans `secrets.h` (non versionné). |
+| `serveur/.env` | Ne **jamais** versionner avec des valeurs réelles (DB, API_KEY, emails, API_SIG_SECRET). Le `.env` de production doit rester hors dépôt ; seuls les `*.example` sont versionnés. |
 
 ---
 

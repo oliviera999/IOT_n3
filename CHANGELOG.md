@@ -6,6 +6,31 @@ Format : [version] - date - description.
 
 ---
 
+## [2026.06] - 2026-06-09
+
+### Références submodules — cycle mai/juin 2026
+
+Synthèse des intégrations depuis l'entrée 2026-06-03 (références reconstituées depuis le `git log` racine). Le détail vit dans les CHANGELOG des submodules (`serveur/CHANGELOG.md`, `firmwires/*/VERSION.md`).
+
+**Submodule serveur : 5.1.3 → 5.1.15**
+- **5.1.4** : migrations d'audit BDD production.
+- **5.1.6** : orchestrateur de crons unifié.
+- **5.1.7** : seuils aquarium en mm (aligné firmwires).
+- **5.1.8** : correctif d'affichage aquaponie.
+- **5.1.11** : stats Poissonglouton sur `GET /pgl` + heartbeat ; **Poissonglouton en ligne**.
+- **5.1.13** : alignement HMAC/OTA avec ffp5cs 13.91.
+- **5.1.14** : correction des marées (aquaponie).
+- **5.1.15** : niveaux d'eau `NULL` (aquaponie) + correctif HMAC POST FFP3 (alignement ffp5cs 14.01).
+
+**Submodule firmwires**
+- **ffp5cs 13.92 → 14.01** : nourrissage distant (PR #9), NTP/HMAC WROOM (13.88), filtrage réservoir (13.93/13.94), netRPC GET différé (13.95), renforcement séquence boot/veille/réveil (14.00), correctifs réseau P1/P2/P3 (14.01).
+- **n3pp 4.39 → 4.41** : log durée POST `n3_data` 1.1.0 (4.40), rapport mail réseau (4.41).
+- **msp 2.43**, **uploadphotosserver 2.39**, **poissonglouton 0.1.2** (compteur recyclage, endpoints `/pgl/post-data` et `/pgl/heartbeat`).
+
+**Publications OTA** : n3pp=4.41, msp=2.43, cam-{msp1,n3pp,ffp3}=2.39, ffp5-wroom-prod=14.01, ffp5-wroom-beta=13.94, ffp5-s3-test=13.44 (audit dans `scripts/ota-audit.jsonl`).
+
+---
+
 ## [2026.06] - 2026-06-03
 
 ### Intégration PR #9 — nourrissage distant FFP5CS

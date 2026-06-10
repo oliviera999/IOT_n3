@@ -9,6 +9,9 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 | `publish_ota.ps1` | Publie vers `serveur/ota/` : n3pp, msp, cam + cibles **ffp5-** (ffp5cs). Ex. `-Targets ffp5-wroom-prod,... -Build`. |
 | `deploy_ota.ps1` | Orchestre `publish_ota.ps1` ; `-IncludeFfp5cs` ajoute les 4 cibles ffp5 ; `-Ffp5csOnly` = ffp5 uniquement. |
 | `publish-cycle.ps1` | Cycle de publication serveur : incrémente VERSION, CHANGELOG, commit, push. Usage : `-Component serveur -Message "description"`. |
+| `generate_ota_keys.ps1` | Génère la paire de clés ECDSA P-256 pour la signature OTA (sortie dans `scripts/ota_keys/`). |
+
+> Journal de publication OTA : `scripts/ota-audit.jsonl` (une ligne par déploiement, cible + version). Clés OTA : `scripts/ota_keys/` (clé publique versionnée, clé privée **hors dépôt**).
 
 ### Déploiement OTA (détail)
 
@@ -37,9 +40,9 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 | Script | Rôle |
 |--------|------|
 | `deploy_ota.ps1` | Déploiement OTA : publie les firmwares vers `serveur/ota/` et optionnellement FFP5CS vers `ffp3/ota/`. Voir section « Déploiement OTA » ci-dessus. |
-| `deploy-server.ps1` | Workflow : `git pull` serveur, commit+push serveur (et parent) si modifs, puis `DEPLOY_NOW.sh` dans `serveur/archives/ffp3/` ou `serveur/analyse-ffp3/`. Options : `-Message "..."`, `-NoPush`. À exécuter depuis la racine IOT_n3. Requiert Git Bash. |
+| `deploy-server.ps1` | Workflow : `git pull` serveur, commit+push serveur (et parent) si modifs, puis `DEPLOY_NOW.sh` dans `serveur/analyse-ffp3/`. Options : `-Message "..."`, `-NoPush`. À exécuter depuis la racine IOT_n3. Requiert Git Bash. **NB** : le script référence encore en dur l'ancien chemin `serveur/ffp3` (inexistant) — à corriger côté script. |
 
-**Déploiement distant (FFP3) :** Le script `serveur/archives/ffp3/deploy-server.ps1` effectue un déploiement SSH vers iot.olution.info (git fetch, composer, chmod). À exécuter depuis `serveur/archives/ffp3/`. En production, un CRON fait déjà `git pull` sur n3_serveur ; les scripts permettent un déploiement manuel ou une mise à jour des dépendances (composer, cache).
+**Déploiement distant (FFP3) :** un déploiement SSH vers iot.olution.info (git fetch, composer, chmod) est possible via les scripts de `serveur/analyse-ffp3/`. En production, un CRON fait déjà `git pull` sur n3_serveur ; les scripts permettent un déploiement manuel ou une mise à jour des dépendances (composer, cache).
 
 ## Tests et diagnostic
 
@@ -58,12 +61,20 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 | `fix-di-cache-prod.ps1` | Vide le cache DI en production (option `-SkipDeploy`). |
 | `fix-production-500-errors.ps1` | Correctifs pour erreurs 500 en production. |
 | `clear-cursor-cache.ps1` | Vide le cache Cursor. |
+| `clean-firmware-builds.ps1` | Nettoie les artefacts de build PlatformIO des firmwares (`.pio/`). |
 
 ## Git et submodules
 
 | Script | Rôle |
 |--------|------|
-| `firmwires-list.ps1` | Liste les firmwares et leur état. |
+| `firmwires-list.ps1` | Liste les firmwares et leur état (lit `firmwires/firmwares.manifest.json`). |
+| `fermer-pr-integrees.ps1` | Ferme les pull requests déjà intégrées (nettoyage GitHub). |
+
+## Audit navigateur
+
+| Chemin | Rôle |
+|--------|------|
+| `browser-audit/` | Package Node (Puppeteer) d'audit des pages rendues (graphiques, galeries). |
 
 ### Archive (scripts one-shot, migration effectuée)
 

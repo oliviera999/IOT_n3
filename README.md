@@ -14,8 +14,9 @@ IOT_n3/
 ├── ANALYSE_ARBORESCENCE.md
 ├── docs/               → Inventaire des appareils (inventaire_appareils.md)
 ├── firmwires/          → Submodule n3_firmwires (tous les projets firmware PlatformIO)
-└── serveur/            → Applications web PHP (msp1, n3pp, msp1gallery, n3ppgallery, ffp3)
-                           · archives/ (site-initial, ffp3) : anciennes versions — consultation uniquement, ne pas modifier
+└── serveur/            → Submodule n3_serveur : application web PHP unifiée (Slim 4)
+                           · code actif dans serveur/src/ (modules msp1, n3pp, ffp3, pgl + galeries)
+                           · serveur/analyse-ffp3/ : extrait FFP3 conservé pour analyse/référence
 ```
 
 - **Firmwares** : [firmwires/](firmwires/) — compilation et upload avec [PlatformIO](https://platformio.org/).
@@ -32,10 +33,10 @@ Chaque firmware qui envoie des données ou est piloté à distance est relié à
 | **[n3pp](firmwires/n3pp/)** — N3PhasmesProto (serre / aquaponie) | ESP32 | **Module N3PP** ([serveur](serveur/README.md)) | Réception des données (`n3ppdatas`), contrôle des sorties (`n3ppcontrol`), galerie photos (`n3ppgallery`) |
 | **[msp](firmwires/msp/)** — MeteoStationPrototype (météo + tracker solaire) | ESP32 | **Module MSP1** ([serveur](serveur/README.md)) | Réception des données (`msp1datas`), contrôle (`msp1control`), galerie (`msp1gallery`) |
 | **[uploadphotosserver](firmwires/uploadphotosserver/)** (unifié, envs msp1/n3pp/ffp3) | ESP32-CAM | **msp1gallery, n3ppgallery, ffp3gallery** | Envoi JPEG vers l’endpoint selon l’env de build + contrôle distant au réveil (GET paramètres depuis `UploadPhoto*Outputs`, POST version firmware). Un seul firmware avec 3 envs PlatformIO. |
-| **[ffp5cs](firmwires/ffp5cs/)** — Contrôleur aquaponie (WROOM/S3) | ESP32 / ESP32-S3 | **Serveur unifié** ([serveur/](serveur/)) | FFP3 : backend web (Slim 4) pour les données et le contrôle des ESP FFP5CS ; archive dans [serveur/archives/ffp3/](serveur/archives/ffp3/) |
+| **[ffp5cs](firmwires/ffp5cs/)** — Contrôleur aquaponie (WROOM/S3) | ESP32 / ESP32-S3 | **Serveur unifié** ([serveur/](serveur/)) | FFP3 : backend web (Slim 4) pour les données et le contrôle des ESP FFP5CS ; code dans `serveur/src/`, extrait d’analyse dans [serveur/analyse-ffp3/](serveur/analyse-ffp3/) |
 | **[poissonglouton](firmwires/poissonglouton/)** — Compteur recyclage ludique | ESP32-S3 (avec ou sans écran) | **Serveur unifié** ([serveur/](serveur/)) | Comptage bouteilles (IR + ultrason), batch `/pgl/post-data`, heartbeat `/pgl/heartbeat`, stats et statut LIVE sur `/pgl` |
-| **[ratata](firmwires/ratata/)** — Kit ZYC0108-EN (voiture / robot) | UNO + ESP32-CAM | — | Pas de serveur dédié (démo locale, stream HTTP possible en direct) |
-| **[LVGL_Widgets](firmwires/LVGL_Widgets/)** — Interface écran tactile | ESP32-S3 | — | Pas de serveur dédié |
+| **[ratata](firmwires/à%20voir/ratata/)** — Kit ZYC0108-EN (voiture / robot) | UNO + ESP32-CAM | — | Pas de serveur dédié (démo locale, stream HTTP possible en direct). Dossier `firmwires/à voir/ratata/` (en revue). |
+| **[LVGL_Widgets](firmwires/à%20voir/LVGL_Widgets/)** — Interface écran tactile | ESP32-S3 | — | Pas de serveur dédié. Dossier `firmwires/à voir/LVGL_Widgets/` (en revue). |
 
 **À propos des modules photo (ESP32-CAM)** : le firmware **uploadphotosserver** (unifié) propose 3 envs (msp1, n3pp, ffp3) ciblant msp1gallery, n3ppgallery ou ffp3gallery. Les variantes legacy sont dans `firmwires/archive/`.
 
@@ -57,7 +58,7 @@ Les **galeries photo** (msp1gallery, n3ppgallery, ffp3) sont des endpoints d’u
 - **Inventaire des appareils** : voir [docs/inventaire_appareils.md](docs/inventaire_appareils.md) pour le registre et le nommage (n3-*).
 - **Firmwares** : voir [firmwires/README.md](firmwires/README.md) pour la liste des projets, cartes, commandes de compilation et structure.
 - **Scripts** : voir [scripts/README.md](scripts/README.md) pour l'inventaire des scripts de publication, audit, déploiement et tests.
-- **FFP3 (serveur)** : voir [serveur/ffp3/README.md](serveur/archives/ffp3/README.md) ou [serveur/analyse-ffp3/README.md](serveur/analyse-ffp3/README.md) pour l’installation, la configuration et l’architecture de l’application Slim 4.
+- **Serveur (Slim 4 unifié)** : voir [serveur/README.md](serveur/README.md) pour l’installation, la configuration et l’architecture ; l’extrait d’analyse FFP3 est dans [serveur/analyse-ffp3/README.md](serveur/analyse-ffp3/README.md).
 - **Audit des échanges serveur ↔ ESP** : voir [docs/audit_echanges_serveur_esp.md](docs/audit_echanges_serveur_esp.md) pour la synthèse des flux, endpoints et authentification.
 - **Diagnostic erreurs serveur** : [cronlog production](https://iot.olution.info/public/cronlog.txt) ; [error_log production](https://iot.olution.info/public/error_log) (accès autorisé comme le cronlog) ; processus de debug (référence d’erreur, script d'analyse) : [serveur/docs/DEBUG_ERREURS_SERVEUR.md](serveur/docs/DEBUG_ERREURS_SERVEUR.md).
 - **Analyse de l’arborescence** : voir [ANALYSE_ARBORESCENCE.md](ANALYSE_ARBORESCENCE.md) pour une analyse détaillée des dossiers et des points d’attention.

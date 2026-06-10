@@ -1,7 +1,7 @@
 # Analyse générale de l'arborescence – IOT_n3
 
-**Date :** 5 mars 2026 (mise à jour doc : mars 2026)  
-**Périmètre :** `c:\IOT_n3`
+**Date :** 5 mars 2026 (mise à jour doc : 9 juin 2026)  
+**Périmètre :** `IOT_n3` (dépôt racine + submodules `serveur/` et `firmwires/`)
 
 ---
 
@@ -75,9 +75,11 @@ Regroupe **tous les firmwares** pour cartes ESP32, ESP32-CAM et Arduino UNO. Out
 
 Un seul firmware **uploadphotosserver** avec trois envs PlatformIO. Les envs indiquent l’**endpoint cible** (msp1gallery, n3ppgallery, ffp3gallery). Compilation : `pio run -e msp1` / `-e n3pp` / `-e ffp3`. Capture JPEG, POST HTTP vers le serveur, WiFi, NTP, LED de statut (GPIO 33).
 
-#### D. Ratata – Kit ZYC0108-EN – `ratata/`
+#### D. Ratata – Kit ZYC0108-EN – `à voir/ratata/`
 
-- **Documentation dédiée :** voir [firmwires/ratata/README.md](firmwires/ratata/README.md) pour la structure, les huit exemples et les broches.
+> **Emplacement réel :** `firmwires/à voir/ratata/` (dossier « en revue », pas à la racine de `firmwires/`).
+
+- **Documentation dédiée :** voir [firmwires/à voir/ratata/README.md](firmwires/à%20voir/ratata/README.md) pour la structure, les huit exemples et les broches.
 - **Un projet, 8 environnements** (objectif : un `platformio.ini` à la racine de `ratata/`) :
   - **7 env. Arduino UNO :** `1_auto_move`, `2_servo_angle`, `3_ultrasonic_follow`, `4_obstacle_avoidance`, `5_tracking`, `6_2_arduino_uno`, `test`
   - **1 env. ESP32-CAM :** `6_1_esp32_car` (voiture avec caméra WiFi, stream HTTP)
@@ -100,13 +102,23 @@ Un seul firmware **uploadphotosserver** avec trois envs PlatformIO. Les envs ind
 - **Environnements notables :** `wroom-prod`, `wroom-test`, `wroom-s3-*`, `native` (tests), etc.
 - **Dépôt Git :** sous-dossier `ffp5cs` contient un `.git/` (sous-projet versionné)
 
-#### F. LVGL_Widgets – `LVGL_Widgets/`
+#### F. Poissonglouton – `poissonglouton/`
+
+- **Carte :** ESP32-S3 (envs `pgl-s3-headless` et `pgl-s3-display`).
+- **Rôle :** compteur ludique de recyclage plastique (poubelle « poisson glouton »).
+- **Fonctionnalités :** comptage bouteilles (capteurs IR + ultrason), envoi par lots `POST /pgl/post-data`, heartbeat `POST /pgl/heartbeat`, version `0.1.2` (`include/config.h`, `PGL_FIRMWARE_VERSION`).
+- **Backend :** serveur unifié, page et statut LIVE sur `/pgl`, stats et API health `/pgl/api/system/health`.
+- **Doc :** [firmwires/poissonglouton/README.md](firmwires/poissonglouton/README.md).
+
+#### G. LVGL_Widgets – `à voir/LVGL_Widgets/`
+
+> **Emplacement réel :** `firmwires/à voir/LVGL_Widgets/` (dossier « en revue »).
 
 - **Carte :** ESP32-S3 (`esp32-s3-devkitc-1`), écran JC4827W543 (Arduino_GFX, TouchLib), PSRAM.
 - **Stack :** LVGL 8.4, AsyncTCP, ESPAsyncWebServer, DHT, OneWire, DallasTemperature, NTP, ElegantOTA, Grove Ultrasonic.
 - **Fichier principal :** `src/main.cpp` (très volumineux : setup vers ligne 1630, loop vers 1753).
 
-#### G. Projets de test (dans ou à côté de ffp5cs)
+#### H. Projets de test (dans ou à côté de ffp5cs)
 
 - `ffp5cs/test psram s3/` et `ffp5cs/test psram s3 2/` : tests ESP32-S3 PSRAM, chacun avec son `platformio.ini` et `src/main.cpp`.
 
@@ -163,7 +175,9 @@ La galerie photos : routes **`/n3ppgallery/`** (voir ci-dessous).
 
 Présence de **error_log** et de fichiers « old » / « 2 » indiquant des évolutions et du legacy.
 
-#### C. FFP3 – `serveur/archives/ffp3/`
+#### C. FFP3 et cœur applicatif – `serveur/src/`
+
+Le code FFP3 n'est plus un sous-projet isolé : il a été **fusionné dans l'application Slim 4 unifiée** (`serveur/src/`, `serveur/config/`, `serveur/public/`). Il n'existe **pas** de dossier `serveur/archives/ffp3/` ; un extrait conservé pour analyse/référence se trouve dans `serveur/analyse-ffp3/`.
 
 Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
@@ -189,26 +203,27 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
 - **Fonctionnalités :** ingestion données capteurs (POST avec clé API + HMAC-SHA256), dashboard (Highcharts, CSV), surveillance aquaponie, contrôle GPIO, sync ESP32 ↔ serveur, tâches planifiées (CRON), logging (Monolog).
 
-- **Dépôt Git :** `serveur/archives/ffp3/` est un dossier versionné dans le dépôt **n3_serveur** (ffp3 a été fusionné avec historique via `git subtree add` ; ce n’est plus un sous-dépôt séparé).
+- **Dépôt Git :** tout le code actif vit dans le dépôt **n3_serveur** (submodule `serveur/`). FFP3 a été fusionné avec historique (`git subtree add`) puis intégré au cœur `serveur/src/` ; ce n’est plus un sous-dépôt ni un dossier `archives/` séparé.
 
 ### 4.3 Fichiers communs / divers
 
 - **error_log** : présents dans plusieurs sous-dossiers (msp1, n3pp, galeries) – à ne pas versionner en production.
 - **Fichiers « old » / « 2 »** : variantes ou anciennes versions (ex. `n3pp-outputsold.php`, `n3pp-databaseold.php`, `n3pp-outputs2.php`) – à clarifier ou archiver.
 
-### 4.4 Dossier `serveur/archives/site-initial/`
+### 4.4 Dossiers d'analyse et d'amélioration
 
-- **Rôle** : archive d’une ancienne version des fichiers serveur (ex. ffp3_prov4).
-- **Règle** : **ne pas modifier** ce dossier. Il est conservé pour **consultation uniquement** (référence, comparaison avec la version actuelle, historique, dépannage).
-- Les évolutions et corrections se font dans les dossiers actuels du serveur (msp1, n3pp, ffp3, galeries), pas dans `archives/site-initial/`.
+- **`serveur/analyse-ffp3/`** : extrait FFP3 (code + docs) conservé pour **analyse et référence** uniquement ; les évolutions se font dans le cœur unifié `serveur/src/`.
+- **`serveur/ameliorations-visuelles-iot-serveur/`** : notes/specs d'améliorations visuelles (CSS/UX) du portail.
+- Il n'existe **pas** de dossier `serveur/archives/` ni `serveur/archives/site-initial/` (ancienne structure supprimée).
 
 ### 4.5 Synthèse serveur
 
 | Chemin | Type | Rôle |
 |--------|------|------|
 | `serveur/public/index.php` | Slim 4 | Front controller unique |
-| Modules msp1, n3pp | Slim 4 | Controllers `src/Controller/Msp/`, `N3pp/` — données, contrôle, galeries |
-| `serveur/archives/ffp3/` | Slim 4 (dossier) | Sous-projet historique, scripts, doc ; code actif dans `serveur/src/` |
+| `serveur/src/Controller/` | Slim 4 | Modules `Msp/`, `N3pp/`, `Ffp3/`, `Pgl/`, galeries — données, contrôle, OTA |
+| `serveur/config/` | Slim 4 | Définition des routes (`routes_msp1_n3pp.php`, `routes_helpers.php`, etc.) |
+| `serveur/analyse-ffp3/` | Extrait | Code/doc FFP3 conservés pour analyse (lecture seule) |
 
 ---
 
@@ -230,8 +245,8 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 
 ### 5.4 Qualité de code (firmwares)
 
-- **n3pp** : bug dans `batterie()` (`sampleTotal += analogRead(...)` au lieu des `samples[sampleIndex]`), et affichage OLED utilisant `digitalRead()` sur des variables (à corriger en affichage direct des variables).
-- Plusieurs firmwares **monolithiques** (un seul `main.cpp` très long) ; ffp5cs sert de référence pour une structure modulaire.
+- **n3pp / msp** : les bugs historiques (moyenne batterie, affichage OLED `digitalRead()` sur des variables, `String emailMessage` locale, position du bloc `intervalDatas`) ont été **corrigés** lors du cycle d'audit 2026-05 (voir `CHANGELOG.md` racine et libs partagées `firmwires/shared/`).
+- Plusieurs firmwares restent **monolithiques** (un seul `main.cpp` très long) ; ffp5cs sert de référence pour une structure modulaire et les libs partagées `shared/` factorisent désormais WiFi/HTTP/NTP/mail/HMAC/OTA.
 
 ### 5.5 Redondances
 
@@ -246,30 +261,29 @@ Application **moderne** (PHP 8.1+, Slim 4, Twig, PHP-DI, Monolog, PHPUnit).
 ## 6. Arborescence schématique (principaux dossiers)
 
 ```
-c:\IOT_n3\
-├── firmwires\
-│   ├── .gitignore
-│   ├── .vscode\settings.json
-│   ├── README.md, RAPPORT_ANALYSE.md, RECOMMANDATIONS.md
-│   ├── n3pp\              # N3PhasmesProto (ESP32 serre/aquaponie)
-│   ├── msp\              # MeteoStationPrototype (ESP32 météo + tracker)
-│   ├── uploadphotosserver\       # ESP32-CAM unifié (envs msp1, n3pp, ffp3)
-│   ├── ratata\              # Kit ZYC0108-EN (8 env. UNO + ESP32-CAM)
-│   ├── ffp5cs\              # Contrôleur aquaponie (WROOM/S3, modulaire) (dossier ordinaire)
-│   ├── LVGL_Widgets\        # ESP32-S3 + écran LVGL
-│   └── (test psram s3, test psram s3 2 dans ffp5cs)
+IOT_n3/
+├── firmwires/                    # submodule n3_firmwires
+│   ├── README.md, AUDIT_FIRMWARES_2026.md, RAPPORT_ANALYSE.md, RECOMMANDATIONS.md
+│   ├── firmwares.manifest.json   # Registre machine des projets firmware
+│   ├── shared/                   # Libs partagées (n3_common, n3_wifi, n3_http, n3_data, n3_hmac, ...)
+│   ├── n3pp/                     # N3PhasmesProto (ESP32 serre/aquaponie)
+│   ├── msp/                      # MeteoStationPrototype (ESP32 météo + tracker)
+│   ├── uploadphotosserver/       # ESP32-CAM unifié (envs msp1, n3pp, ffp3 + variantes -cam)
+│   ├── poissonglouton/           # ESP32-S3 compteur recyclage (/pgl)
+│   ├── ffp5cs/                   # Contrôleur aquaponie (WROOM/S3, modulaire)
+│   ├── archive/                  # uploadphotosserver_legacy
+│   └── à voir/                   # ratata (ZYC0108-EN), LVGL_Widgets (en revue)
 │
-└── serveur\
-    ├── public\index.php     # Front controller Slim 4 unique
-    ├── src\Controller\     # Msp, N3pp, Ffp3, Gallery
-    ├── config\              # routes_msp1_n3pp.php, routes_helpers.php
-    ├── archives\            # site-initial, ffp3 (archives — consultation uniquement)
-    ├── analyse-ffp3\        # Extrait utile FFP3 pour analyse
-    ├── msp1gallery\         # Routes /msp1gallery/ (upload photos)
-    └── n3ppgallery\        # Routes /n3ppgallery/ (upload photos)
+└── serveur/                      # submodule n3_serveur — app Slim 4 unifiée
+    ├── public/index.php          # Front controller unique
+    ├── src/Controller/           # Msp, N3pp, Ffp3, Pgl, Gallery
+    ├── config/                   # routes_msp1_n3pp.php, routes_helpers.php
+    ├── templates/, assets/       # Vues Twig, CSS/JS
+    ├── migrations/, ota/         # SQL, binaires OTA + metadata
+    └── analyse-ffp3/             # Extrait FFP3 pour analyse (lecture seule)
 ```
 
-*Note :* Le dossier **serveur/** dans IOT_n3 est un clone du dépôt **n3_serveur** (submodule) ; ffp3 n’est plus un sous-dépôt séparé mais un dossier versionné dans n3_serveur.
+*Note :* Le dossier **serveur/** dans IOT_n3 est le submodule **n3_serveur** ; ffp3 n’est plus un sous-dépôt ni un dossier `archives/` séparé, mais intégré au cœur `serveur/src/`.
 
 ---
 
