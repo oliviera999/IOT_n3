@@ -33,5 +33,5 @@ alwaysApply: true
 - **Scripts de workflow et analyse (firmwires)**
   - Lors de l'ajout ou la modification de scripts de workflow, monitoring ou analyse : mettre a jour `firmwires/README.md` (section Scripts) et, pour ffp5cs, `firmwires/ffp5cs/docs/INVENTAIRE_SCRIPTS_FFP5CS.md` si le repertoire des scripts change.
 
-- **Dossier `serveur/archives/site-initial/`**
-  - Ne pas modifier : ancienne version des fichiers serveur, conservee pour consultation uniquement (reference, comparaison, historique). Les evolutions se font dans les dossiers actuels (msp1, n3pp, ffp3, galeries).
+- **Dossier `serveur/analyse-ffp3/`**
+  - Extrait FFP3 conserve pour analyse/reference (lecture seule). Les evolutions se font dans le coeur unifie `serveur/src/` (modules msp1, n3pp, ffp3, pgl, galeries). Il n'existe pas de dossier `serveur/archives/`.

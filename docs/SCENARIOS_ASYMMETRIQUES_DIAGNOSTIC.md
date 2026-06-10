@@ -81,5 +81,5 @@ curl "http://iot.olution.info/ffp3/api/outputs-test/state"
 ## Références
 
 - [audit_echanges_serveur_esp.md](audit_echanges_serveur_esp.md)
-- [SYNCHRONISATION_BIDIRECTIONNELLE.md](serveur/archives/ffp3/docs/SYNCHRONISATION_BIDIRECTIONNELLE.md (ou serveur/docs/SYNCHRONISATION_BIDIRECTIONNELLE.md))
-- [ENDPOINTS_ESP32_SERVEUR.md](serveur/docs/ENDPOINTS_ESP32_SERVEUR.md)
+- [SYNCHRONISATION_BIDIRECTIONNELLE.md](../serveur/docs/SYNCHRONISATION_BIDIRECTIONNELLE.md)
+- [ENDPOINTS_ESP32_SERVEUR.md](../serveur/docs/ENDPOINTS_ESP32_SERVEUR.md)

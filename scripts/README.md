@@ -11,6 +11,9 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 | `publish_ota.ps1` | Publie vers `serveur/ota/` : n3pp, msp, cam + cibles **ffp5-** (ffp5cs). Ex. `-Targets ffp5-wroom-prod,... -Build`. `-RequireSign` refuse de publier sans signature ECDSA (n3pp/msp/cam). |
 | `deploy_ota.ps1` | Orchestre `publish_ota.ps1` ; `-IncludeFfp5cs` ajoute les 4 cibles ffp5 ; `-Ffp5csOnly` = ffp5 uniquement. |
 | `publish-cycle.ps1` | Cycle de publication serveur : incrémente VERSION, CHANGELOG, commit, push. Usage : `-Component serveur -Message "description"`. |
+| `generate_ota_keys.ps1` | Génère la paire de clés ECDSA P-256 pour la signature OTA (sortie dans `scripts/ota_keys/`). |
+
+> Journal de publication OTA : `scripts/ota-audit.jsonl` (une ligne par déploiement, cible + version). Clés OTA : `scripts/ota_keys/` (clé publique versionnée, clé privée **hors dépôt**).
 
 ### Déploiement OTA (détail)
 
@@ -58,12 +61,20 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 | `fix-di-cache-prod.ps1` | Vide le cache DI en production (option `-SkipDeploy`). |
 | `fix-production-500-errors.ps1` | Correctifs pour erreurs 500 en production. |
 | `clear-cursor-cache.ps1` | Vide le cache Cursor. |
+| `clean-firmware-builds.ps1` | Nettoie les artefacts de build PlatformIO des firmwares (`.pio/`). |
 
 ## Git et submodules
 
 | Script | Rôle |
 |--------|------|
-| `firmwires-list.ps1` | Liste les firmwares et leur état. |
+| `firmwires-list.ps1` | Liste les firmwares et leur état (lit `firmwires/firmwares.manifest.json`). |
+| `fermer-pr-integrees.ps1` | Ferme les pull requests déjà intégrées (nettoyage GitHub). |
+
+## Audit navigateur
+
+| Chemin | Rôle |
+|--------|------|
+| `browser-audit/` | Package Node (Puppeteer) d'audit des pages rendues (graphiques, galeries). |
 
 ### Archive (scripts obsolètes / one-shot)
 

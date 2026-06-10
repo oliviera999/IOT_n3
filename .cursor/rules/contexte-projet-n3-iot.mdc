@@ -20,13 +20,13 @@ alwaysApply: true
 
 - **Structure du workspace**
   - `firmwires/` : firmwares ESP32, ESP32-CAM, Arduino UNO (PlatformIO).
-  - `serveur/` : serveur unifie PHP (Slim 4) — front controller unique gerant ffp3, msp1, n3pp et galeries.
-  - `serveur/archives/site-initial/` : **ne pas modifier** — ancienne version des fichiers serveur, conservee pour consultation (reference, comparaison, historique).
+  - `serveur/` : serveur unifie PHP (Slim 4) — front controller unique gerant ffp3, msp1, n3pp, pgl et galeries.
+  - `serveur/analyse-ffp3/` : extrait FFP3 conserve pour analyse/reference (lecture seule). Il n'y a pas de dossier `serveur/archives/`.
   - `docs/` : inventaire des appareils (`inventaire_appareils.md`).
 
 - **Submodules Git**
-  - `firmwires` : depot **n3_firmwires** (tous les firmwares : n3pp, msp, ffp5cs, uploadphotosserver_*, ratata, LVGL_Widgets).
-  - `serveur` : depot **n3_serveur** (serveur unifie : msp1, n3pp, ffp3, galeries).
+  - `firmwires` : depot **n3_firmwires** (firmwares : n3pp, msp, ffp5cs, uploadphotosserver, poissonglouton ; `ratata` et `LVGL_Widgets` sous `firmwires/à voir/`).
+  - `serveur` : depot **n3_serveur** (serveur unifie : msp1, n3pp, ffp3, pgl, galeries).
   - Ces sous-projets ont leurs propres regles Cursor (`.cursorrules`, `.cursor/rules/`).
 
 - **Langue**

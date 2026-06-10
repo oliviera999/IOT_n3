@@ -1,6 +1,6 @@
 # Recommandations techniques – IoT de la salle aérée n³
 
-*Dernière mise à jour : avril 2026.*
+*Dernière mise à jour : 9 juin 2026.*
 
 **Contexte :** [La salle aérée n³](https://n3.olution.info) (Nature, Numérique, Nomade) — Lycée Lyautey de Casablanca. Espace pédagogique en plein air : aquaponie, jardins, station météo, objets connectés et robotique.
 
@@ -25,9 +25,10 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 |--------------|----------|---------|------------------|
 | Serre / aquaponie (N3PP) | `n3pp` | serveur/n3pp | Température, humidité, pompe, nourrissage → n3ppdatas, n3ppcontrol |
 | Station météo (MSP) | `msp` | serveur/msp1 | DHT, pluie, DS18B20, tracker solaire → msp1datas, msp1control |
-| Aquaponie avancée (FFP) | `ffp5cs` | serveur/ffp3 | Données + contrôle via API FFP3 (Slim 4) |
+| Aquaponie avancée (FFP) | `ffp5cs` | serveur (routes `/ffp3/*`) | Données + contrôle via API FFP3 (Slim 4, HMAC-SHA256) |
+| Recyclage ludique (PGL) | `poissonglouton` | serveur (routes `/pgl/*`) | Comptage bouteilles → `/pgl/post-data`, `/pgl/heartbeat`, statut LIVE `/pgl` |
 | Caméras (photos) | uploadphotosserver (unifié, envs msp1, n3pp, ffp3) | msp1gallery, n3ppgallery, ffp3 | Envoi JPEG vers upload.php. **Les noms des firmwares indiquent l’endpoint cible** (msp1gallery, n3ppgallery ou ffp3), pas une association exclusive à MSP ou N3PP : une caméra peut envoyer vers n’importe quelle galerie selon la config. |
-| Robot / démo | ratata, LVGL_Widgets | — | Usage local ou stream direct |
+| Robot / démo | ratata, LVGL_Widgets (sous `firmwires/à voir/`) | — | Usage local ou stream direct |
 
 ---
 
@@ -75,8 +76,8 @@ Tous les firmwares du dépôt **IOT_n3** qui envoient des données ou sont pilot
 2. **Nommage cohérent**  
    - Utiliser un préfixe commun (ex. `n3-`) pour hostname mDNS ou noms dans les logs (ex. `n3-msp-01`, `n3-n3pp-01`) pour faciliter le diagnostic sur le réseau du lycée.
 
-3. **Version et build**  
-   - Afficher la version du firmware dans les logs et, si possible, dans les requêtes POST (paramètre `version` ou équivalent). FFP5CS le fait déjà ; étendre l’idée à n3pp et msp.
+3. **Version et build** — **Fait**  
+   - La version du firmware est désormais affichée dans les logs et transmise dans les POST (paramètre `version`) par **ffp5cs, n3pp, msp et poissonglouton**. n3pp logge aussi la durée du POST `n3_data` depuis la v4.40.
 
 ---
 
@@ -113,10 +114,11 @@ D’après le [RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md) :
 
 ### 2.5 Backend : cohérence et évolution
 
-**Constat :** Deux familles de backends coexistent :
+**Constat (mis à jour 2026-06) :** les backends sont désormais **unifiés** dans une seule application **Slim 4** (`serveur/src/`), avec des modules par produit (msp1, n3pp, ffp3, pgl, galeries) :
 
-- **msp1 et n3pp** : PHP procédural (control, datas, gallery), clé API simple, structure par dossiers.
-- **ffp3** : Application structurée (Slim 4, Twig, PHP-DI, PHPUnit), API plus riche, HMAC, logging centralisé.
+- **msp1 et n3pp** : modules Slim 4 (`Controller/Msp/`, `Controller/N3pp/`). Le contrat moderne (`/msp1/post-data`, `/n3pp/post-data`, heartbeat) supporte **HMAC-SHA256** avec fallback `api_key` ; les anciens endpoints `.php` restent en alias.
+- **ffp3** : module Slim 4 historique de référence (HMAC, logging Monolog centralisé, PHPUnit).
+- Les contrats HTTP sont documentés dans `serveur/docs/API_MSP1_N3PP.md`, `serveur/docs/ENDPOINTS_ESP32_SERVEUR.md` et `serveur/docs/API_REALTIME_MSP_N3PP.md`.
 
 **Recommandations :**
 
@@ -142,7 +144,7 @@ D’après le [RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md) :
 **Structure actuelle (galeries à la racine de `serveur/`) :**
 - `serveur/msp1gallery/` (upload.php, msp1-gallery.php) → URL `/msp1gallery/upload.php`
 - `serveur/n3ppgallery/` (upload.php, n3pp-gallery.php, triphotos.php) → URL `/n3ppgallery/upload.php`. **triphotos.php** modifie/déplace des fichiers : le protéger en production (cron, token `TRIPHOTOS_SECRET`, ou accès restreint).
-- FFP3 : galerie intégrée dans l’app Slim (routes dans le serveur unifié (archive FFP3 dans `serveur/archives/ffp3/`)).
+- FFP3 : galerie intégrée dans l’app Slim (routes dans le serveur unifié `serveur/src/` ; extrait d’analyse dans `serveur/analyse-ffp3/`).
 
 Les firmwares **uploadphotosserver_msp1** et **uploadphotosserver_n3pp_1_6_deppsleep** envoient respectivement vers `/msp1gallery/upload.php` et `/n3ppgallery/upload.php`. Vérifier que le serveur web (Apache/Nginx) expose bien ces chemins à la racine du site (ex. `https://iot.olution.info/msp1gallery/`, `https://iot.olution.info/n3ppgallery/`).
 
@@ -282,7 +284,7 @@ Le firmware **ffp5cs** appelle des APIs ESP-IDF directement (éviter `String` Ar
 
 - **Présentation salle aérée n³ :** [https://n3.olution.info](https://n3.olution.info)  
 - **Backend IoT :** [https://iot.olution.info](https://iot.olution.info)  
-- **Documentation projet :** [README](README.md), [ANALYSE_ARBORESCENCE](ANALYSE_ARBORESCENCE.md), [docs/inventaire_appareils](docs/inventaire_appareils.md), [firmwires/README](firmwires/README.md), [firmwires/RAPPORT_ANALYSE](firmwires/RAPPORT_ANALYSE.md), [serveur/archives/ffp3/README](serveur/archives/ffp3/README.md) (ffp3 fait partie du dépôt n3_serveur).
+- **Documentation projet :** [README](README.md), [ANALYSE_ARBORESCENCE](ANALYSE_ARBORESCENCE.md), [docs/inventaire_appareils](docs/inventaire_appareils.md), [firmwires/README](firmwires/README.md), [serveur/README](serveur/README.md), [serveur/analyse-ffp3/README](serveur/analyse-ffp3/README.md) (extrait FFP3 du dépôt n3_serveur).
 
 ---
 

@@ -15,13 +15,13 @@
 1. **Firmware**  
    - Utilise `#include "credentials.h"` et `API_KEY` (pas de clé en dur dans `main.cpp`).  
    - `credentials.h` n’est pas versionné ; le projet partagé a un `firmwires/credentials.h.example` avec `#define API_KEY "VOTRE_CLE_API"`.  
-   - **À faire** : dans `firmwires/n3pp`, s’assurer que `credentials.h` (copie locale ou lien vers le partagé) contient `#define API_KEY "fdGTMoptd5CD2ert3"` pour correspondre au serveur.
+   - **À faire** : dans `firmwires/n3pp`, s’assurer que `credentials.h` (copie locale ou lien vers le partagé) définit la même `API_KEY` que le serveur (`#define API_KEY "<clé>"`). Ne pas committer la valeur réelle.
 
 2. **Serveur**  
    - `N3ppPostDataController` exige `$_ENV['API_KEY']` ; si absent → 500, si différent du POST → 401.  
-   - Chargement du `.env` : `Env::load()` lit le fichier à la **racine du dépôt serveur** (`serveur/.env`), pas `serveur/archives/ffp3/.env`.  
-   - Un `.env` présent dans le repo a été vu dans `serveur/archives/ffp3/.env` avec `API_KEY=fdGTMoptd5CD2ert3`. En production, le front unique utilise en général un `.env` à la racine de `serveur/` (souvent non versionné).  
-   - **À faire** : sur iot.olution.info, vérifier que le `.env` effectivement chargé par l’app (racine `serveur/`) contient `API_KEY=fdGTMoptd5CD2ert3`.
+   - Chargement du `.env` : `Env::load()` lit le fichier à la **racine du dépôt serveur** (`serveur/.env`). Il n'y a plus de `.env` dans un sous-dossier `archives/ffp3/` (dossier supprimé).  
+   - En production, le front unique charge le `.env` à la racine de `serveur/` (non versionné).  
+   - **À faire** : sur iot.olution.info, vérifier que le `.env` effectivement chargé par l’app (racine `serveur/`) contient la même `API_KEY` que celle configurée dans le firmware n3pp.
 
 3. **Log moniteur (terminals/69858.txt)**  
    - On voit de nombreuses fois « recup info bdd » et les variables (GET outputs OK).  
