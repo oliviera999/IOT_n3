@@ -33,6 +33,7 @@
 #   .\scripts\publish_ota.ps1
 #   .\scripts\publish_ota.ps1 -Targets "n3pp","msp"
 #   .\scripts\publish_ota.ps1 -Build -SignKey scripts\ota_keys\ota_signing_key.pem
+#   .\scripts\publish_ota.ps1 -RequireSign        # refuse de publier sans signature ECDSA
 #   .\scripts\publish_ota.ps1 -DryRun
 # =============================================================================
 
@@ -43,6 +44,7 @@ param(
     [switch]$DryRun,
     [switch]$SkipValidate,
     [switch]$NoSign,         # Ne pas signer (ignore la cle par defaut)
+    [switch]$RequireSign,    # Echouer si la signature ECDSA est indisponible ou echoue (cibles n3pp/msp/cam)
     [string]$SignKey = ""    # Chemin vers la cle privee ECDSA PEM (defaut : scripts\ota_keys\ota_signing_key.pem)
 )
 
@@ -234,6 +236,13 @@ if (-not $signingEnabled -and $SignKey -eq $defaultSignKey) {
     Write-Host "Info : publication sans signature ECDSA (cle absente, utiliser -SignKey pour forcer la generation)." -ForegroundColor Gray
 } elseif (-not $signingEnabled) {
     Write-Host "Info : publication sans signature ECDSA." -ForegroundColor Gray
+}
+
+# -RequireSign : la signature est exigee. On echoue tot si elle n'est pas disponible.
+if ($RequireSign -and -not $signingEnabled) {
+    Write-Host "Erreur : -RequireSign mais signature ECDSA indisponible (cle absente ou -NoSign). Publication annulee." -ForegroundColor Red
+    Write-Host "  Generez/installez la cle : .\scripts\generate_ota_keys.ps1  (puis recompilez avec -Build pour embarquer la cle publique)." -ForegroundColor Yellow
+    exit 1
 }
 
 # -----------------------------------------------------------------------------
@@ -522,6 +531,9 @@ foreach ($targetName in $Targets) {
         $signature = Invoke-OtaSign -BinaryPath $destBin -PrivateKeyPath $SignKey
         if ($signature) {
             Write-Host "  Signature ECDSA : OK ($(($signature.Length)) chars base64)" -ForegroundColor Green
+        } elseif ($RequireSign) {
+            Write-Host "  Erreur : signature ECDSA echouee pour $targetName et -RequireSign actif. Publication annulee." -ForegroundColor Red
+            exit 1
         } else {
             Write-Host "  Avertissement : signature ECDSA echouee, publication sans signature." -ForegroundColor Yellow
         }
