@@ -186,3 +186,25 @@ Aucune correction n'est nécessaire côté serveur. Côté firmware, seul **A** 
 correctif fonctionnel ; **B/C** sont des raffinements de la détection d'inflexion ;
 **D–H** relèvent du nettoyage. Aucun de ces points ne remet en cause les données que le
 serveur recalcule : la chaîne actuelle produit déjà des résultats corrects de bout en bout.
+
+## 6. Correctifs appliqués (A, D–H)
+
+Les points **A, D, E, F, G, H** sont corrigés dans le commit
+`fix(ffp5cs): correctifs marée — signe du fallback OLED + nettoyage`
+(8 fichiers, +38/−45), préparé sur la base du commit épinglé par le superprojet
+(`08f225c`, v14.02 wroom-prod). Détails notables :
+
+- **A** : fallback OLED recalculé en `passé − actuel` ; sentinelle `DIFF_MAREE_UNSET`
+  (`INT_MIN`) au lieu de `-1`.
+- **G** : quand le niveau aquarium est inconnu, `diffMaree` est laissé vide →
+  `buildFullUpdateBody()` omet la clé du POST → le serveur (`$toFloat`) stocke NULL.
+  Vérifié compatible HMAC : le firmware signe le payload réellement construit, et le
+  serveur ne reconstruit que les clés reçues.
+- **B/C** (raffinements de la détection d'inflexion) : volontairement non traités ici.
+
+> ⚠️ La session n'ayant pas d'accès en écriture au dépôt `n3_firmwires` (proxy git
+> restreint à `IOT_n3`), le commit est livré dans
+> [`0001-fix-ffp5cs-correctifs-maree.patch`](0001-fix-ffp5cs-correctifs-maree.patch).
+> Application : `cd firmwires && git checkout -b fix/maree 08f225c && git am ../0001-fix-ffp5cs-correctifs-maree.patch`.
+> Compilation non vérifiée (pas de toolchain PlatformIO dans l'environnement) :
+> lancer `pio run -e wroom-prod` avant publication OTA.

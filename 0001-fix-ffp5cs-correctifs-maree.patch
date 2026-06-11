@@ -1,0 +1,284 @@
+From e5c2bb8127cf869f9273da9131c769eeeb70a63c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 11 Jun 2026 20:37:55 +0000
+Subject: [PATCH] =?UTF-8?q?fix(ffp5cs):=20correctifs=20mar=C3=A9e=20?=
+ =?UTF-8?q?=E2=80=94=20signe=20du=20fallback=20OLED=20+=20nettoyage?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Suite à l'analyse de la chaîne marée au regard de la refonte serveur
+(n3_serveur v5.1.14, sémantique distance) :
+
+- automatism.cpp/h : le fallback d'affichage calculait (actuel − passé),
+  signe inversé par rapport à la convention diffMaree = (passé − actuel) ;
+  la flèche marée OLED pouvait s'inverser. Sentinelle -1 remplacée par
+  DIFF_MAREE_UNSET (INT_MIN), -1 mm étant une valeur légitime.
+- automatism_sync.cpp : diffMaree omis du POST quand le niveau aquarium
+  est inconnu (le serveur stocke NULL au lieu d'un faux 0 « stable »).
+- system_sensors : suppression du code mort _aquaMax/getAquaMax/resetAquaMax
+  et du setter setTideWindowMs jamais appelé (fenêtre fixe 15 s).
+- Nomenclature : diffMaree10s → diffMareeWindow, logs « 10s/15s » unifiés
+  sur la fenêtre réelle _tideWindowMs.
+- mailer.cpp : unités du footer corrigées (mm, pas cm).
+
+Aucun changement de comportement des automatismes (sommeil, inflexion) ;
+contrat POST/HMAC inchangé (clé absente = déjà géré côté serveur).
+---
+ ffp5cs/include/automatism.h                  |  6 ++++--
+ ffp5cs/include/automatism/automatism_sleep.h |  2 +-
+ ffp5cs/include/system_sensors.h              |  8 +-------
+ ffp5cs/src/automatism.cpp                    | 11 +++++------
+ ffp5cs/src/automatism/automatism_sleep.cpp   | 16 ++++++++--------
+ ffp5cs/src/automatism/automatism_sync.cpp    | 13 +++++++++----
+ ffp5cs/src/mailer.cpp                        |  8 ++++----
+ ffp5cs/src/system_sensors.cpp                | 19 ++++++-------------
+ 8 files changed, 38 insertions(+), 45 deletions(-)
+
+diff --git a/ffp5cs/include/automatism.h b/ffp5cs/include/automatism.h
+index 2ed327c..ec1bb09 100644
+--- a/ffp5cs/include/automatism.h
++++ b/ffp5cs/include/automatism.h
+@@ -1,6 +1,7 @@
+ #pragma once
+ #include <cstring>
+ #include <atomic>
++#include <climits>
+ #include "system_sensors.h"
+ #include "system_actuators.h"
+ #include "web_client.h"
+@@ -325,8 +326,9 @@ class Automatism {
+   uint16_t tempsGros = ActuatorConfig::Default::FEED_BIG_DURATION_SEC;
+   uint16_t tempsPetits = ActuatorConfig::Default::FEED_SMALL_DURATION_SEC;
+ 
+-  // suivi marée pour affichage
+-  int _lastDiffMaree{-1};
++  // suivi marée pour affichage — sentinelle dédiée : -1 mm est une valeur légitime de diffMaree
++  static constexpr int DIFF_MAREE_UNSET = INT_MIN;
++  int _lastDiffMaree{DIFF_MAREE_UNSET};
+   
+   // États pour les alertes (anciennement dans AutomatismAlertController)
+   bool _lowAquaSent{false};
+diff --git a/ffp5cs/include/automatism/automatism_sleep.h b/ffp5cs/include/automatism/automatism_sleep.h
+index 059e275..b09302b 100644
+--- a/ffp5cs/include/automatism/automatism_sleep.h
++++ b/ffp5cs/include/automatism/automatism_sleep.h
+@@ -25,7 +25,7 @@ public:
+                                bool tankPumpRunning,
+                                uint32_t countdownEnd,
+                                unsigned long lastWakeMs,
+-                               int diffMaree10s,
++                               int diffMareeWindow,
+                                int16_t tideTriggerCm);
+ 
+     // Activité
+diff --git a/ffp5cs/include/system_sensors.h b/ffp5cs/include/system_sensors.h
+index ce3ec2a..7c85e1a 100644
+--- a/ffp5cs/include/system_sensors.h
++++ b/ffp5cs/include/system_sensors.h
+@@ -26,20 +26,14 @@ class SystemSensors {
+   // Calcul de la différence de marée à partir de la dernière mesure fournie
+   int diffMaree(uint16_t currentAqua);
+   
+-  // Configuration fenêtre d'analyse marée (~15s par défaut)
+-  void setTideWindowMs(uint32_t ms) { _tideWindowMs = ms; }
++  // Fenêtre d'analyse marée (fixe, 15s — posté en métadonnée tideWindowMs)
+   uint32_t getTideWindowMs() const { return _tideWindowMs; }
+-  
+-  // Accesseurs pour la gestion de la marée
+-  uint16_t getAquaMax() const { return _aquaMax; }
+-  void resetAquaMax() { _aquaMax = 0; }
+  private:
+   UltrasonicManager _usAqua{Pins::ULTRASON_AQUA, "Ultrasonic-Aqua"};
+   UltrasonicManager _usTank{Pins::ULTRASON_TANK, "Ultrasonic-Tank"};
+   UltrasonicManager _usPota{Pins::ULTRASON_POTA, "Ultrasonic-Pota"};
+   AirSensor _air;
+   WaterTempSensor _water;
+-  uint16_t _aquaMax{0};
+   // Dernières valeurs valides (non nulles, non aberrantes) pour gestion fallback
+   uint16_t _lastValidWlAqua{0};
+   uint16_t _lastValidWlTank{0};
+diff --git a/ffp5cs/src/automatism.cpp b/ffp5cs/src/automatism.cpp
+index ca7764f..cc57119 100644
+--- a/ffp5cs/src/automatism.cpp
++++ b/ffp5cs/src/automatism.cpp
+@@ -1152,17 +1152,16 @@ void Automatism::updateDisplayInternal(const AutomatismRuntimeContext& ctx) {
+         readings.luminosite = 0;
+     }
+ 
+-    // Calcul de la différence de marée
++    // Calcul de la différence de marée — convention distance (passé − actuel) :
++    // positif = distance qui baisse = eau qui monte
+     int diffMaree = _lastDiffMaree;
+-    
+-    if (diffMaree == -1 && _lastReadings.wlAqua > 0) {
++
++    if (diffMaree == DIFF_MAREE_UNSET) {
+         if (readings.wlAqua > 0 && _lastReadings.wlAqua > 0) {
+-            diffMaree = static_cast<int>(readings.wlAqua) - static_cast<int>(_lastReadings.wlAqua);
++            diffMaree = static_cast<int>(_lastReadings.wlAqua) - static_cast<int>(readings.wlAqua);
+         } else {
+             diffMaree = 0;
+         }
+-    } else if (diffMaree == -1) {
+-        diffMaree = 0;
+     }
+     
+     // Calcul de la direction de marée
+diff --git a/ffp5cs/src/automatism/automatism_sleep.cpp b/ffp5cs/src/automatism/automatism_sleep.cpp
+index dcb0ca2..c000e40 100644
+--- a/ffp5cs/src/automatism/automatism_sleep.cpp
++++ b/ffp5cs/src/automatism/automatism_sleep.cpp
+@@ -141,7 +141,7 @@ bool AutomatismSleep::shouldEnterSleepEarly(const SensorReadings& r,
+                                             bool tankPumpRunning,
+                                             uint32_t countdownEnd,
+                                             unsigned long lastWakeMs,
+-                                            int diffMaree10s,
++                                            int diffMareeWindow,
+                                             int16_t tideTriggerCm) {
+     // Synchroniser l'état interne
+     _forceWakeUp = forceWakeUp;
+@@ -171,13 +171,13 @@ bool AutomatismSleep::shouldEnterSleepEarly(const SensorReadings& r,
+     bool delayReached = (nowMs - lastWakeMs) >= (adaptiveDelaySec * 1000UL);
+ 
+     const int tideTriggerMm = static_cast<int>(SensorConfig::Ultrasonic::cmToMm(static_cast<uint16_t>(tideTriggerCm)));
+-    bool tideAscendingTrigger = (diffMaree10s > tideTriggerMm);
++    bool tideAscendingTrigger = (diffMareeWindow > tideTriggerMm);
+ 
+     if (tideAscendingTrigger || delayReached) {
+         unsigned long awakeSec = (nowMs - lastWakeMs) / 1000UL;
+         if (tideAscendingTrigger) {
+-            Serial.printf("[Auto] Sleep précoce déclenché: marée montante (~10s, +%d mm)\n",
+-                          diffMaree10s);
++            Serial.printf("[Auto] Sleep précoce déclenché: marée montante (fenêtre marée, +%d mm)\n",
++                          diffMareeWindow);
+         } else {
+             Serial.printf("[Auto] Sleep précoce déclenché: délai atteint (%lu s)\n", awakeSec);
+         }
+@@ -291,7 +291,7 @@ bool AutomatismSleep::handleAutoSleep(const SensorReadings& r, SystemActuators&
+     
+     bool feedingInProgress = core.isFeedingInProgress();
+     uint32_t countdownEnd = core.getCountdownEndMs();
+-    int diffMaree10s = core.computeDiffMaree(r.wlAqua);
++    int diffMareeWindow = core.computeDiffMaree(r.wlAqua);
+     int16_t tideTriggerCm = core.getTideTriggerCm();
+     
+     // Récupération du nombre de clients WebSocket
+@@ -328,7 +328,7 @@ bool AutomatismSleep::handleAutoSleep(const SensorReadings& r, SystemActuators&
+                                              tankPumpRunning,
+                                              countdownEnd,
+                                              localLastWakeMs,
+-                                             diffMaree10s,
++                                             diffMareeWindow,
+                                              tideTriggerCm);
+ 
+     uint32_t sleepDurationSec = core.getFreqWakeSec();
+@@ -348,7 +348,7 @@ bool AutomatismSleep::handleAutoSleep(const SensorReadings& r, SystemActuators&
+     const uint32_t adaptiveDelaySec = calculateAdaptiveSleepDelay();
+     const bool delayReached = (nowMs - localLastWakeMs) >= (adaptiveDelaySec * 1000UL);
+     const int tideTriggerMm = static_cast<int>(SensorConfig::Ultrasonic::cmToMm(static_cast<uint16_t>(tideTriggerCm)));
+-    const bool tideAscending = (diffMaree10s > tideTriggerMm);
++    const bool tideAscending = (diffMareeWindow > tideTriggerMm);
+     const bool decisionChanged = (canSleep != _lastCanSleep) || (shouldSleep != _lastShouldSleep);
+     if (decisionChanged || (nowMs - _lastDecisionLogMs > 30000)) {
+         _lastDecisionLogMs = nowMs;
+@@ -359,7 +359,7 @@ bool AutomatismSleep::handleAutoSleep(const SensorReadings& r, SystemActuators&
+                       shouldSleep ? 1 : 0,
+                       delayReached ? 1 : 0,
+                       tideAscending ? 1 : 0,
+-                      diffMaree10s,
++                      diffMareeWindow,
+                       tideTriggerMm,
+                       wsClients,
+                       feedingInProgress ? 1 : 0,
+diff --git a/ffp5cs/src/automatism/automatism_sync.cpp b/ffp5cs/src/automatism/automatism_sync.cpp
+index d05cf00..8936fbb 100644
+--- a/ffp5cs/src/automatism/automatism_sync.cpp
++++ b/ffp5cs/src/automatism/automatism_sync.cpp
+@@ -302,9 +302,8 @@ bool AutomatismSync::sendFullUpdate(const SensorReadings& readings,
+ 
+     char payloadBuffer[BufferConfig::POST_PAYLOAD_MAX_SIZE];
+     Ffp3PostBody::FullUpdateValues body{};
+-    int diffMaree = SensorValidation::isWaterLevelKnown(readings.wlAqua)
+-                      ? core.computeDiffMaree(readings.wlAqua)
+-                      : 0;
++    const bool diffMareeKnown = SensorValidation::isWaterLevelKnown(readings.wlAqua);
++    int diffMaree = diffMareeKnown ? core.computeDiffMaree(readings.wlAqua) : 0;
+     float pressureForPost = isnan(readings.pressureHpa) ? 0.0f : readings.pressureHpa;
+ 
+     snprintf(body.apiKey, sizeof(body.apiKey), "%s", ApiConfig::API_KEY);
+@@ -317,7 +316,13 @@ bool AutomatismSync::sendFullUpdate(const SensorReadings& readings,
+     SensorReadingFallback::formatWaterLevelPost(body.eauPotager, sizeof(body.eauPotager), readings.wlPota);
+     SensorReadingFallback::formatWaterLevelPost(body.eauAquarium, sizeof(body.eauAquarium), readings.wlAqua);
+     SensorReadingFallback::formatWaterLevelPost(body.eauReserve, sizeof(body.eauReserve), readings.wlTank);
+-    snprintf(body.diffMaree, sizeof(body.diffMaree), "%d", diffMaree);
++    // Niveau inconnu → champ vide : la clé est omise du POST et le serveur stocke NULL
++    // (0 signifierait à tort « marée stable » dans les stats serveur)
++    if (diffMareeKnown) {
++        snprintf(body.diffMaree, sizeof(body.diffMaree), "%d", diffMaree);
++    } else {
++        body.diffMaree[0] = '\0';
++    }
+     snprintf(body.luminosite, sizeof(body.luminosite), "%u", readings.luminosite);
+     snprintf(body.etatPompeAqua, sizeof(body.etatPompeAqua), "%d", acts.isAquaPumpRunning() ? 1 : 0);
+     snprintf(body.etatPompeTank, sizeof(body.etatPompeTank), "%d", acts.isTankPumpRunning() ? 1 : 0);
+diff --git a/ffp5cs/src/mailer.cpp b/ffp5cs/src/mailer.cpp
+index 539204d..f3cb505 100644
+--- a/ffp5cs/src/mailer.cpp
++++ b/ffp5cs/src/mailer.cpp
+@@ -545,11 +545,11 @@ static const char* buildSystemInfoFooter() {
+   written = snprintf(buf, remaining, "- Temp eau: %.1f °C\n"
+                                      "- Temp air: %.1f °C\n"
+                                      "- Humidité: %.0f %%\n"
+-                                     "- Aqua lvl: %d cm\n"
+-                                     "- Réserve lvl: %d cm\n"
+-                                     "- Potager lvl: %d cm\n"
++                                     "- Aqua lvl: %d mm\n"
++                                     "- Réserve lvl: %d mm\n"
++                                     "- Potager lvl: %d mm\n"
+                                      "- Luminosité: %d\n"
+-                                     "- Diff marée: %d\n",
++                                     "- Diff marée: %d mm\n",
+                      rs.tempWater, rs.tempAir, rs.humidity, rs.wlAqua, rs.wlTank, rs.wlPota, rs.luminosite, diffM);
+   if (written < 0 || (size_t)written >= remaining) {
+     buf[remaining - 1] = '\0';
+diff --git a/ffp5cs/src/system_sensors.cpp b/ffp5cs/src/system_sensors.cpp
+index 50a84bb..bfc8949 100644
+--- a/ffp5cs/src/system_sensors.cpp
++++ b/ffp5cs/src/system_sensors.cpp
+@@ -305,13 +305,6 @@ SensorReadings SystemSensors::read() {
+     r.pressureHpa = (isnan(val) || val <= 0.0f || val > 1200.0f) ? NAN : val;
+   }
+ 
+-  // marée diff (max valide uniquement)
+-  uint16_t oldAquaMax = _aquaMax;
+-  if (SensorValidation::isWaterLevelKnown(r.wlAqua) && r.wlAqua > _aquaMax) {
+-    _aquaMax = r.wlAqua;
+-    SENSOR_LOG_PRINTF("[Maree] Nouveau max: %u mm (précédent: %u mm)\n", _aquaMax, oldAquaMax);
+-  }
+-
+   // Vérification du timeout global et affichage du temps d'exécution
+   uint32_t elapsed = millis() - startTime;
+   if (elapsed > GLOBAL_TIMEOUT_MS) {
+@@ -328,12 +321,12 @@ SensorReadings SystemSensors::read() {
+ int SystemSensors::diffMaree(uint16_t currentAqua) {
+   // Différence cohérente: (passé - actuel) sur la fenêtre configurée (_tideWindowMs)
+   uint32_t nowMs = millis();
+-  int diff10s = diffMareeWindow(currentAqua, nowMs);
+-  
+-  // Log détaillé du calcul de marée (15s)
+-  SENSOR_LOG_PRINTF("[Maree] Calcul15s: actuel=%u, diff15s=%d mm\n", currentAqua, diff10s);
+-  return diff10s;
+-} 
++  int diffWin = diffMareeWindow(currentAqua, nowMs);
++
++  SENSOR_LOG_PRINTF("[Maree] Calcul fenêtre %lu ms: actuel=%u, diff=%d mm\n",
++                    static_cast<unsigned long>(_tideWindowMs), currentAqua, diffWin);
++  return diffWin;
++}
+ 
+ void SystemSensors::pushAquaHist(uint16_t value, uint32_t nowMs) {
+   _aquaHist[_aquaHistHead] = value;
+-- 
+2.43.0
+
