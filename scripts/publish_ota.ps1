@@ -34,6 +34,7 @@
 #   .\scripts\publish_ota.ps1 -Targets "n3pp","msp"
 #   .\scripts\publish_ota.ps1 -Build -SignKey scripts\ota_keys\ota_signing_key.pem
 #   .\scripts\publish_ota.ps1 -RequireSign        # refuse de publier sans signature ECDSA
+#   .\scripts\generate_ota_keys.ps1               # provisioning/rotation explicite des cles
 #   .\scripts\publish_ota.ps1 -DryRun
 # =============================================================================
 
@@ -209,25 +210,16 @@ if ($SignKey -eq "") {
 $signingEnabled = $false
 if ($NoSign) {
     Write-Host "Info : publication sans signature ECDSA (-NoSign)." -ForegroundColor Gray
-} elseif ($SignKey -ne "" -and (Test-Path $SignKey)) {
+} elseif ($SignKey -ne "" -and (Test-Path -LiteralPath $SignKey)) {
     $signingEnabled = $true
     Write-Host "Signature ECDSA activee : $SignKey" -ForegroundColor Green
 } elseif ($SignKey -ne "") {
-    # Cle demandee mais absente : generation auto si chemin par defaut (premiere utilisation)
+    # Ne jamais generer une cle pendant une publication : les appareils deployes
+    # embarquent deja une cle publique et rejetteraient une signature inconnue.
     $isDefaultPath = ($SignKey -eq $defaultSignKey -or $SignKey -like "*ota_keys\ota_signing_key.pem")
     if ($isDefaultPath) {
-        Write-Host "Cle de signature absente — generation via generate_ota_keys.ps1 (premiere utilisation)..." -ForegroundColor Yellow
-        & (Join-Path $scriptDir "generate_ota_keys.ps1") -OutDir "scripts\ota_keys"
-        if (Test-Path $SignKey) {
-            $signingEnabled = $true
-            Write-Host "  Cles generees. Signature ECDSA activee." -ForegroundColor Green
-        } else {
-            Write-Host "Erreur : generation des cles a echoue." -ForegroundColor Red
-            exit 1
-        }
-        if ($Build) {
-            Write-Host "  Utilisez -Build pour recompiler les firmwares avec la nouvelle cle publique." -ForegroundColor Cyan
-        }
+        Write-Host "Avertissement : cle de signature par defaut absente ($SignKey) — publication sans signature ECDSA." -ForegroundColor Yellow
+        Write-Host "  Pour une premiere installation, generez explicitement la cle avec .\scripts\generate_ota_keys.ps1 puis recompilez les firmwares." -ForegroundColor Yellow
     } else {
         Write-Host "Avertissement : cle de signature introuvable ($SignKey) — publication sans signature ECDSA." -ForegroundColor Yellow
     }

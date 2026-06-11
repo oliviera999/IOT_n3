@@ -13,7 +13,7 @@ Scripts PowerShell à exécuter depuis la racine du dépôt (`IOT_n3/`), sauf in
 | `publish-cycle.ps1` | Cycle de publication serveur : incrémente VERSION, CHANGELOG, commit, push. Usage : `-Component serveur -Message "description"`. |
 | `generate_ota_keys.ps1` | Génère la paire de clés ECDSA P-256 pour la signature OTA (sortie dans `scripts/ota_keys/`). |
 
-> Journal de publication OTA : `scripts/ota-audit.jsonl` (une ligne par déploiement, cible + version). Clés OTA : `scripts/ota_keys/` (clé publique versionnée, clé privée **hors dépôt**).
+> Journal de publication OTA : `scripts/ota-audit.jsonl` (une ligne par déploiement, cible + version). Clés OTA : `scripts/ota_keys/` (clé publique versionnée, clé privée **hors dépôt**). `publish_ota.ps1` ne génère pas de clé manquante pendant une publication ; utiliser explicitement `generate_ota_keys.ps1` lors d'un provisioning ou d'une rotation planifiée.
 
 ### Déploiement OTA (détail)
 

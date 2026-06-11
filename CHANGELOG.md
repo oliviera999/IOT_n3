@@ -6,6 +6,15 @@ Format : [version] - date - description.
 
 ---
 
+## [2026.06.1] - 2026-06-11
+
+### Correctif scripts OTA — signature ECDSA
+
+- `scripts/publish_ota.ps1` ne genere plus automatiquement une cle ECDSA manquante pendant une publication : `-RequireSign` echoue explicitement si la cle attendue est absente, ce qui evite de signer des metadata OTA avec une cle inconnue des appareils deja deployes.
+- Documentation `scripts/README.md` alignee : la generation de cle reste une etape volontaire via `scripts/generate_ota_keys.ps1`.
+
+---
+
 ## [2026.06] - 2026-06-09
 
 ### Références submodules — cycle mai/juin 2026
