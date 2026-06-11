@@ -225,7 +225,7 @@ if ($NoSign) {
     }
 }
 if (-not $signingEnabled -and $SignKey -eq $defaultSignKey) {
-    Write-Host "Info : publication sans signature ECDSA (cle absente, utiliser -SignKey pour forcer la generation)." -ForegroundColor Gray
+    Write-Host "Info : publication sans signature ECDSA (cle absente, installer la cle ou utiliser -SignKey)." -ForegroundColor Gray
 } elseif (-not $signingEnabled) {
     Write-Host "Info : publication sans signature ECDSA." -ForegroundColor Gray
 }
