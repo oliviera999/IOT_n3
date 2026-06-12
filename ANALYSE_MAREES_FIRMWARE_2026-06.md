@@ -208,3 +208,30 @@ Les points **A, D, E, F, G, H** sont corrigés dans le commit
 > Application : `cd firmwires && git checkout -b fix/maree 08f225c && git am ../0001-fix-ffp5cs-correctifs-maree.patch`.
 > Compilation non vérifiée (pas de toolchain PlatformIO dans l'environnement) :
 > lancer `pio run -e wroom-prod` avant publication OTA.
+
+## 7. Addendum — bug serveur découvert : consommations à signe inversé
+
+Contrairement au verdict initial (« aucune correction nécessaire côté serveur »),
+l'examen du bloc de stats marées a révélé que `WaterBalanceService` n'appliquait **pas**
+la sémantique distance aux consommations :
+
+- **`computeReserveStats()`** comptait les deltas **négatifs** d'`EauReserve` comme
+  « Consommation totale ». Or distance qui diminue = eau qui **monte** : la carte
+  Réserve affichait donc le ravitaillement sous le label consommation et inversement,
+  avec un « Bilan net » de signe inversé.
+- **`computeAquariumConsumption()`** moyennait les baisses de distance (= remontées
+  d'eau, remplissages marée) sous le label « Consommation moyenne ».
+- La correction v5.1.14 avait bien inversé le signe pour la **tendance**
+  (`detectCurrentTrend`) et les extrema, mais pas pour ces deux fonctions ; le test
+  existant ne vérifiait que les clés de tendance.
+- `tide_stats.twig` (libellés neutres « Variation positive/négative ») n'est pas
+  concerné.
+
+Correctif livré dans
+[`0002-fix-serveur-consommation-semantique-distance.patch`](0002-fix-serveur-consommation-semantique-distance.patch)
+(base : submodule `serveur` épinglé `b1ec57f`) : consommation = variations positives
+de distance, ravitaillement = négatives, bilan = ravitaillement − consommation,
+moyenne aquarium sur `delta > 0` ; docblock de `computeVariations()` clarifié ; nouveau
+test `testConsumptionFollowsDistanceSemantics` avec valeurs vérifiées.
+**Suite PHPUnit complète exécutée : 185 tests OK (9 skipped, préexistants).**
+Application : `cd serveur && git checkout -b fix/conso b1ec57f && git am ../0002-fix-serveur-consommation-semantique-distance.patch`.
