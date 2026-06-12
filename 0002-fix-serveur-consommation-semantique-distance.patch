@@ -1,0 +1,153 @@
+From e4f594d1a44b3f7eb2e04579bfa49b1697fffb84 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 12 Jun 2026 06:42:50 +0000
+Subject: [PATCH] =?UTF-8?q?fix(aquaponie):=20consommation/ravitaillement?=
+ =?UTF-8?q?=20align=C3=A9s=20sur=20la=20s=C3=A9mantique=20distance?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+EauReserve et EauAquarium sont des distances capteur → surface :
+distance qui augmente = eau qui descend. Or WaterBalanceService comptait
+les deltas négatifs (eau qui monte) comme consommation :
+
+- computeReserveStats : « Consommation totale » affichait en réalité le
+  ravitaillement et inversement ; bilan net de signe inversé. Corrigé :
+  consommation = variations positives (distance ↑), ravitaillement =
+  variations négatives, bilan = ravitaillement − consommation.
+- computeAquariumConsumption : la « consommation moyenne » moyennait les
+  remontées d'eau (remplissages marée). Corrigé : seules les hausses de
+  distance (delta > 0) comptent.
+- TideCycleDetector::computeVariations : docblock clarifié (cumuls bruts,
+  interprétation physique à la charge de l'appelant — tide_stats.twig
+  affiche des libellés neutres, inchangés).
+- Test testConsumptionFollowsDistanceSemantics avec valeurs vérifiées.
+
+Suite PHPUnit complète : 185 tests OK (9 skipped, inchangés).
+---
+ src/Service/TideCycleDetector.php         |  6 ++++
+ src/Service/WaterBalanceService.php       | 24 ++++++++++-----
+ tests/Service/WaterBalanceServiceTest.php | 36 +++++++++++++++++++++++
+ 3 files changed, 58 insertions(+), 8 deletions(-)
+
+diff --git a/src/Service/TideCycleDetector.php b/src/Service/TideCycleDetector.php
+index 2ebbaa5..3d9c1a3 100644
+--- a/src/Service/TideCycleDetector.php
++++ b/src/Service/TideCycleDetector.php
+@@ -214,6 +214,12 @@ class TideCycleDetector
+     }
+ 
+     /**
++     * Cumuls de variations brutes de la série (sans interprétation physique).
++     *
++     * Sur une série distance capteur → surface : positive = distance qui augmente
++     * = eau qui descend ; negative = distance qui diminue = eau qui monte.
++     * L'interprétation (consommation / ravitaillement) appartient à l'appelant.
++     *
+      * @param array<float|int|null> $levels Niveaux d'eau
+      * @return array{positive: float, negative: float, global: float}
+      */
+diff --git a/src/Service/WaterBalanceService.php b/src/Service/WaterBalanceService.php
+index 91091b3..8e016a5 100644
+--- a/src/Service/WaterBalanceService.php
++++ b/src/Service/WaterBalanceService.php
+@@ -80,7 +80,11 @@ class WaterBalanceService
+     }
+ 
+     /**
+-     * Calcule les statistiques de la réserve (consommation, ravitaillement, bilan)
++     * Calcule les statistiques de la réserve (consommation, ravitaillement, bilan).
++     *
++     * Sémantique distance (EauReserve = distance capteur → surface) :
++     * distance qui augmente (delta > 0) = niveau qui baisse = consommation ;
++     * distance qui diminue (delta < 0) = niveau qui monte = ravitaillement.
+      */
+     private function computeReserveStats(array $rows): array
+     {
+@@ -88,9 +92,9 @@ class WaterBalanceService
+         $variations = $this->cycleDetector->computeVariations($reserveLevels, self::UNCERTAINTY_THRESHOLD);
+ 
+         return [
+-            'consumption' => $variations['negative'],
+-            'refill' => $variations['positive'],
+-            'balance' => $variations['positive'] - $variations['negative'],
++            'consumption' => $variations['positive'],
++            'refill' => $variations['negative'],
++            'balance' => $variations['negative'] - $variations['positive'],
+         ];
+     }
+ 
+@@ -144,7 +148,11 @@ class WaterBalanceService
+     }
+ 
+     /**
+-     * Calcule la consommation moyenne de l'aquarium (différence de niveau)
++     * Calcule la consommation moyenne de l'aquarium (cm par variation significative).
++     *
++     * Sémantique distance (EauAquarium = distance capteur → surface) :
++     * seules les hausses de distance (delta > 0 = eau qui descend) comptent
++     * comme consommation.
+      */
+     private function computeAquariumConsumption(array $rows): ?float
+     {
+@@ -165,9 +173,9 @@ class WaterBalanceService
+                 continue;
+             }
+ 
+-            // Compter uniquement les baisses de niveau (consommation)
+-            if ($delta < 0) {
+-                $consumption += abs($delta);
++            // Distance qui augmente = eau qui descend (consommation)
++            if ($delta > 0) {
++                $consumption += $delta;
+                 $countSignificantChanges++;
+             }
+         }
+diff --git a/tests/Service/WaterBalanceServiceTest.php b/tests/Service/WaterBalanceServiceTest.php
+index 9b84f29..8ed380e 100644
+--- a/tests/Service/WaterBalanceServiceTest.php
++++ b/tests/Service/WaterBalanceServiceTest.php
+@@ -64,4 +64,40 @@ class WaterBalanceServiceTest extends TestCase
+         $this->assertSame(2.0, $balance['tide_threshold_cm']);
+         $this->assertGreaterThanOrEqual(0, $balance['tide_cycles']);
+     }
++
++    /**
++     * Sémantique distance : distance qui augmente = eau qui descend (consommation),
++     * distance qui diminue = eau qui monte (ravitaillement).
++     */
++    public function testConsumptionFollowsDistanceSemantics(): void
++    {
++        // Valeurs en mm (brut BDD), converties en cm par le service.
++        // EauReserve (cm) : 50 → 53 → 56 → 56 → 46 → 49
++        //   consommation (distance ↑) : 3+3+3 = 9 cm ; ravitaillement (distance ↓) : 10 cm
++        // EauAquarium (cm) : 30 → 33 → 36 → 33 → 36 → 33
++        //   consommation moyenne (distance ↑) : (3+3+3)/3 = 3 cm
++        $reserve = [500, 530, 560, 560, 460, 490];
++        $aquarium = [300, 330, 360, 330, 360, 330];
++
++        $rows = [];
++        foreach ($reserve as $i => $r) {
++            $rows[] = [
++                'reading_time' => sprintf('2026-05-25 10:%02d:00', $i * 10),
++                'EauAquarium' => $aquarium[$i],
++                'EauReserve' => $r,
++                'EauPotager' => 200,
++            ];
++        }
++
++        $repo = $this->createMock(SensorReadRepository::class);
++        $repo->method('fetchBetween')->willReturn(array_reverse($rows));
++
++        $service = new WaterBalanceService($repo, new TideCycleDetector());
++        $balance = $service->computeBalance('2026-05-25 10:00:00', '2026-05-25 10:50:00');
++
++        $this->assertEqualsWithDelta(9.0, $balance['reserve_consumption'], 0.001);
++        $this->assertEqualsWithDelta(10.0, $balance['reserve_refill'], 0.001);
++        $this->assertEqualsWithDelta(1.0, $balance['reserve_balance'], 0.001);
++        $this->assertEqualsWithDelta(3.0, $balance['aquarium_consumption'], 0.001);
++    }
+ }
+-- 
+2.43.0
+
