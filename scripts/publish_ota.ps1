@@ -296,14 +296,13 @@ function Get-FirmwareVersion {
     }
 
     if ($TargetName -like "ffp5-*") {
-        $ch = Join-Path $projectDir "include\config.h"
-        if (-not (Test-Path $ch)) {
-            Write-Host "  Erreur : $ch introuvable" -ForegroundColor Red
-            return $null
+        foreach ($header in @("include\config_system.h", "include\config.h")) {
+            $ch = Join-Path $projectDir $header
+            if (-not (Test-Path $ch)) { continue }
+            $c = Get-Content -Path $ch -Raw
+            if ($c -match 'VERSION\s*=\s*"([^"]+)"') { return $Matches[1] }
         }
-        $c = Get-Content -Path $ch -Raw
-        if ($c -match 'VERSION\s*=\s*"([^"]+)"') { return $Matches[1] }
-        Write-Host "  Erreur : VERSION introuvable dans config.h (ffp5cs)" -ForegroundColor Red
+        Write-Host "  Erreur : VERSION introuvable dans config_system.h / config.h (ffp5cs)" -ForegroundColor Red
         return $null
     }
 

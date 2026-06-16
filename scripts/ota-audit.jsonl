@@ -83,3 +83,5 @@
 {"timestamp":"2026-06-08T16:50:27Z","target":"n3pp","version":"4.40","sha256":"890db6c099c485074ba1b1f875ae98b3b418598c48e494cf8f68341bfbbc2f58","signed":false,"dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-06-08T16:57:27Z","target":"n3pp","version":"4.41","sha256":"d3c19bdba0906b3da910c33cbea62474c77def8548445fa9b7f7cb73cdf2bd5e","signed":false,"dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-06-11T14:53:04Z","target":"ffp5-wroom-prod","version":"14.02","md5_ffp5":"ebe2a542f0889bf205dee3cf9bec0df7","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-06-16T09:02:15Z","target":"ffp5-wroom-beta","version":"0.0.0","md5_ffp5":"47ccfd0bd50ba6a83174fa3daf2d3702","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-06-16T09:06:05Z","target":"ffp5-wroom-beta","version":"14.06","md5_ffp5":"47ccfd0bd50ba6a83174fa3daf2d3702","dry_run":false,"deployer":"olivi"}
