@@ -85,3 +85,8 @@
 {"timestamp":"2026-06-11T14:53:04Z","target":"ffp5-wroom-prod","version":"14.02","md5_ffp5":"ebe2a542f0889bf205dee3cf9bec0df7","dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-06-16T09:02:15Z","target":"ffp5-wroom-beta","version":"0.0.0","md5_ffp5":"47ccfd0bd50ba6a83174fa3daf2d3702","dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-06-16T09:06:05Z","target":"ffp5-wroom-beta","version":"14.06","md5_ffp5":"47ccfd0bd50ba6a83174fa3daf2d3702","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-06-16T11:47:33Z","target":"n3pp","version":"4.42","sha256":"a7d06d5b4362d1dc66f78cf1d80144608b3c86d9e4ae624c0fc1373ca3944a53","signed":false,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-06-16T20:42:00Z","target":"ffp5-wroom-beta","version":"14.08","md5_ffp5":"e490e9f11157eb83636df39164604913","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-06-17T07:28:22Z","target":"ffp5-wroom-beta","version":"14.09","md5_ffp5":"535be4cca33312f0d325c00a4cf614e7","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-06-17T18:39:52Z","target":"ffp5-wroom-beta","version":"14.10","md5_ffp5":"90b2de4aae3d884ddc77349e3c137f77","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-06-18T10:41:01Z","target":"ffp5-wroom-prod","version":"14.12","md5_ffp5":"baac9eed437aecd4b772ba980326e6fd","dry_run":false,"deployer":"olivi"}
