@@ -92,3 +92,4 @@
 {"timestamp":"2026-06-18T10:41:01Z","target":"ffp5-wroom-prod","version":"14.12","md5_ffp5":"baac9eed437aecd4b772ba980326e6fd","dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-06-18T13:13:12Z","target":"ffp5-wroom-prod","version":"14.13","md5_ffp5":"76897554b69f382de759c51ee1589be3","dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-06-18T15:36:41Z","target":"ffp5-wroom-prod","version":"14.14","md5_ffp5":"f331c5d3c4f8d994f015782ae4787baa","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-06-19T10:18:10Z","target":"ffp5-wroom-prod","version":"14.15","md5_ffp5":"1b594b33c46cec2d78000c83ae5da81e","dry_run":false,"deployer":"olivi"}
