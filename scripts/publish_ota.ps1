@@ -312,6 +312,24 @@ function Get-FirmwareVersion {
 # -----------------------------------------------------------------------------
 # Signature ECDSA P-256 du binaire
 # -----------------------------------------------------------------------------
+function Get-OtaOpenSslCommand {
+    $opensslCmd = Get-Command "openssl" -ErrorAction SilentlyContinue
+    if ($opensslCmd) { return $opensslCmd }
+    $opensslPaths = @(
+        "C:\Program Files\OpenSSL-Win64\bin\openssl.exe",
+        "C:\Program Files\OpenSSL-Win32\bin\openssl.exe",
+        "C:\Program Files (x86)\OpenSSL-Win32\bin\openssl.exe"
+    )
+    foreach ($p in $opensslPaths) {
+        if (Test-Path -LiteralPath $p) {
+            $env:PATH = "$(Split-Path $p -Parent);$env:PATH"
+            $opensslCmd = Get-Command "openssl" -ErrorAction SilentlyContinue
+            if ($opensslCmd) { return $opensslCmd }
+        }
+    }
+    return $null
+}
+
 function Invoke-OtaSign {
     param(
         [string]$BinaryPath,
@@ -323,7 +341,7 @@ function Invoke-OtaSign {
     }
 
     # Tentative via openssl (prefere : compatible avec mbedTLS DER sur ESP32)
-    $opensslCmd = Get-Command "openssl" -ErrorAction SilentlyContinue
+    $opensslCmd = Get-OtaOpenSslCommand
     if ($opensslCmd) {
         $tempSig = [System.IO.Path]::GetTempFileName()
         try {
@@ -340,9 +358,13 @@ function Invoke-OtaSign {
         Write-Host "  Avertissement : openssl dgst a echoue, tentative .NET..." -ForegroundColor Yellow
     }
 
-    # Fallback : .NET ECDsa (requiert .NET 6+ pour ImportFromPem + DSASignatureFormat)
+    # Fallback : .NET ECDsa (ImportFromPem requiert .NET 5+ / PowerShell 7+)
     try {
         $ecdsa = [System.Security.Cryptography.ECDsa]::Create()
+        $importPem = $ecdsa.GetType().GetMethod("ImportFromPem")
+        if (-not $importPem) {
+            throw "ImportFromPem indisponible (PowerShell 5.1 / .NET Framework)"
+        }
         $ecdsa.ImportFromPem((Get-Content $PrivateKeyPath -Raw))
         $firmwareBytes = [System.IO.File]::ReadAllBytes($BinaryPath)
         $sigBytes = $ecdsa.SignData(
@@ -354,8 +376,32 @@ function Invoke-OtaSign {
         return [Convert]::ToBase64String($sigBytes)
     } catch {
         Write-Host "  Avertissement : signature .NET echouee : $_" -ForegroundColor Yellow
-        return $null
     }
+
+    # Dernier recours : PowerShell 7+ (dotnet runtime moderne, ImportFromPem disponible)
+    $pwshCmd = Get-Command "pwsh" -ErrorAction SilentlyContinue
+    if ($pwshCmd) {
+        try {
+            $escapedBin = $BinaryPath.Replace("'", "''")
+            $escapedKey = $PrivateKeyPath.Replace("'", "''")
+            $sigB64 = & pwsh -NoProfile -Command @"
+`$ecdsa = [System.Security.Cryptography.ECDsa]::Create()
+`$ecdsa.ImportFromPem((Get-Content -Raw '$escapedKey'))
+`$bytes = [System.IO.File]::ReadAllBytes('$escapedBin')
+`$sig = `$ecdsa.SignData(`$bytes, [System.Security.Cryptography.HashAlgorithmName]::SHA256, [System.Security.Cryptography.DSASignatureFormat]::Rfc3279DerSequence)
+`$ecdsa.Dispose()
+[Convert]::ToBase64String(`$sig)
+"@
+            if ($sigB64 -and $sigB64.Trim().Length -gt 0) {
+                return $sigB64.Trim()
+            }
+        } catch {
+            Write-Host "  Avertissement : signature pwsh echouee : $_" -ForegroundColor Yellow
+        }
+    }
+
+    Write-Host "  Info : installez OpenSSL (Win64) ou utilisez pwsh/.NET 6+ pour signer ; publication possible sans signature (sha256 seul)." -ForegroundColor Gray
+    return $null
 }
 
 # -----------------------------------------------------------------------------

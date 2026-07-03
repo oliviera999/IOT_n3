@@ -105,3 +105,11 @@
 {"timestamp":"2026-06-24T18:37:42Z","target":"ffp5-wroom-prod","version":"14.27","md5_ffp5":"4e9dafbfcfef819d59d1966f60c221cc","dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-06-24T18:37:42Z","target":"ffp5-wroom-beta","version":"14.27","md5_ffp5":"6884b1580b3c1ac2f8b0cc8b02855580","dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-06-25T19:52:33Z","target":"ffp5-wroom-prod","version":"15.0","md5_ffp5":"217c43fdc721b1e1f192c2335ae3222d","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-03T17:23:43Z","target":"cam-msp1","version":"2.53","sha256":"6a079daf4a0b24eff3dbccde1ee2d1796780ad47174a0513c0ed0462e8cfd441","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-03T17:23:43Z","target":"cam-n3pp","version":"2.53","sha256":"fedb6e08cba7da179601c5a66179a561afb657aeb300e44008af87cfbe04ba1b","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-03T17:23:43Z","target":"cam-ffp3","version":"2.53","sha256":"82c5921134c2225641d01d15837b5119a8f41ef4e36debbb4c2f93e4a9fd02f1","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-03T17:32:07Z","target":"cam-msp1","version":"2.54","sha256":"faa30c4d1c0be62217165169648a08d0683e56d04194cc5c6fc219bfbb542ca4","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-03T17:32:07Z","target":"cam-n3pp","version":"2.54","sha256":"38af4ad6a0eab417763c402e0d62d959241b37028a6a5ad2c910c755bdf7b7f7","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-03T17:32:07Z","target":"cam-ffp3","version":"2.54","sha256":"386d55bbfd7498330e2f8c8198c6bf7b69a28acc1638e6bb029ce2ba31289c37","signed":true,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-03T17:39:35Z","target":"n3pp","version":"4.46","sha256":"a4998836086ea374e09dcc3171147c483faeff7c92e3875f834317f0998ba286","signed":false,"dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-03T17:41:55Z","target":"n3pp","version":"4.46","sha256":"a4998836086ea374e09dcc3171147c483faeff7c92e3875f834317f0998ba286","signed":true,"dry_run":false,"deployer":"olivi"}
