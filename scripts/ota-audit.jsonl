@@ -131,3 +131,6 @@
 {"timestamp":"2026-07-06T13:52:05Z","target":"cam-msp1","version":"2.60","sha256":"eb1f1b1b674f53a1ad69d9ecf905cf8e027b8cf90e85f5a803d7c861305e0cd0","signed":true,"dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-07-06T13:52:05Z","target":"cam-ffp3","version":"2.60","sha256":"3441fb4e3cf8d88301cfa6ef12ee9a1053f49c9b6c8325b113ff35807865db7e","signed":true,"dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-07-06T13:52:05Z","target":"ffp5-wroom-prod","version":"15.06","md5_ffp5":"985dc18ece432fc8d9d6b348ac8bcdf9","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-06T18:15:31Z","target":"ffp5-wroom-prod","version":"15.08","md5_ffp5":"a67ca6eac4780b671943023a0ed7cf39","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-06T18:20:05Z","target":"ffp5-wroom-prod","version":"15.08","md5_ffp5":"a67ca6eac4780b671943023a0ed7cf39","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-07-06T18:20:05Z","target":"ffp5-wroom-beta","version":"15.08","md5_ffp5":"1ec4ed382245892eb6f094d905489f68","dry_run":false,"deployer":"olivi"}
