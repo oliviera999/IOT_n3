@@ -32,6 +32,9 @@ cronlog*.txt
 # Rapports de verification serveur (extraits de logs)
 scripts/reports/
 
+# Script scroll-debug (Playwright)
+scripts/scroll-debug/node_modules/
+
 # Temporaire / backups
 _tmp_ffp5cs/
 backup/
