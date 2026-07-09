@@ -16,6 +16,13 @@ alwaysApply: true
 - **Branches Git (obligatoire)**
   - **n3_firmwires** (`firmwires/`) et **n3_serveur** (`serveur/`) : travailler **uniquement sur `master`** (branche principale).
   - Ne **pas** creer, checkout ni pousser de branche de travail longue durée type `pio-build` — cette branche est **supprimee et interdite** (historique de merges Windows/build, integre dans `master`).
+  - **Si `pio-build` existe encore** (localement ou sur `origin/pio-build` dans **n3_firmwires**) : la **fusionner systematiquement** dans `master` avant toute autre action Git sur ce depot, puis supprimer la branche :
+    1. `cd firmwires` → `git fetch origin`
+    2. `git checkout master && git pull origin master`
+    3. `git merge pio-build` (fast-forward ou merge commit selon l'historique)
+    4. `git push origin master`
+    5. `git branch -d pio-build` et `git push origin --delete pio-build` si la branche distante existe
+    6. Depuis la racine IOT_n3 : committer la ref submodule `firmwires` si le SHA a change, puis push parent
   - Features : branches courtes `claude/…` ou PR depuis fork, puis merge vers `master` ; pas de parallele permanent hors `master`.
   - **Ne pas confondre** : le repertoire Windows `C:\pio-builds\` (artefacts PlatformIO rediriges) n'est **pas** une branche Git — voir `firmwires/README.md` section build Windows.
 
