@@ -13,6 +13,12 @@ alwaysApply: true
   - Mise a jour : `git submodule update --init --recursive`
   - Ne pas modifier le contenu d'un submodule depuis le depot parent sans y entrer d'abord (`cd firmwires` ou `cd serveur`).
 
+- **Branches Git (obligatoire)**
+  - **n3_firmwires** (`firmwires/`) et **n3_serveur** (`serveur/`) : travailler **uniquement sur `master`** (branche principale).
+  - Ne **pas** creer, checkout ni pousser de branche de travail longue durée type `pio-build` — cette branche est **supprimee et interdite** (historique de merges Windows/build, integre dans `master`).
+  - Features : branches courtes `claude/…` ou PR depuis fork, puis merge vers `master` ; pas de parallele permanent hors `master`.
+  - **Ne pas confondre** : le repertoire Windows `C:\pio-builds\` (artefacts PlatformIO rediriges) n'est **pas** une branche Git — voir `firmwires/README.md` section build Windows.
+
 - **Cycle obligatoire a chaque modification**
   - Toute modification de code (firmware ou serveur) doit suivre ce cycle complet :
     1. **Incrementer la version** du composant modifie (voir « Versionnage » ci-dessous).
