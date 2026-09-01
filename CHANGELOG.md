@@ -6,6 +6,17 @@ Format : [version] - date - description.
 
 ---
 
+## [2026.06.1] - 2026-09-01
+
+### Correctif
+- `publish_ota.ps1` ne génère plus implicitement une clé ECDSA si elle est absente :
+  les appareils déjà flashés rejetteraient une signature inconnue. Provisioning /
+  rotation via `generate_ota_keys.ps1` uniquement.
+
+### Références submodules
+- serveur **6.39.1** : toggle galerie POST-only, marée après restart pompe, FLAT_STATE off sans ack orphelin.
+- firmwires **ffp5cs 15.30** : régulation chauffage hors gate Phase 3.
+
 ## [2026.06] - 2026-06-09
 
 ### Références submodules — cycle mai/juin 2026
