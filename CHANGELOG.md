@@ -6,6 +6,13 @@ Format : [version] - date - description.
 
 ---
 
+## [2026.06.2] - 2026-09-02
+
+### Correctif
+- firmwires **ffp5cs 15.31** : `FloodOrchestrator` hors gate Phase 3 — un trop-plein
+  notifié en failover ne fige plus `inFlood`, ce qui bloquait `RefillOverfill::Unlock`
+  (pompe réserve sticky jusqu'au reboot). La 15.30 ne sortait que le chauffage.
+
 ## [2026.06.1] - 2026-09-01
 
 ### Correctif
