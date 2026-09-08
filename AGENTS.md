@@ -23,7 +23,7 @@ Le serveur intégré PHP active un **mode fallback local** (`PHP_SAPI === 'cli-s
 cd /workspace/serveur && ./vendor/bin/phpunit
 ```
 
-Les tests nécessitant une base de données MySQL sont automatiquement skippés en environnement local sans DB.
+Les tests nécessitant une base de données MySQL sont automatiquement skippés en environnement local sans DB. Le `ContainerWiringTest` utilise SQLite en mémoire — l'extension `php8.2-sqlite3` est requise.
 
 ### Lint
 
@@ -35,7 +35,12 @@ find serveur/src/ -name "*.php" -exec php -l {} \;
 
 ### Configuration (.env)
 
-Copier `serveur/.env.example` vers `serveur/.env`. Pour le dev local sans base de données, les valeurs par défaut suffisent. Passer `AUTH_METHOD=none` pour désactiver l'authentification en local.
+Copier `serveur/.env.example` vers `serveur/.env`. Pour le dev local sans base de données :
+- Passer `AUTH_METHOD=none` pour désactiver l'authentification.
+- Passer `ENV=test` pour éviter la compilation du cache DI (qui échoue sans MySQL).
+- Supprimer `serveur/var/cache/di/` si le cache existe déjà (`rm -rf serveur/var/cache/di/`).
+
+Le mode `cli-server` utilise automatiquement un fallback SQLite en mémoire quand MySQL est inaccessible.
 
 ### Submodules
 
