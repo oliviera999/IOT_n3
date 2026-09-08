@@ -23,7 +23,7 @@ Le serveur intégré PHP active un **mode fallback local** (`PHP_SAPI === 'cli-s
 cd /workspace/serveur && ./vendor/bin/phpunit
 ```
 
-Les tests nécessitant une base de données MySQL sont automatiquement skippés en environnement local sans DB.
+Les tests nécessitant une base de données MySQL sont automatiquement skippés en environnement local sans DB. Le `ContainerWiringTest` utilise SQLite en mémoire — l'extension `php8.2-sqlite3` est requise.
 
 ### Lint
 
