@@ -41,7 +41,8 @@ Les anciens répertoires sont dans `firmwires/archive/` (référence historique,
 - Champ fichier : `imageFile`.
 - Boundary : `RandomNerdTutorials` (doit correspondre côté serveur `GalleryUploadController`).
 - Chunks de 4096 octets.
-- Toujours libérer le framebuffer (`esp_camera_fb_return(fb)`) **après** l'envoi HTTP, pas avant.
+- **Capteur coupé avant tout réseau (v2.79)** : JPEG copié en PSRAM, `esp_camera_fb_return(fb)`, puis `n3CameraPowerDown()` (deinit + PWDN) avant l'upload, le drain SD et les mails. Capteur alimenté, l'upload TLS et le SMTP échouaient à 100 % sur ESP32-CAM.
+- Sans copie possible (pas de PSRAM) : envoyer depuis le framebuffer et ne le libérer **qu'après** l'envoi HTTP.
 - Ne pas accéder à `fb->buf` / `fb->len` après `esp_camera_fb_return()` — use-after-free.
 
 ## OTA distant (HTTP + integrite)
