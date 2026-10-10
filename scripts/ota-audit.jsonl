@@ -152,3 +152,4 @@
 {"timestamp":"2026-07-09T11:58:14Z","target":"cam-ffp3","version":"2.63","sha256":"7478e79e0e648666afe08f0d824da749dbd61681b735d202177bedbb284ee406","signed":true,"dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-07-09T11:58:14Z","target":"ffp5-wroom-prod","version":"15.15","md5_ffp5":"63760902c7795e9e5000848a6a8c5c50","dry_run":false,"deployer":"olivi"}
 {"timestamp":"2026-07-09T11:58:14Z","target":"ffp5-wroom-beta","version":"15.15","md5_ffp5":"b881bae1eb3bd921ad4eb40bede29938","dry_run":false,"deployer":"olivi"}
+{"timestamp":"2026-10-10T09:53:39Z","target":"cam-n3pp","version":"2.77","sha256":"56825a45491f0e01217d7b47601c08db1b77c414f938b37b930a74d7f48096d7","signed":true,"dry_run":false,"deployer":"olivi"}
